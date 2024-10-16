@@ -1,0 +1,29 @@
+Package: CWP.dataset
+Title: Package to Analyse and Tidy Fisheries Dataset on CWP Standards
+Version: 0.0.0.9000
+Authors@R: 
+    person("Bastien", "Grasset", , "bastien.grasset@ird.fr", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-9946-1338"))
+Description: This package is to easily analyse standardized CWP data and
+    to compare different datasets.
+License: MIT + file LICENSE
+Imports: 
+    cowplot,
+    data.table,
+    dplyr,
+    DT,
+    flextable,
+    knitr,
+    purrr,
+    qs,
+    rlang
+Suggests: 
+    here,
+    rmarkdown,
+    testthat
+VignetteBuilder: 
+    knitr
+Config/fusen/version: 0.6.0.9003
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
