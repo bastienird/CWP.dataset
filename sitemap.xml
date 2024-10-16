@@ -1,0 +1,27 @@
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/LICENSE-text.html</loc></url>
+<url><loc>/LICENSE.html</loc></url>
+<url><loc>/articles/first.html</loc></url>
+<url><loc>/articles/index.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/news/index.html</loc></url>
+<url><loc>/reference/bar_plot_default.html</loc></url>
+<url><loc>/reference/cat_title.html</loc></url>
+<url><loc>/reference/compute_summary_of_differences.html</loc></url>
+<url><loc>/reference/filtering_function.html</loc></url>
+<url><loc>/reference/fonction_empreinte_spatiale.html</loc></url>
+<url><loc>/reference/fonction_groupement.html</loc></url>
+<url><loc>/reference/grapes-notin-grapes.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/isNullList.html</loc></url>
+<url><loc>/reference/is_ggplot.html</loc></url>
+<url><loc>/reference/knitting_plots_subfigures.html</loc></url>
+<url><loc>/reference/pie_chart_2_default.html</loc></url>
+<url><loc>/reference/qflextable2.html</loc></url>
+<url><loc>/reference/read_data.html</loc></url>
+<url><loc>/reference/render_subfigures.html</loc></url>
+<url><loc>/reference/save_image.html</loc></url>
+</urlset>
+
