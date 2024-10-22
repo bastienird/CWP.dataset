@@ -423,7 +423,7 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
 #' @param interactive_plot Logical indicating if the output should be interactive.
 #' @return A flextable object or a DT datatable if interactive_plot is TRUE.
 #' @export
-qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, columns_to_color = NULL, save_folder = NULL, fig.pathinside = "Figures", grouped_data = NULL, interactive_plot = FALSE, find_and_print = FALSE) {
+qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, columns_to_color = NULL, save_folder = NULL, fig.pathinside = "Figures", grouped_data = NULL, interactive_plot = FALSE) {
   captionn <- eval(captionn)
 
   if (all(class(x) == "flextable")) {

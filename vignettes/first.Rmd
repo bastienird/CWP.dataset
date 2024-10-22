@@ -59,9 +59,13 @@ After inflating the template
 
 ```{r example-read_data}
 # Example: Reading a CSV file
-csv_data <- read_data(here::here("inst/CWP_dataset.csv"))
-head(csv_data)  # Display the first few rows
+# csv_data <- read_data(here::here("inst/CWP_dataset.csv"))
+# head(csv_data)  # Display the first few rows
+
 ```
+
+
+
 
 # Last path to be handled in workflow 
 ```{r last_path}

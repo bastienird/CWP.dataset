@@ -13,8 +13,7 @@ qflextable2(
   save_folder = NULL,
   fig.pathinside = "Figures",
   grouped_data = NULL,
-  interactive_plot = FALSE,
-  find_and_print = FALSE
+  interactive_plot = FALSE
 )
 }
 \arguments{

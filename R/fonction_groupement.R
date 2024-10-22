@@ -86,12 +86,6 @@ fonction_groupement <- function(these_col, init, final) {
 #' @return A list containing two elements:
 #' \item{chunks}{A character vector with the content of all R code chunks.}
 #' \item{text}{A character vector with the content outside of R code chunks.}
-#' @examples
-#' # Example usage:
-#' # Assuming 'example.Rmd' is an RMarkdown file
-#' result <- separate_chunks_and_text("example.Rmd", save_files = TRUE)
-#' cat("Chunks:\n", paste(result$chunks, collapse = "\n"), "\n")
-#' cat("Text:\n", paste(result$text, collapse = "\n"), "\n")
 #'
 #' @export
 separate_chunks_and_text <- function(rmd_file, save_files = FALSE) {

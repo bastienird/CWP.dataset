@@ -10,13 +10,14 @@
 #' @export
 #' @examples
 #' # Example: Reading a CSV file
-#' csv_data <- read_data(here::here("inst/CWP_dataset.csv"))
-#' head(csv_data)  # Display the first few rows
+#' # csv_data <- read_data(here::here("inst/CWP_dataset.csv"))
+#' # head(csv_data)  # Display the first few rows
+#'
 read_data <- function(file_path){
   if (grepl("\\.rds$", file_path)) {
     readRDS(file_path)
   } else if (grepl("\\.csv$", file_path)) {
-    fread(file_path)
+    data.table::fread(file_path)
   } else if (grepl("\\.qs$", file_path)) {
     qs::qread(file_path)
   } else {    stop("File type not supported")

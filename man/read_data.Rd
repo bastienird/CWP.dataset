@@ -17,6 +17,7 @@ This function reads data based on the provided file path and file type.
 }
 \examples{
 # Example: Reading a CSV file
-csv_data <- read_data(here::here("inst/CWP_dataset.csv"))
-head(csv_data)  # Display the first few rows
+# csv_data <- read_data(here::here("inst/CWP_dataset.csv"))
+# head(csv_data)  # Display the first few rows
+
 }

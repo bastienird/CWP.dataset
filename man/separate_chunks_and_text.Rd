@@ -22,11 +22,3 @@ This function reads an RMarkdown file and separates the code chunks from the tex
 It returns a list with two elements: \code{chunks} (R code chunks) and \code{text} (non-code content).
 Optionally, it saves the chunks to an \code{.R} file and the text to a \code{.txt} file.
 }
-\examples{
-# Example usage:
-# Assuming 'example.Rmd' is an RMarkdown file
-result <- separate_chunks_and_text("example.Rmd", save_files = TRUE)
-cat("Chunks:\n", paste(result$chunks, collapse = "\n"), "\n")
-cat("Text:\n", paste(result$text, collapse = "\n"), "\n")
-
-}

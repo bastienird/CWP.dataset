@@ -40,10 +40,11 @@ and `system.file()` to read it in your examples.
 pkgload::load_all(path = here::here(), export_all = FALSE)
 
 # You will be able to read your example data file in each of your function examples and tests as follows - see chunks below
-datafile <- system.file("CWP_dataset.csv", package = "CWP.dataset")
-nyc_squirrels <- read.csv(datafile, encoding = "UTF-8")
+# datafile <- system.file("CWP_dataset.csv", package = "CWP.dataset")
+# nyc_squirrels <- read.csv(datafile, encoding = "UTF-8")
+# 
+# nyc_squirrels
 
-nyc_squirrels
 ```
 
 
@@ -76,7 +77,7 @@ read_data <- function(file_path){
   if (grepl("\\.rds$", file_path)) {
     readRDS(file_path)
   } else if (grepl("\\.csv$", file_path)) {
-    fread(file_path)
+    data.table::fread(file_path)
   } else if (grepl("\\.qs$", file_path)) {
     qs::qread(file_path)
   } else {    stop("File type not supported")
@@ -87,16 +88,26 @@ read_data <- function(file_path){
 
 ```{r example-read_data}
 # Example: Reading a CSV file
-csv_data <- read_data(here::here("inst/CWP_dataset.csv"))
-head(csv_data)  # Display the first few rows
+# csv_data <- read_data(here::here("inst/CWP_dataset.csv"))
+# head(csv_data)  # Display the first few rows
+
 ```
 
 
 ```{r test-read_data}
-# Test: Ensure the function reads a CSV file correctly
 test_that("read_data works with CSV", {
-  sample_data <- read_data(here::here("inst/CWP_dataset.csv"))
-  expect_true(is.data.frame(sample_data))
+  # Use system.file to locate the file in the installed package
+  csv_file <- system.file("CWP_dataset.csv", package = "CWP.dataset")
+  
+  # Check if the file path is valid
+  expect_true(nzchar(csv_file), info = "CSV file not found")
+  
+  # Check if the file exists
+  expect_true(file.exists(csv_file), info = "CSV file does not exist")
+  
+  # Read the file and test if it's correctly read as a data frame
+  data <- read_data(csv_file)
+  expect_true(is.data.frame(data), info = "Data should be a data.frame or data.table")
 })
 ```
 
@@ -209,7 +220,7 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
       # This will run if outside a knitr/RMarkdown environment (e.g., in a plain R script)
       print(plot)
     }
-  } else if (class(plot) == "tmap"){
+  } else if (inherits(plot, "tmap")) {
     if(in_knitr) {
       # This will run if inside a knitr/RMarkdown environment
 
@@ -761,7 +772,7 @@ is_ggplot <- function(obj) {
 #' @param interactive_plot Logical indicating if the output should be interactive.
 #' @return A flextable object or a DT datatable if interactive_plot is TRUE.
 #' @export
-qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, columns_to_color = NULL, save_folder = NULL, fig.pathinside = "Figures", grouped_data = NULL, interactive_plot = FALSE, find_and_print = FALSE) {
+qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, columns_to_color = NULL, save_folder = NULL, fig.pathinside = "Figures", grouped_data = NULL, interactive_plot = FALSE) {
   captionn <- eval(captionn)
 
   if (all(class(x) == "flextable")) {
@@ -929,12 +940,6 @@ fonction_groupement <- function(these_col, init, final) {
 #' @return A list containing two elements:
 #' \item{chunks}{A character vector with the content of all R code chunks.}
 #' \item{text}{A character vector with the content outside of R code chunks.}
-#' @examples
-#' # Example usage:
-#' # Assuming 'example.Rmd' is an RMarkdown file
-#' result <- separate_chunks_and_text("example.Rmd", save_files = TRUE)
-#' cat("Chunks:\n", paste(result$chunks, collapse = "\n"), "\n")
-#' cat("Text:\n", paste(result$text, collapse = "\n"), "\n")
 #'
 #' @export
 separate_chunks_and_text <- function(rmd_file, save_files = FALSE) {
@@ -1100,7 +1105,7 @@ compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", t
 ```{r development-inflate, eval=FALSE}
 # Keep eval=FALSE to avoid infinite loop in case you hit the knit button
 # Execute in the console directly
-fusen::inflate(flat_file = "dev/flat_first.Rmd", vignette_name = "First")
+fusen::inflate(flat_file = "dev/flat_first.Rmd", vignette_name = "First",overwrite = "yes")
 ```
 
 # Inflate your package

@@ -20,7 +20,6 @@ Imports:
     qs,
     rlang
 Suggests: 
-    here,
     rmarkdown,
     testthat
 VignetteBuilder: 

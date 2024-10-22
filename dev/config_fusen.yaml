@@ -19,6 +19,6 @@ flat_first.Rmd:
     open_vignette: true
     check: true
     document: true
-    overwrite: ask
+    overwrite: 'yes'
     clean: ask
     codecov: false
