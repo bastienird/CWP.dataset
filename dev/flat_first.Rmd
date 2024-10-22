@@ -906,8 +906,6 @@ fonction_groupement <- function(these_col, init, final) {
 ```
 
 
-## Use sub-functions in the same chunk
-
 ```{r function-Negate}
 #' Negate `%in%` Operator
 #'
@@ -916,6 +914,127 @@ fonction_groupement <- function(these_col, init, final) {
 #' @param table A vector to check against.
 #' @return Logical vector indicating if each element of `x` is not in `table`.
 `%notin%` <- Negate(`%in%`)
+```
+
+```{r function-separate_chunks_and_text}
+#' Separate R Code Chunks and Text from an RMarkdown (.Rmd) File and Optionally Save Them
+#'
+#' This function reads an RMarkdown file and separates the code chunks from the text.
+#' It returns a list with two elements: `chunks` (R code chunks) and `text` (non-code content).
+#' Optionally, it saves the chunks to an `.R` file and the text to a `.txt` file.
+#'
+#' @param rmd_file A character string specifying the path to the .Rmd file.
+#' @param save_files Logical. If TRUE, saves the chunks to an `.R` file and the text to a `.txt` file.
+#' Default is FALSE.
+#' @return A list containing two elements:
+#' \item{chunks}{A character vector with the content of all R code chunks.}
+#' \item{text}{A character vector with the content outside of R code chunks.}
+#' @examples
+#' # Example usage:
+#' # Assuming 'example.Rmd' is an RMarkdown file
+#' result <- separate_chunks_and_text("example.Rmd", save_files = TRUE)
+#' cat("Chunks:\n", paste(result$chunks, collapse = "\n"), "\n")
+#' cat("Text:\n", paste(result$text, collapse = "\n"), "\n")
+#'
+#' @export
+separate_chunks_and_text <- function(rmd_file, save_files = FALSE) {
+  # Read the RMarkdown file
+  lines <- readLines(rmd_file)
+  
+  # Initialize vectors to store chunks and text
+  chunks <- c()
+  text <- c()
+  
+  # Boolean to track whether we are inside a chunk or not
+  in_chunk <- FALSE
+  
+  # Initialize a temporary container for a chunk
+  current_chunk <- c()
+  
+  # Loop through the lines of the file
+  for (line in lines) {
+    # Detect the start and end of code chunks (marked by ```)
+    if (grepl("^```", line)) {
+      in_chunk <- !in_chunk  # Toggle chunk state
+      
+      if (!in_chunk) {
+        # If we just exited a chunk, save the accumulated chunk
+        chunks <- c(chunks, paste(current_chunk, collapse = "\n"))
+        current_chunk <- c()  # Reset the current chunk
+      }
+    } else {
+      if (in_chunk) {
+        # Accumulate lines that are part of a chunk
+        current_chunk <- c(current_chunk, line)
+      } else {
+        # Accumulate lines that are outside chunks (text)
+        text <- c(text, line)
+      }
+    }
+  }
+  
+  # If the save_files option is TRUE, save the chunks and text to separate files
+  if (save_files) {
+    # Extract the base name from the file path (without extension)
+    base_name <- sub("\\.Rmd$", "", rmd_file)
+    
+    # Save the chunks to a .R file
+    writeLines(chunks, paste0(base_name, ".R"))
+    
+    # Save the text to a .txt file
+    writeLines(text, paste0(base_name, ".txt"))
+  }
+  
+  # Return the separated chunks and text as a list
+  return(list(chunks = chunks, text = text))
+}
+
+```
+
+```{r test-separate_chunks_and_text}
+# Test suite for extract_non_chunk_content function
+test_that("separate_chunks_and_text works correctly", {
+  # Create a temporary .Rmd file for testing
+  temp_rmd <- tempfile(fileext = ".Rmd")
+  
+  # Write sample content to the temporary .Rmd file
+  writeLines(c(
+    "# Title of the document",
+    "",
+    "This is some text before the chunk.",
+    "```{r}",
+    "x <- 1:10",
+    "summary(x)",
+    "```",
+    "",
+    "This is some text after the chunk."
+  ), temp_rmd)
+  
+  # Expected output (non-chunk content only)
+  expected_chunks <- "x <- 1:10\nsummary(x)"
+  expected_text <- "# Title of the document\n\nThis is some text before the chunk.\n\nThis is some text after the chunk."
+  
+  # Apply the function without saving files
+  result <- separate_chunks_and_text(temp_rmd, save_files = FALSE)
+  
+  # Test if the function's output matches the expected content
+  expect_equal(paste(result$chunks, collapse = "\n"), expected_chunks)
+  expect_equal(paste(result$text, collapse = "\n"), expected_text)
+  
+  # Apply the function with saving files
+  result <- separate_chunks_and_text(temp_rmd, save_files = TRUE)
+  
+  # Check if the .R and .txt files were created
+  r_file <- sub("\\.Rmd$", ".R", temp_rmd)
+  txt_file <- sub("\\.Rmd$", ".txt", temp_rmd)
+  
+  expect_true(file.exists(r_file))
+  expect_true(file.exists(txt_file))
+  
+  # Clean up the temporary files
+  unlink(c(temp_rmd, r_file, txt_file))
+})
+
 ```
 
 <!--
@@ -929,14 +1048,6 @@ Create a chunk with 'development' actions
 
 These are only included in the present flat template file, their content will not be part of the package anywhere else.
 -->
-
-```{r development-inflate, eval=FALSE}
-# Keep eval=FALSE to avoid infinite loop in case you hit the knit button
-# Execute in the console directly
-fusen::inflate(flat_file = "dev/flat_first.Rmd", vignette_name = "Get started")
-```
-
-
 
 ```{r function-compute_summary_of_differences}
 #' Compute Summary of Differences

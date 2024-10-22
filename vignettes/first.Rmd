@@ -64,7 +64,6 @@ head(csv_data)  # Display the first few rows
 ```
 
 # Last path to be handled in workflow 
-
 ```{r last_path}
 #' Extract Last Part of a File Path
 #'
@@ -109,7 +108,7 @@ last_path_reduced <- function(x) {
 
 
 
-## Use sub-functions in the same chunk
+
 
 <!--
 # There can be development actions
@@ -122,8 +121,6 @@ Create a chunk with 'development' actions
 
 These are only included in the present flat template file, their content will not be part of the package anywhere else.
 -->
-
-
 
 
 # Inflate your package

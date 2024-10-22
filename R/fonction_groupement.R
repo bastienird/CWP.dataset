@@ -73,3 +73,76 @@ fonction_groupement <- function(these_col, init, final) {
 
   return(fulljoin)
 }
+
+#' Separate R Code Chunks and Text from an RMarkdown (.Rmd) File and Optionally Save Them
+#'
+#' This function reads an RMarkdown file and separates the code chunks from the text.
+#' It returns a list with two elements: `chunks` (R code chunks) and `text` (non-code content).
+#' Optionally, it saves the chunks to an `.R` file and the text to a `.txt` file.
+#'
+#' @param rmd_file A character string specifying the path to the .Rmd file.
+#' @param save_files Logical. If TRUE, saves the chunks to an `.R` file and the text to a `.txt` file.
+#' Default is FALSE.
+#' @return A list containing two elements:
+#' \item{chunks}{A character vector with the content of all R code chunks.}
+#' \item{text}{A character vector with the content outside of R code chunks.}
+#' @examples
+#' # Example usage:
+#' # Assuming 'example.Rmd' is an RMarkdown file
+#' result <- separate_chunks_and_text("example.Rmd", save_files = TRUE)
+#' cat("Chunks:\n", paste(result$chunks, collapse = "\n"), "\n")
+#' cat("Text:\n", paste(result$text, collapse = "\n"), "\n")
+#'
+#' @export
+separate_chunks_and_text <- function(rmd_file, save_files = FALSE) {
+  # Read the RMarkdown file
+  lines <- readLines(rmd_file)
+  
+  # Initialize vectors to store chunks and text
+  chunks <- c()
+  text <- c()
+  
+  # Boolean to track whether we are inside a chunk or not
+  in_chunk <- FALSE
+  
+  # Initialize a temporary container for a chunk
+  current_chunk <- c()
+  
+  # Loop through the lines of the file
+  for (line in lines) {
+    # Detect the start and end of code chunks (marked by ```)
+    if (grepl("^```", line)) {
+      in_chunk <- !in_chunk  # Toggle chunk state
+      
+      if (!in_chunk) {
+        # If we just exited a chunk, save the accumulated chunk
+        chunks <- c(chunks, paste(current_chunk, collapse = "\n"))
+        current_chunk <- c()  # Reset the current chunk
+      }
+    } else {
+      if (in_chunk) {
+        # Accumulate lines that are part of a chunk
+        current_chunk <- c(current_chunk, line)
+      } else {
+        # Accumulate lines that are outside chunks (text)
+        text <- c(text, line)
+      }
+    }
+  }
+  
+  # If the save_files option is TRUE, save the chunks and text to separate files
+  if (save_files) {
+    # Extract the base name from the file path (without extension)
+    base_name <- sub("\\.Rmd$", "", rmd_file)
+    
+    # Save the chunks to a .R file
+    writeLines(chunks, paste0(base_name, ".R"))
+    
+    # Save the text to a .txt file
+    writeLines(text, paste0(base_name, ".txt"))
+  }
+  
+  # Return the separated chunks and text as a list
+  return(list(chunks = chunks, text = text))
+}
+

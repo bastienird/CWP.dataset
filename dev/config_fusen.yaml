@@ -8,8 +8,10 @@ flat_first.Rmd:
   - R/fonction_groupement.R
   - R/knitting_plots_subfigures.R
   - R/read_data.R
-  - R/use-sub-functions-in-the-same-chunk.R
-  tests: tests/testthat/test-read_data.R
+  - R/comparison-between-multiple-cwp-datasets.R
+  tests:
+  - tests/testthat/test-read_data.R
+  - tests/testthat/test-fonction_groupement.R
   vignettes: vignettes/first.Rmd
   inflate:
     flat_file: dev/flat_first.Rmd
