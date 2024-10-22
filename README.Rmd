@@ -1,4 +1,4 @@
----
+--
 output: github_document
 ---
 
@@ -30,10 +30,6 @@ You can install the development version of CWP.dataset from [GitHub](https://git
 # install.packages("pak")
 pak::pak("bastienird/CWP.dataset")
 ```
-
-## Documentation
-
-Full documentation website on: https://bastienird.github.io/CWP.dataset
 
 ## Example
 
