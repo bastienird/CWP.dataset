@@ -259,36 +259,69 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
 render_subfigures <- function(plots_list, titles_list, general_title) {
   # Check if the function is being run in a knitr environment
   in_knitr <- !is.null(knitr::opts_knit$get("out.format"))
+  
   # Check if the lists are of the same length
   if (length(plots_list) != length(titles_list)) {
     stop("The lengths of plots_list and titles_list are not the same.")
   }
+  
   # Check if all plots are ggplots
   if (!all(sapply(plots_list, inherits, "gg"))) {
     stop("Not all items in plots_list are ggplot objects.")
   }
+  
+  # Determine the output format
+  output_format <- knitr::opts_knit$get("out.format")
+  
   if (in_knitr) {
-    # Create subcaptions
-    subcaps <- lapply(titles_list, function(title) paste0("(", title, ")"))
-    # Start creating the dynamic R chunk as a string
-    chunk_header <- sprintf(
-      '```{r subfigures, fig.cap="%s", fig.subcap=c(%s), fig.ncol=2, out.width="50%%", fig.align="center"}',
-      general_title,
-      paste0('"', subcaps, '"', collapse=", ")
-    )
-    # Assign each plot in plots_list to a new variable in the environment
-    for (i in seq_along(plots_list)) {
-      assign(paste0("plot_", i), plots_list[[i]], envir = environment())
+    if (output_format == "html") {
+      # Use gridExtra for HTML output
+      library(gridExtra)
+      library(grid)
+      
+      # Combine plots with captions using gridExtra::arrangeGrob
+      plot_grobs <- lapply(seq_along(plots_list), function(i) {
+        arrangeGrob(
+          plots_list[[i]], 
+          bottom = grid::textGrob(
+            titles_list[[i]], 
+            gp = grid::gpar(fontsize = 10), 
+            vjust = -0.5  # Adjust vjust to bring caption closer to plot
+          )
+        )
+      })
+
+      # Arrange the plots side by side using grid.arrange
+      grid.arrange(
+        grobs = plot_grobs, 
+        ncol = 2,  # Arrange in two columns
+        widths = c(1, 1),  # Ensure equal width for each plot
+        top = textGrob(general_title, gp = gpar(fontsize = 14, fontface = "bold"))
+      )
+      
+    } else {
+      # For non-HTML outputs (e.g., PDF), use subfigures as before
+      subcaps <- lapply(titles_list, function(title) paste0("(", title, ")"))
+      
+      chunk_header <- sprintf(
+        '```{r subfigures, fig.cap="%s", fig.subcap=c(%s), fig.ncol=2, out.width="50%%", fig.align="center"}',
+        general_title,
+        paste0('"', subcaps, '"', collapse=", ")
+      )
+      
+      for (i in seq_along(plots_list)) {
+        assign(paste0("plot_", i), plots_list[[i]], envir = environment())
+      }
+      
+      plot_commands <- lapply(seq_along(plots_list), function(i) {
+        paste0("print(plot_", i, ")")
+      })
+      
+      chunk_text <- paste(chunk_header, paste(plot_commands, collapse = '\n'), '```', sep = '\n')
+      
+      result <- knitr::knit_child(text = chunk_text, envir = environment(), quiet = TRUE)
+      cat(result)
     }
-    # Create a string for each plot command, referring to the correct plot objects
-    plot_commands <- lapply(seq_along(plots_list), function(i) {
-      paste0("print(plot_", i, ")")
-    })
-    # Combine all elements into a single character string
-    chunk_text <- paste(chunk_header, paste(plot_commands, collapse = '\n'), '```', sep = '\n')
-    # Render the chunk
-    result <- knitr::knit_child(text = chunk_text, envir = environment(), quiet = TRUE)
-    cat(result)
   } else {
     # If not in a knitr environment, just print the plots
     for (plot in plots_list) {
@@ -296,6 +329,7 @@ render_subfigures <- function(plots_list, titles_list, general_title) {
     }
   }
 }
+
 ```
 
 ## Plots and maps 
