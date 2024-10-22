@@ -82,80 +82,9 @@
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example: Reading a CSV file</span></span></span>
-<span class="r-in"><span><span class="va">csv_data</span> <span class="op">&lt;-</span> <span class="fu">read_data</span><span class="op">(</span><span class="fu">here</span><span class="fu">::</span><span class="fu"><a href="https://here.r-lib.org//reference/here.html" class="external-link">here</a></span><span class="op">(</span><span class="st">"inst/CWP_dataset.csv"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">csv_data</span><span class="op">)</span>  <span class="co"># Display the first few rows</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         long      lat unique_squirrel_id hectare  shift     date</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;num&gt;    &lt;num&gt;             &lt;char&gt;  &lt;char&gt; &lt;char&gt;    &lt;int&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: -73.96767 40.77647     15G-AM-1008-03     15G     AM 10082018</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: -73.97603 40.77036      5D-AM-1020-02     05D     AM 10202018</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: -73.95460 40.79566     39F-AM-1014-04     39F     AM 10142018</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: -73.97159 40.77462     11E-PM-1012-06     11E     PM 10122018</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: -73.95553 40.79777     40D-AM-1013-04     40D     AM 10132018</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6: -73.96479 40.79116     30A-PM-1020-02     30A     PM 10202018</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    hectare_squirrel_number      age primary_fur_color highlight_fur_color</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                      &lt;int&gt;   &lt;char&gt;            &lt;char&gt;              &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:                       3    Adult              Gray                &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:                       2    Adult              Gray            Cinnamon</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:                       4 Juvenile              Gray            Cinnamon</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                       6    Adult              Gray     Cinnamon, White</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:                       4    Adult              Gray            Cinnamon</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                       2    Adult              Gray     Cinnamon, White</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    combination_of_primary_and_highlight_color</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                        &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:                                      Gray+</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:                              Gray+Cinnamon</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:                              Gray+Cinnamon</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                       Gray+Cinnamon, White</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:                              Gray+Cinnamon</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                       Gray+Cinnamon, White</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                      color_notes</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                                                                                           &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:                                                                                                          &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:                                                                                                          &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:                                                                                                          &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                Gray &amp; Cinnamon selected as Primary. White selected as Highlights. Made executive adjustments.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:              Gray &amp; Cinnamon selected as Primary. Nothing selected as Highlights. Made executive adjustments.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6: Cinnamon back. Gray &amp; Cinnamon selected as Primary. White selected as Highlights. Made executive adjustments.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        location above_ground_sighter_measurement specific_location running</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          &lt;char&gt;                           &lt;char&gt;            &lt;char&gt;  &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: Ground Plane                            FALSE              &lt;NA&gt;   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: Ground Plane                            FALSE              &lt;NA&gt;   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3: Ground Plane                            FALSE              &lt;NA&gt;   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: Above Ground                                5              &lt;NA&gt;   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: Ground Plane                            FALSE              &lt;NA&gt;   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6: Ground Plane                            FALSE              Rock   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    chasing climbing eating foraging other_activities   kuks  quaas  moans</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     &lt;lgcl&gt;   &lt;lgcl&gt; &lt;lgcl&gt;   &lt;lgcl&gt;           &lt;char&gt; &lt;lgcl&gt; &lt;lgcl&gt; &lt;lgcl&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:    TRUE    FALSE  FALSE    FALSE             &lt;NA&gt;   TRUE  FALSE  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:   FALSE     TRUE  FALSE     TRUE      small jumps  FALSE  FALSE  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:   FALSE    FALSE  FALSE     TRUE             &lt;NA&gt;  FALSE  FALSE  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:   FALSE     TRUE   TRUE    FALSE             &lt;NA&gt;  FALSE  FALSE  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:   FALSE    FALSE   TRUE     TRUE             &lt;NA&gt;  FALSE  FALSE  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:   FALSE    FALSE   TRUE    FALSE             &lt;NA&gt;  FALSE  FALSE  FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    tail_flags tail_twitches approaches indifferent runs_from other_interactions</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        &lt;lgcl&gt;        &lt;lgcl&gt;     &lt;lgcl&gt;      &lt;lgcl&gt;    &lt;lgcl&gt;             &lt;char&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:      FALSE         FALSE      FALSE       FALSE     FALSE               &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:      FALSE         FALSE      FALSE       FALSE     FALSE               &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:      FALSE         FALSE      FALSE        TRUE     FALSE               &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:      FALSE         FALSE      FALSE        TRUE     FALSE               &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:      FALSE         FALSE      FALSE        TRUE     FALSE               &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:      FALSE         FALSE      FALSE       FALSE      TRUE               &lt;NA&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                      lat_long zip_codes community_districts</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                                        &lt;char&gt;     &lt;int&gt;               &lt;int&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1: POINT (-73.9676692772518 40.7764726688908)        NA                  19</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2: POINT (-73.9760256477558 40.7703573131398)        NA                  19</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:  POINT (-73.954595058342 40.7956567934304)        NA                  19</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4: POINT (-73.9715921982161 40.7746153066601)        NA                  19</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5: POINT (-73.9555255950648 40.7977720808005)        NA                  19</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6: POINT (-73.9647904085226 40.7911589002217)        NA                  19</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    borough_boundaries city_council_districts police_precincts</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 &lt;int&gt;                  &lt;int&gt;            &lt;int&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1:                  4                     19               13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2:                  4                     19               13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3:                  4                     19               13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4:                  4                     19               13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5:                  4                     19               13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6:                  4                     19               13</span>
+<span class="r-in"><span><span class="co"># csv_data &lt;- read_data(here::here("inst/CWP_dataset.csv"))</span></span></span>
+<span class="r-in"><span><span class="co"># head(csv_data)  # Display the first few rows</span></span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
