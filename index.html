@@ -53,7 +53,10 @@
   </div>
 </nav><div class="container template-home">
 <div class="row">
-  <main id="main" class="col-md-9"><div class="section level1">
+  <main id="main" class="col-md-9"><table class="table"><tbody><tr class="odd">
+<td>output: github_document</td>
+</tr></tbody></table>
+<!-- README.md is generated from README.Rmd. Please edit that file --><div class="section level1">
 <div class="page-header"><h1 id="cwpdataset">CWP.dataset<a class="anchor" aria-label="anchor" href="#cwpdataset"></a>
 </h1></div>
 <!-- badges: start -->
@@ -75,30 +78,68 @@
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>This is a basic example which shows you how to solve a common problem:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/bastienird/CWP.dataset" class="external-link">CWP.dataset</a></span><span class="op">)</span></span>
-<span><span class="co">## basic example code</span></span></code></pre></div>
-<p>What is special about using <code>README.Rmd</code> instead of just <code>README.md</code>? You can include R chunks like so:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">cars</span><span class="op">)</span></span>
-<span><span class="co">#&gt;      speed           dist       </span></span>
-<span><span class="co">#&gt;  Min.   : 4.0   Min.   :  2.00  </span></span>
-<span><span class="co">#&gt;  1st Qu.:12.0   1st Qu.: 26.00  </span></span>
-<span><span class="co">#&gt;  Median :15.0   Median : 36.00  </span></span>
-<span><span class="co">#&gt;  Mean   :15.4   Mean   : 42.98  </span></span>
-<span><span class="co">#&gt;  3rd Qu.:19.0   3rd Qu.: 56.00  </span></span>
-<span><span class="co">#&gt;  Max.   :25.0   Max.   :120.00</span></span></code></pre></div>
-<p>You’ll still need to render <code>README.Rmd</code> regularly, to keep <code>README.md</code> up-to-date. <code>devtools::build_readme()</code> is handy for this.</p>
-<p>You can also embed plots, for example:</p>
-<div class="figure">
-<img src="reference/figures/README-pressure-1.png" alt="plot of chunk pressure" width="100%"><p class="caption">
-plot of chunk pressure
-</p>
+<code class="sourceCode R"><span><span class="fu">fusen</span><span class="fu">::</span><span class="fu">draw_package_structure</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co">#&gt; ── Reading NAMESPACE file ─────────────────────────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ── flat_additional.Rmd ────────────────────────────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ── flat_first.Rmd ─────────────────────────────────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; - flat_additional.Rmd</span></span>
+<span><span class="co">#&gt;   - flat_title</span></span>
+<span><span class="co">#&gt;       + flat_additional.Rmd empty</span></span>
+<span><span class="co">#&gt;   - path</span></span>
+<span><span class="co">#&gt;       + dev/flat_additional.Rmd</span></span>
+<span><span class="co">#&gt;   - state</span></span>
+<span><span class="co">#&gt;       + 🍏 active</span></span>
+<span><span class="co">#&gt;   - R</span></span>
+<span><span class="co">#&gt;     - R/my_fun.R</span></span>
+<span><span class="co">#&gt;       + 👀 my_fun</span></span>
+<span><span class="co">#&gt;   - tests</span></span>
+<span><span class="co">#&gt;       + tests/testthat/test-my_fun.R</span></span>
+<span><span class="co">#&gt;   - vignettes</span></span>
+<span><span class="co">#&gt;       + vignettes/go-further.Rmd</span></span>
+<span><span class="co">#&gt; - flat_first.Rmd</span></span>
+<span><span class="co">#&gt;   - flat_title</span></span>
+<span><span class="co">#&gt;       + flat_first.Rmd for working package</span></span>
+<span><span class="co">#&gt;   - path</span></span>
+<span><span class="co">#&gt;       + dev/flat_first.Rmd</span></span>
+<span><span class="co">#&gt;   - state</span></span>
+<span><span class="co">#&gt;       + 🍏 active</span></span>
+<span><span class="co">#&gt;   - R</span></span>
+<span><span class="co">#&gt;     - R/bar_plot_default.R</span></span>
+<span><span class="co">#&gt;       + 👀 bar_plot_default</span></span>
+<span><span class="co">#&gt;       + 👀 cat_title</span></span>
+<span><span class="co">#&gt;       + 👀 fonction_empreinte_spatiale</span></span>
+<span><span class="co">#&gt;       + 👀 is_ggplot</span></span>
+<span><span class="co">#&gt;       + 👀 pie_chart_2_default</span></span>
+<span><span class="co">#&gt;       + 👀 qflextable2</span></span>
+<span><span class="co">#&gt;       + 👀 save_image</span></span>
+<span><span class="co">#&gt;     - R/compute_summary_of_differences.R</span></span>
+<span><span class="co">#&gt;       + 👀 compute_summary_of_differences</span></span>
+<span><span class="co">#&gt;     - R/isnulllist.R</span></span>
+<span><span class="co">#&gt;       + 👀 filtering_function</span></span>
+<span><span class="co">#&gt;       + 👀 isNullList</span></span>
+<span><span class="co">#&gt;     - R/fonction_groupement.R</span></span>
+<span><span class="co">#&gt;       + 👀 fonction_groupement</span></span>
+<span><span class="co">#&gt;       + 👀 separate_chunks_and_text</span></span>
+<span><span class="co">#&gt;     - R/function_multiple_comparison.R</span></span>
+<span><span class="co">#&gt;       + 👀 function_multiple_comparison</span></span>
+<span><span class="co">#&gt;     - R/knitting_plots_subfigures.R</span></span>
+<span><span class="co">#&gt;       + 👀 knitting_plots_subfigures</span></span>
+<span><span class="co">#&gt;       + 👀 render_subfigures</span></span>
+<span><span class="co">#&gt;     - R/read_data.R</span></span>
+<span><span class="co">#&gt;       + 👀 read_data</span></span>
+<span><span class="co">#&gt;     - R/comparison-between-multiple-cwp-datasets.R</span></span>
+<span><span class="co">#&gt;       + 🙈 </span></span>
+<span><span class="co">#&gt;   - tests</span></span>
+<span><span class="co">#&gt;       + tests/testthat/test-read_data.R</span></span>
+<span><span class="co">#&gt;       + tests/testthat/test-fonction_groupement.R</span></span>
+<span><span class="co">#&gt;       + tests/testthat/test-test-function_multiple_comparison.R</span></span>
+<span><span class="co">#&gt;   - vignettes</span></span>
+<span><span class="co">#&gt;       + vignettes/first.Rmd</span></span></code></pre></div>
 </div>
-<p>In that case, don’t forget to commit and push the resulting figure files, so they display on GitHub and CRAN.</p>
 </div>
-</div>
+
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
