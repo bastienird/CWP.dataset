@@ -1138,7 +1138,7 @@ compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", t
 
 #### Function: function_multiple_comparison
 
-```{r function-multiple_comparison}
+```{r function-function_multiple_comparison}
 #' Summarising_step
 #'
 #' This function performs various summarizing steps on data related to species and gear types, retrieving data from a database, 
@@ -1224,13 +1224,8 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
 }
 ```
 
-### Tests
-
-#### Test: function_multiple_comparison
 
 ```{r test-function_multiple_comparison}
-# Example test case
-library(testthat)
 test_that("function_multiple_comparison handles identical datasets correctly", {
   # Mock input data
   mock_data <- list(a = 1, b = 2) # Replace with actual test inputs

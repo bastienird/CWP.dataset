@@ -88,7 +88,7 @@ fusen::draw_package_structure()
 #>   - tests
 #>       + tests/testthat/test-read_data.R
 #>       + tests/testthat/test-fonction_groupement.R
-#>       + tests/testthat/test-test-function_multiple_comparison.R
+#>       + tests/testthat/test-function_multiple_comparison.R
 #>   - vignettes
 #>       + vignettes/first.Rmd
 ```

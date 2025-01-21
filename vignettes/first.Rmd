@@ -128,9 +128,6 @@ These are only included in the present flat template file, their content will no
 
 #### Function: function_multiple_comparison
 
-### Tests
-
-#### Test: function_multiple_comparison
 
 
 # Inflate your package

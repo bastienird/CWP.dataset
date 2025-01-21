@@ -92,3 +92,428 @@ bar_plot_default <- function(first,
   }
   return(bar_plot)
 }
+
+#' Create a Title with Optional Child Header
+#'
+#' @description This function formats a title with optional child headers for output.
+#' @param x A character string representing the title.
+#' @param child_headerinside An optional character string for the child header.
+#' @return A formatted character string.
+#' @export
+cat_title <- function(x, child_headerinside = "") {
+  if(is.null(child_headerinside)){
+    child_headerinside <- ""
+  }
+  if(child_headerinside == "-#"){
+    x <- sub("#", "", x)
+    child_headerinside = ""
+  }
+
+  output = paste0(child_headerinside, x, " \n")
+  return(output)
+}
+
+
+#' Spatial Footprint Function
+#'
+#' This function generates a spatial representation of measurement values from two datasets,
+#' allowing for comparison between initial and final datasets using a provided shapefile.
+#'
+#' @param variable_affichee A character string indicating the measurement unit to be displayed.
+#' @param initial_dataset A data.table containing the initial measurement data (default: init).
+#' @param final_dataset A data.table containing the final measurement data (default: final).
+#' @param titre_1 A character string for the title of the first dataset (default: "Dataset 1").
+#' @param titre_2 A character string for the title of the second dataset (default: "Dataset 2").
+#' @param shapefile.fix A spatial object (sf) for the polygons that defines the geographical areas.
+#' @param plotting_type A character string indicating the type of plot ("plot" or "view").
+#' @param continent An optional spatial object for adding continent borders to the plot.
+#'
+#' @return A plot object representing the spatial footprint of the measurement values.
+#' @export
+fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final,
+                                        titre_1 = "Dataset 1", titre_2 = "Dataset 2",
+                                        shapefile.fix = NULL, plotting_type = "plot", continent = NULL) {
+
+  if(is.null(shapefile.fix)){
+    stop("Please provide a shape for the polygons")
+  }
+
+  selection <- function(x) {
+    x[, .(geographic_identifier = as.character(geographic_identifier),
+          measurement_value,
+          GRIDTYPE,
+          measurement_unit)]
+  }
+
+  Initial_dataframe <- selection(as.data.table(initial_dataset))
+  Final_dataframe <- selection(as.data.table(final_dataset))
+
+  geo_data <- rbind(Initial_dataframe, Final_dataframe, use.names = TRUE, fill = TRUE)
+
+  geo_data[, source := fifelse(source == "Initial_dataframe", titre_1,
+                               fifelse(source == "Final_dataframe", titre_2, "Error"))]
+
+  inner_join <- geo_data[, .(measurement_value = sum(measurement_value, na.rm = TRUE)),
+                         by = .(geographic_identifier, measurement_unit, source, GRIDTYPE)][
+                           measurement_value != 0]
+
+  inner_join <- st_as_sf(inner_join)[st_join(inner_join, shapefile.fix %>% select(-GRIDTYPE),
+                                             join = st_equals)]
+
+  if (nrow(inner_join[measurement_unit == variable_affichee]) != 0) {
+    if (plotting_type == "view") {
+      image <- tm_shape(inner_join[measurement_unit == variable_affichee]) +
+        tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
+        tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE)
+    } else {
+      image <- tm_shape(inner_join[measurement_unit == variable_affichee]) +
+        tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
+        tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE) +
+        tm_shape(continent) + tm_borders()
+    }
+
+    return(image)
+  }
+}
+
+#' Check if an Object is a ggplot
+#'
+#' @description This function checks if an object is a ggplot object.
+#' @param obj The object to check.
+#' @return Logical value indicating whether the object is a ggplot.
+#' @export
+is_ggplot <- function(obj) {
+  inherits(obj, "gg") || inherits(obj, "ggplot")
+}
+
+#' Create Pie Charts from Data
+#'
+#' @description This function creates pie charts from measurement data for one or two datasets.
+#' @param dimension A character string indicating the dimension for grouping.
+#' @param first A data frame representing the first dataset.
+#' @param second An optional second data frame.
+#' @param topn An integer for the number of top categories to display.
+#' @param titre_1 A character string for the title of the first dataset.
+#' @param titre_2 A character string for the title of the second dataset.
+#' @param title_yes_no Logical indicating if a title should be displayed.
+#' @param dataframe Logical indicating if a data frame should be returned.
+#' @return A pie chart or a list containing the pie chart and data frame, if specified.
+#' @export
+pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titre_1 = "first",
+                                 titre_2 = "second", title_yes_no = TRUE, dataframe = FALSE)
+{
+  topn = 5
+  first[is.na(first)] <- "NA"
+  if (deparse(substitute(dimension)) == "X[[i]]") {
+    r <- dimension
+  }
+  else {
+    r <- deparse(substitute(dimension))
+  }
+  dimension <- gsub("\"", "", r)
+  if (dimension == "source_authority") {
+    topn = 6
+  }
+  name1 <- titre_1
+  name2 <- titre_2
+  if(is.null(second)){
+    name1 <- ""
+  }
+  all_class_i <- first %>% dplyr::group_by(across(c(dimension,
+                                                    "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+                                                                                                                       na.rm = TRUE)) %>% filter(measurement_value != 0) %>%
+    dplyr::select(-measurement_value)
+  colnames(all_class_i) <- c("class", "measurement_unit")
+  all_class_i <- all_class_i %>% mutate(class = paste(class,
+                                                      measurement_unit, sep = " / "))
+  provisoire_i <- first %>% dplyr::group_by(dplyr::across(c(dimension,
+                                                            "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+                                                                                                                               na.rm = TRUE)) %>% dplyr::group_by(measurement_unit) %>%
+    dplyr::arrange(desc(measurement_value)) %>% dplyr::mutate(id = row_number()) %>%
+    dplyr::mutate(class = as.factor(ifelse(id < topn, !!rlang::sym(dimension),
+                                           "Others"))) %>% dplyr::group_by(class, measurement_unit) %>%
+    dplyr::summarise(measurement_value = sum(measurement_value,
+                                             na.rm = TRUE)) %>% dplyr::ungroup() %>% dplyr::select(measurement_value,
+                                                                                                   class, measurement_unit) %>% dplyr::group_by(measurement_unit) %>%
+    dplyr::mutate(pourcentage = prop.table(measurement_value) *
+                    100) %>% dplyr::mutate(labels = paste0(pourcentage,
+                                                           " ", " % ")) %>% dplyr::arrange(desc(class)) %>% dplyr::mutate(ypos_ligne = cumsum(pourcentage) -
+                                                                                                                            0.5 * pourcentage) %>% dplyr::distinct() %>% dplyr::filter(!is.na(class))
+  if (!is.null(second)) {
+    all_class_t <- first %>% dplyr::group_by(across(c(dimension,
+                                                      "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+                                                                                                                         na.rm = TRUE)) %>% filter(measurement_value != 0) %>%
+      dplyr::select(-measurement_value)
+    colnames(all_class_t) <- c("class", "measurement_unit")
+    all_class_t <- all_class_t %>% mutate(class = paste(class,
+                                                        measurement_unit, sep = " / "))
+    provisoire_t <- second %>% dplyr::group_by(across(c(dimension,
+                                                        "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+                                                                                                                           na.rm = TRUE)) %>% dplyr::group_by(measurement_unit) %>%
+      dplyr::arrange(desc(measurement_value)) %>% dplyr::mutate(id = row_number()) %>%
+      dplyr::mutate(class = as.factor(ifelse(id < topn,
+                                             !!rlang::sym(dimension), "Others"))) %>% dplyr::group_by(class,
+                                                                                                      measurement_unit) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+                                                                                                                                                                     na.rm = TRUE)) %>% dplyr::ungroup() %>% dplyr::select(measurement_value,
+                                                                                                                                                                                                                           class, measurement_unit) %>% dplyr::group_by(measurement_unit) %>%
+      dplyr::mutate(pourcentage = prop.table(measurement_value) *
+                      100) %>% dplyr::mutate(labels = paste0(pourcentage,
+                                                             " ", " % ")) %>% dplyr::arrange(desc(class)) %>%
+      dplyr::mutate(ypos_ligne = cumsum(pourcentage) -
+                      0.5 * pourcentage) %>% dplyr::distinct() %>%
+      dplyr::filter(!is.na(class))
+  }
+  if (!is.null(second)) {
+    disappearing_stratas <- anti_join(all_class_i %>% dplyr::select(class),
+                                      all_class_t %>% dplyr::select(class)) %>% distinct()
+    appearing_stratas <- anti_join(all_class_t %>% dplyr::select(class),
+                                   all_class_i %>% dplyr::select(class)) %>% distinct()
+    number_disappearing_stratas <- nrow(disappearing_stratas)
+    number_appearing_stratas <- nrow(appearing_stratas)
+    summary_apparition <- ggdraw() + draw_label(paste0("Number of appearing stratas : ",
+                                                       number_appearing_stratas), size = 10)
+    if (number_appearing_stratas != 0)
+      summary_apparition <- summary_apparition + draw_label(paste0(" \nThey are ",
+                                                                   paste((appearing_stratas %>% dplyr::select(class) %>%
+                                                                            distinct())$class, sep = ";")), size = 10)
+    summary_apparition <- summary_apparition + draw_label(paste0(" \nNumber of disappearing stratas : ",
+                                                                 number_disappearing_stratas), size = 10)
+    if (number_disappearing_stratas != 0)
+      summary_apparition <- summary_apparition + draw_label(paste0(" \nThey are ",
+                                                                   paste((disappearing_stratas %>% dplyr::select(class) %>%
+                                                                            distinct())$class, sep = ";")), size = 10)
+  }
+  set.seed(2)
+  if (!(is.null(second))) {
+    number <- length(unique(unlist(as.character(c(provisoire_i$class,
+                                                  provisoire_t$class)))))
+  }
+  else {
+    number <- length(unique(unlist(as.character(c(provisoire_i$class)))))
+  }
+  pal <- brewer.pal(number, "Paired")
+  if (!(is.null(second))) {
+    pal = setNames(pal, unique(unlist(as.character(c(provisoire_i$class,
+                                                     provisoire_t$class)))))
+  }
+  else {
+    pal = setNames(pal, unique(unlist(as.character(c(provisoire_i$class)))))
+  }
+  ggplot_i <- ggplot(provisoire_i %>% dplyr::filter(!is.na(class))) +
+    aes(x = "", fill = class, group = class, weight = pourcentage) +
+    geom_bar(position = "fill") + scale_fill_hue(direction = 1) +
+    scale_color_hue(direction = 1) + theme_minimal() + coord_polar("y",
+                                                                   start = 0) + geom_text(first = (provisoire_i %>% dplyr::filter(!is.na(class)) %>%
+                                                                                                     dplyr::mutate_if(is.numeric, round)), size = 3, aes(x = 1,
+                                                                                                                                                         y = ypos_ligne/100, label = paste0(round(pourcentage),
+                                                                                                                                                                                            "%")), color = "black") + theme(axis.ticks.x = element_blank(),
+                                                                                                                                                                                                                            axis.text.x = element_blank()) + labs(x = "", y = "") +
+    scale_fill_manual(values = pal) + guides(fill = guide_legend(title = toupper(r))) +
+    facet_wrap("measurement_unit")
+  if (!is.null(second)) {
+    to_get_legend <- ggplot(rbind(provisoire_i %>% dplyr::filter(!is.na(class)),
+                                  provisoire_t %>% dplyr::filter(!is.na(class)))) +
+      aes(x = "", fill = class, group = class, weight = pourcentage) +
+      geom_bar(position = "fill") + guides(fill = guide_legend(title = toupper(r)))+
+      scale_fill_manual(values = pal)
+    legend <- cowplot::get_legend(to_get_legend)
+    ggplot_t <- ggplot(provisoire_t %>% dplyr::filter(!is.na(class))) +
+      aes(x = "", fill = class, group = class, weight = pourcentage) +
+      geom_bar(position = "fill") + scale_fill_hue(direction = 1) +
+      scale_color_hue(direction = 1) + theme_minimal() +
+      coord_polar("y", start = 0) + geom_text(first = (provisoire_t %>%
+                                                         dplyr::filter(!is.na(class)) %>% dplyr::mutate_if(is.numeric,
+                                                                                                           round)), size = 3, aes(x = 1, y = ypos_ligne/100,
+                                                                                                                                  label = paste0(round(pourcentage), "%")), color = "black") +
+      theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())  +
+      labs(x = "", y = "") +  scale_fill_manual(values = pal) +
+      guides(fill = guide_legend(title = toupper(r))) +
+      facet_wrap("measurement_unit") +
+      theme(legend.position = "none")
+  }
+  else {
+    legend <- cowplot::get_legend(ggplot_i +
+                                    scale_fill_manual(values = pal))
+  }
+  if (title_yes_no) {
+    title <- ggdraw() + draw_label(paste0("Distribution in measurement_value for the dimension : ",
+                                          r), fontface = "bold", x = 0, hjust = 0) + theme(plot.margin = margin(0,
+                                                                                                                0, 0, 7))
+  }
+  else {
+    title <- ggdraw() + draw_label(" \n ")
+  }
+  if (!is.null(second)) {
+    graph <- plot_grid(ggplot_i + theme(legend.position = "none"),
+                       ggplot_t, nrow = 2, labels = c(gsub("\"", "", gsub("~\"",
+                                                                          "", deparse(substitute(name1)))), gsub("\"",
+                                                                                                                 "", gsub("~\"", "", deparse(substitute(name2))))),
+                       label_size = 10, vjust = 1.3, label_x = c(0, 0),
+                       label_y = 1.025, axis = "l", align = "v")
+    ploting_map <- plot_grid(title, nrow = 2, plot_grid(graph,
+                                                        legend, ncol = 2), rel_heights = c(0.1, 1)) + theme(plot.background = element_rect(color = "black"))
+    if (sum(!(round(provisoire_i$pourcentage) == round(provisoire_t$pourcentage))) ==
+        0) {
+      title <- ggdraw() + draw_label(paste0("Distribution in measurement_value for the dimension : ",
+                                            r, "\n(same distribution to the nearest rounding for both datasets : \n",
+                                            gsub("\"", "", gsub("~\"", "", deparse(substitute(name1)))),
+                                            " and \n", gsub("\"", "", gsub("~\"", "", deparse(substitute(name2)))),
+                                            ")"), fontface = "bold", x = 0, hjust = 0, vjust = 0.5,
+                                     size = 13) + theme(plot.margin = margin(0, 0,
+                                                                             0, 7))
+      graph <- ggplot_i + theme(legend.position = "none")
+    }
+  }
+  else {
+    graph <- plot_grid(ggplot_i + theme(legend.position = "none"),
+                       nrow = 1, labels = c(gsub("\"", "", gsub("~\"",
+                                                                "", deparse(substitute(name1))))), label_size = 10,
+                       vjust = 1.3, label_x = c(0, 0), label_y = 0.8, axis = "l",
+                       align = "v")
+  }
+  if (title_yes_no) {
+    if (exists("provisoire_t"))
+      if (sum(!(round(provisoire_i$pourcentage) == round(provisoire_t$pourcentage))) ==
+          0) {
+        title <- ggdraw() + draw_label(paste0("(same distribution to the nearest rounding for both datasets :\n",
+                                              gsub("\"", "", gsub("~\"", "", deparse(substitute(name1)))),
+                                              " and ", gsub("\"", "", gsub("~\"", "", deparse(substitute(name2)))),
+                                              ")"), fontface = "bold", x = 0, hjust = 0,
+                                       vjust = 0.5, size = 13) + theme(plot.margin = margin(0,
+                                                                                            0, 0, 7))
+      }
+    else {
+      title <- ggdraw() + draw_label(" \n ")
+    }
+  }
+  ploting_map <- plot_grid(title, nrow = 2, plot_grid(graph,
+                                                      legend, ncol = 2), rel_heights = c(0.1, 1)) + theme(plot.background = element_rect(color = "black"))
+  if (exists("summary_apparition") & dataframe) {
+    df <- data.frame(` ` = c("Stratas appearing", "Stratas disappearing"),
+                     Number = c(number_appearing_stratas, number_disappearing_stratas),
+                     Detail = c(toString(paste((appearing_stratas %>%
+                                                  dplyr::select(class) %>% mutate(class = gsub(" ",
+                                                                                               "", class)) %>% distinct())$class, sep = ";")),
+                                toString(paste((disappearing_stratas %>% dplyr::select(class) %>%
+                                                  mutate(class = gsub(" ", "", class)) %>% distinct())$class,
+                                               sep = ";"))), check.names = FALSE, fix.empty.names = FALSE)
+    if (number_disappearing_stratas == 0 & number_appearing_stratas ==
+        0) {
+      df <- df %>% dplyr::select(-Detail)
+    }
+    list_df_plot <- list(plot = ploting_map, df = df)
+    return(list_df_plot)
+  }
+  else {
+    return(ploting_map)
+  }
+}
+
+#' Create and Save a Flextable
+#'
+#' @description This function creates a flextable from a data frame, optionally saving it as an image.
+#' @param x A data frame or flextable to create the table from.
+#' @param captionn An optional character string for the table caption.
+#' @param autonumm An optional automatic numbering parameter.
+#' @param pgwidth A numeric value for the width of the table.
+#' @param columns_to_color Optional columns to apply color coding.
+#' @param save_folder Optional folder to save the flextable.
+#' @param fig.pathinside A character string for the path to save figures.
+#' @param grouped_data Optional grouped data for formatting.
+#' @param interactive_plot Logical indicating if the output should be interactive.
+#' @return A flextable object or a DT datatable if interactive_plot is TRUE.
+#' @export
+qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, columns_to_color = NULL, save_folder = NULL, fig.pathinside = "Figures", grouped_data = NULL, interactive_plot = FALSE) {
+  captionn <- eval(captionn)
+
+  if (all(class(x) == "flextable")) {
+    flextabley <- x
+  } else {
+    if (!(all(class(x) == "data.frame"))) {
+      x <- as.data.frame(x %>% dplyr::ungroup())
+    }
+    if (!is.null(save_folder)) {
+      if (!dir.exists(file.path(fig.pathinside, save_folder))) {
+        dir.create(file.path(fig.pathinside, save_folder), recursive = TRUE)
+      }
+      save_path_data <- file.path(fig.pathinside, save_folder, paste0(make.names(captionn), ".csv" ))  # Adjust the file name as needed
+      fwrite(x, file = save_path_data)
+    }
+
+    y <- x %>%
+      dplyr::ungroup() %>%
+      dplyr::mutate_if(is.factor, as.character) %>%
+      dplyr::mutate_if(is.character, ~ str_replace_all(., ",", ", \n" )) %>%
+      dplyr::mutate_if(is.character, ~ str_replace_all(., "_", "-" )) %>%
+      dplyr::mutate_if(is.numeric, function(.) { round(., 2) })
+
+    if(!is.null(grouped_data)){
+      y <- as_grouped_data(y, groups = grouped_data)
+    }
+
+    if (!is.null(columns_to_color)) {
+      colormatrix <- ifelse(y %>% dplyr::select(all_of(columns_to_color)) < 0, "red",
+                            ifelse(y %>% dplyr::select(all_of(columns_to_color)) > 0, "green", "white"))
+      flextabley <- flextable::flextable(y)
+
+      flextabley <- flextabley %>% highlight(j = all_of(columns_to_color), color = colormatrix)
+
+
+    } else {    flextabley <- flextable::flextable(y)}
+
+  }
+
+  if (!is.null(captionn)) {
+    flextable_captionned <- flextable::set_caption(flextabley, caption = captionn, style = "Table Caption")
+  } else {
+    flextable_captionned <- flextabley
+  }
+
+
+
+  ft_out <- flextable_captionned %>% autofit()
+  ft_out <- width(ft_out, width = dim(ft_out)$widths * pgwidth / flextable_dim(ft_out)$widths)
+
+  if (!is.null(save_folder)) {
+    save_path_flextable <- file.path(fig.pathinside, save_folder, paste0(make.names(captionn), ".png"))  # Adjust the file name as needed
+    save_as_image(ft_out, path = save_path_flextable)
+  }
+  if (interactive_plot) {
+    # Create an interactive plot using DT
+    return(DT::datatable(y))
+  }
+  ft_out
+
+}
+
+
+#' Save Plot as Image
+#'
+#' @description This function saves the current plot as an image in a specified folder.
+#' @param title A character string representing the title of the plot.
+#' @param plott The plot object to save.
+#' @param folder The folder where the image will be saved.
+#' @param fig.pathinside The path for saving the figure.
+#' @param find_and_print Logical indicating if results should be printed.
+#' @return None
+#' @export
+save_image <- function(title, plott = last_plot(), folder = NULL, fig.pathinside = fig.path, find_and_print = FALSE){
+  current <- tmap_mode()
+  title <- eval(title)
+  if(!is.null(folder)){
+    dir.create(file.path(fig.pathinside, folder), recursive = TRUE)
+
+    if(all(class(plott) == "flextable")){
+      save_as_image(plott,path = file.path(fig.pathinside, file.path(folder, paste0( make.names(title), ".png"))))
+    } else if(all(class(plott) == "tmap")){
+      tmap_mode("plot")
+      filenametmap <- file.path(fig.pathinside, file.path(folder, paste0( make.names(title), ".png")))
+      tmap_save(tm = plott, filename = filenametmap)
+      tmap_mode(current)
+    } else {
+      ggsave(paste0( make.names(title), ".png"),plot = plott,   device = "png", path = file.path(fig.pathinside, folder), create.dir = TRUE)
+    }
+  } else { print("Cannot save the image the folder does not exist")}
+  # return(plott)
+
+}
