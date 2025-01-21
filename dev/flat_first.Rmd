@@ -48,8 +48,6 @@ pkgload::load_all(path = here::here(), export_all = FALSE)
 ```
 
 
-# The first function of the package: Calculate the median of a vector
-
 <!--
 Create a chunk for the core of the function
 
@@ -1135,6 +1133,114 @@ compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", t
   return(summary)
 }
 ```
+
+### Function Definitions
+
+#### Function: function_multiple_comparison
+
+```{r function-multiple_comparison}
+#' Summarising_step
+#'
+#' This function performs various summarizing steps on data related to species and gear types, retrieving data from a database, 
+#' processing it, and rendering output reports.
+#'
+#' @param main_dir Character. The main directory containing the entities. (jobs/entities)
+#' @param connectionDB Object. The database connection.
+#' @param config List. Configuration list containing metadata and options for processing.
+#' @param source_authoritylist Vector. Vector of source_authority to filter on, "all" being all of them.
+#' @return NULL. The function has side effects, such as writing files and rendering reports.
+#' @param size Character string. La taille peut prendre les valeurs suivantes :
+#'   \itemize{
+#'     \item `"long"` (par défaut) : Long with coverage.
+#'     \item `"middle"` : Long without coverage
+#'     \item `"short"` : Only first characteristics, first differences and main table of steps
+#'   }
+#'
+#' @examples
+#' Summarising_step(main_dir = "path/to/main/dir", connectionDB = db_connection, config = config_list)
+#' @import dplyr
+#' @import sf
+#' @import futile.logger
+#' @export
+function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, parameters_child_global, fig.path, coverage = FALSE, shapefile.fix, continent) {
+  gc()
+  step_mapping <- sum(which(sub_list_dir == "Markdown/mapping_codelist"))
+  parameter_init <- paste0(sub_list_dir[counting], "/data.qs")
+  parameter_final <- paste0(sub_list_dir[counting + 1], "/data.qs")
+  parameter_titre_dataset_1 <- basename(sub_list_dir[counting])
+  parameter_titre_dataset_2 <- basename(sub_list_dir[counting + 1])
+
+  new_path <- file.path(fig.path, "Comparison", paste0(basename(sub_list_dir[counting]), "_", basename(sub_list_dir[counting + 1])))
+  dir.create(new_path, recursive = TRUE)
+
+  flog.info(paste("Starting comparison between:", parameter_titre_dataset_1, " and ", parameter_titre_dataset_2, " with coverage being: ", coverage))
+
+  formals(filtering_function, envir = environment())$parameter_filtering = parameter_filtering
+  initfiltered <- filtering_function(qs::qread(parameter_init))
+  finalfiltered <- filtering_function(qs::qread(parameter_final))
+  if (!identical(initfiltered, finalfiltered)) {
+    rm(initfiltered)
+    rm(finalfiltered)
+    flog.info(paste("Datasets are different:", parameter_titre_dataset_1, "and", parameter_titre_dataset_2))
+
+    child_env_result <- comprehensive_cwp_dataframe_analysis(
+      parameter_init = parameter_init,
+      parameter_final = parameter_final,
+      fig.path = new_path,
+      parameter_fact = "catch",
+      plotting_type = "view",
+      parameter_colnames_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet",
+                                     "fishing_mode", "geographic_identifier",
+                                     "measurement_unit", "measurement_value", "GRIDTYPE",
+                                     "species_group", "Gear"),
+      shapefile_fix = shapefile.fix,
+      continent = continent,
+      coverage = coverage,
+      parameter_resolution_filter = parameters_child_global$parameter_resolution_filter,
+      parameter_filtering = parameters_child_global$parameter_filtering,
+      parameter_titre_dataset_1 = parameter_titre_dataset_1,
+      parameter_titre_dataset_2 = parameter_titre_dataset_2,
+      unique_analyse = FALSE
+    )
+
+    flog.info(paste("Analysis completed for:", parameter_titre_dataset_1, "vs", parameter_titre_dataset_2))
+
+    child_env_result$step_title_t_f <- TRUE
+    child_env_result$step_title <- paste0(" Treatment : ", basename(sub_list_dir[counting + 1]))
+    child_env_result$step <- counting
+    child_env_result$parameter_titre_dataset_1 <- basename(sub_list_dir[counting])
+    child_env_result$parameter_titre_dataset_2 <- basename(sub_list_dir[counting + 1])
+    child_env_result$child_header <- "##"
+
+    gc()
+    flog.info(paste("New result saved to:", new_path))
+    return(child_env_result)
+  } else {
+    rm(initfiltered)
+    rm(finalfiltered)
+    flog.info(paste("Datasets are identical, skipping comparison for:", parameter_titre_dataset_1, "and", parameter_titre_dataset_2))
+    return(NA)
+  }
+}
+```
+
+### Tests
+
+#### Test: function_multiple_comparison
+
+```{r test-function_multiple_comparison}
+# Example test case
+library(testthat)
+test_that("function_multiple_comparison handles identical datasets correctly", {
+  # Mock input data
+  mock_data <- list(a = 1, b = 2) # Replace with actual test inputs
+
+  result <- function_multiple_comparison(mock_data) # Update with required parameters
+
+  expect_true(is.na(result))
+})
+```
+
 
 ```{r development-inflate, eval=FALSE}
 # Keep eval=FALSE to avoid infinite loop in case you hit the knit button

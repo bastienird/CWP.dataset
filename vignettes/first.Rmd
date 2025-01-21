@@ -41,8 +41,6 @@ and `system.file()` to read it in your examples.
 -->
 
 
-# The first function of the package: Calculate the median of a vector
-
 <!--
 Create a chunk for the core of the function
 
@@ -125,6 +123,14 @@ Create a chunk with 'development' actions
 
 These are only included in the present flat template file, their content will not be part of the package anywhere else.
 -->
+
+### Function Definitions
+
+#### Function: function_multiple_comparison
+
+### Tests
+
+#### Test: function_multiple_comparison
 
 
 # Inflate your package

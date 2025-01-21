@@ -1,3 +1,18 @@
+flat_additional.Rmd:
+  path: dev/flat_additional.Rmd
+  state: active
+  R: R/my_fun.R
+  tests: tests/testthat/test-my_fun.R
+  vignettes: vignettes/go-further.Rmd
+  inflate:
+    flat_file: dev/flat_additional.Rmd
+    vignette_name: Go further
+    open_vignette: true
+    check: true
+    document: true
+    overwrite: ask
+    clean: ask
+    codecov: false
 flat_first.Rmd:
   path: dev/flat_first.Rmd
   state: active
@@ -6,12 +21,14 @@ flat_first.Rmd:
   - R/compute_summary_of_differences.R
   - R/isnulllist.R
   - R/fonction_groupement.R
+  - R/function_multiple_comparison.R
   - R/knitting_plots_subfigures.R
   - R/read_data.R
   - R/comparison-between-multiple-cwp-datasets.R
   tests:
   - tests/testthat/test-read_data.R
   - tests/testthat/test-fonction_groupement.R
+  - tests/testthat/test-test-function_multiple_comparison.R
   vignettes: vignettes/first.Rmd
   inflate:
     flat_file: dev/flat_first.Rmd
