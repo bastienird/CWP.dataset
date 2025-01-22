@@ -7,7 +7,7 @@ Authors@R:
 Description: This package is to easily analyse standardized CWP data and
     to compare different datasets.
 License: MIT + file LICENSE
-URL: https://github.com/bastienird/CWP.dataset
+URL: https://github.com/bastienird/CWP.dataset, https://bastienird.github.io/CWP.dataset
 BugReports: https://github.com/bastienird/CWP.dataset/issues
 Imports: 
     cowplot,
