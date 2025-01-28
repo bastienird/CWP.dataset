@@ -1,0 +1,224 @@
+#' Create Pie Charts from Data
+#'
+#' @description This function creates pie charts from measurement data for one or two datasets.
+#' @param dimension A character string indicating the dimension for grouping.
+#' @param first A data frame representing the first dataset.
+#' @param second An optional second data frame.
+#' @param topn An integer for the number of top categories to display.
+#' @param titre_1 A character string for the title of the first dataset.
+#' @param titre_2 A character string for the title of the second dataset.
+#' @param title_yes_no Logical indicating if a title should be displayed.
+#' @param dataframe Logical indicating if a data frame should be returned.
+#' @return A pie chart or a list containing the pie chart and data frame, if specified.
+#' @export
+pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titre_1 = "first",
+                                 titre_2 = "second", title_yes_no = TRUE, dataframe = FALSE)
+{
+  topn = 5
+  first[is.na(first)] <- "NA"
+  if (deparse(substitute(dimension)) == "X[[i]]") {
+    r <- dimension
+  }
+  else {
+    r <- deparse(substitute(dimension))
+  }
+  dimension <- gsub("\"", "", r)
+  if (dimension == "source_authority") {
+    topn = 6
+  }
+  name1 <- titre_1
+  name2 <- titre_2
+  if(is.null(second)){
+    name1 <- ""
+  }
+  all_class_i <- first %>% dplyr::group_by(across(c(dimension,
+                                                    "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+                                                                                                                       na.rm = TRUE)) %>% filter(measurement_value != 0) %>%
+    dplyr::select(-measurement_value)
+  colnames(all_class_i) <- c("class", "measurement_unit")
+  all_class_i <- all_class_i %>% mutate(class = paste(class,
+                                                      measurement_unit, sep = " / "))
+  provisoire_i <- first %>% dplyr::group_by(dplyr::across(c(dimension,
+                                                            "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+                                                                                                                               na.rm = TRUE)) %>% dplyr::group_by(measurement_unit) %>%
+    dplyr::arrange(desc(measurement_value)) %>% dplyr::mutate(id = row_number()) %>%
+    dplyr::mutate(class = as.factor(ifelse(id < topn, !!rlang::sym(dimension),
+                                           "Others"))) %>% dplyr::group_by(class, measurement_unit) %>%
+    dplyr::summarise(measurement_value = sum(measurement_value,
+                                             na.rm = TRUE)) %>% dplyr::ungroup() %>% dplyr::select(measurement_value,
+                                                                                                   class, measurement_unit) %>% dplyr::group_by(measurement_unit) %>%
+    dplyr::mutate(pourcentage = prop.table(measurement_value) *
+                    100) %>% dplyr::mutate(labels = paste0(pourcentage,
+                                                           " ", " % ")) %>% dplyr::arrange(desc(class)) %>% dplyr::mutate(ypos_ligne = cumsum(pourcentage) -
+                                                                                                                            0.5 * pourcentage) %>% dplyr::distinct() %>% dplyr::filter(!is.na(class))
+  if (!is.null(second)) {
+    all_class_t <- first %>% dplyr::group_by(across(c(dimension,
+                                                      "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+                                                                                                                         na.rm = TRUE)) %>% filter(measurement_value != 0) %>%
+      dplyr::select(-measurement_value)
+    colnames(all_class_t) <- c("class", "measurement_unit")
+    all_class_t <- all_class_t %>% mutate(class = paste(class,
+                                                        measurement_unit, sep = " / "))
+    provisoire_t <- second %>% dplyr::group_by(across(c(dimension,
+                                                        "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+                                                                                                                           na.rm = TRUE)) %>% dplyr::group_by(measurement_unit) %>%
+      dplyr::arrange(desc(measurement_value)) %>% dplyr::mutate(id = row_number()) %>%
+      dplyr::mutate(class = as.factor(ifelse(id < topn,
+                                             !!rlang::sym(dimension), "Others"))) %>% dplyr::group_by(class,
+                                                                                                      measurement_unit) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+                                                                                                                                                                     na.rm = TRUE)) %>% dplyr::ungroup() %>% dplyr::select(measurement_value,
+                                                                                                                                                                                                                           class, measurement_unit) %>% dplyr::group_by(measurement_unit) %>%
+      dplyr::mutate(pourcentage = prop.table(measurement_value) *
+                      100) %>% dplyr::mutate(labels = paste0(pourcentage,
+                                                             " ", " % ")) %>% dplyr::arrange(desc(class)) %>%
+      dplyr::mutate(ypos_ligne = cumsum(pourcentage) -
+                      0.5 * pourcentage) %>% dplyr::distinct() %>%
+      dplyr::filter(!is.na(class))
+  }
+  if (!is.null(second)) {
+    disappearing_stratas <- anti_join(all_class_i %>% dplyr::select(class),
+                                      all_class_t %>% dplyr::select(class)) %>% distinct()
+    appearing_stratas <- anti_join(all_class_t %>% dplyr::select(class),
+                                   all_class_i %>% dplyr::select(class)) %>% distinct()
+    number_disappearing_stratas <- nrow(disappearing_stratas)
+    number_appearing_stratas <- nrow(appearing_stratas)
+    summary_apparition <- ggdraw() + draw_label(paste0("Number of appearing stratas : ",
+                                                       number_appearing_stratas), size = 10)
+    if (number_appearing_stratas != 0)
+      summary_apparition <- summary_apparition + draw_label(paste0(" \nThey are ",
+                                                                   paste((appearing_stratas %>% dplyr::select(class) %>%
+                                                                            distinct())$class, sep = ";")), size = 10)
+    summary_apparition <- summary_apparition + draw_label(paste0(" \nNumber of disappearing stratas : ",
+                                                                 number_disappearing_stratas), size = 10)
+    if (number_disappearing_stratas != 0)
+      summary_apparition <- summary_apparition + draw_label(paste0(" \nThey are ",
+                                                                   paste((disappearing_stratas %>% dplyr::select(class) %>%
+                                                                            distinct())$class, sep = ";")), size = 10)
+  }
+  set.seed(2)
+  if (!(is.null(second))) {
+    number <- length(unique(unlist(as.character(c(provisoire_i$class,
+                                                  provisoire_t$class)))))
+  }
+  else {
+    number <- length(unique(unlist(as.character(c(provisoire_i$class)))))
+  }
+  pal <- brewer.pal(number, "Paired")
+  if (!(is.null(second))) {
+    pal = setNames(pal, unique(unlist(as.character(c(provisoire_i$class,
+                                                     provisoire_t$class)))))
+  }
+  else {
+    pal = setNames(pal, unique(unlist(as.character(c(provisoire_i$class)))))
+  }
+  ggplot_i <- ggplot(provisoire_i %>% dplyr::filter(!is.na(class))) +
+    aes(x = "", fill = class, group = class, weight = pourcentage) +
+    geom_bar(position = "fill") + scale_fill_hue(direction = 1) +
+    scale_color_hue(direction = 1) + theme_minimal() + coord_polar("y",
+                                                                   start = 0) + geom_text(first = (provisoire_i %>% dplyr::filter(!is.na(class)) %>%
+                                                                                                     dplyr::mutate_if(is.numeric, round)), size = 3, aes(x = 1,
+                                                                                                                                                         y = ypos_ligne/100, label = paste0(round(pourcentage),
+                                                                                                                                                                                            "%")), color = "black") + theme(axis.ticks.x = element_blank(),
+                                                                                                                                                                                                                            axis.text.x = element_blank(),
+                                                                                                                                                                                                                            plot.margin = margin(0, 0, 0, 0)) + labs(x = "", y = "") +
+    scale_fill_manual(values = pal) + guides(fill = guide_legend(title = toupper(r))) +
+    facet_wrap("measurement_unit")
+  if (!is.null(second)) {
+    to_get_legend <- ggplot(rbind(provisoire_i %>% dplyr::filter(!is.na(class)),
+                                  provisoire_t %>% dplyr::filter(!is.na(class)))) +
+      aes(x = "", fill = class, group = class, weight = pourcentage) +
+      geom_bar(position = "fill") + guides(fill = guide_legend(title = toupper(r)))+
+      scale_fill_manual(values = pal)
+    legend <- cowplot::get_legend(to_get_legend)
+    ggplot_t <- ggplot(provisoire_t %>% dplyr::filter(!is.na(class))) +
+      aes(x = "", fill = class, group = class, weight = pourcentage) +
+      geom_bar(position = "fill") + scale_fill_hue(direction = 1) +
+      scale_color_hue(direction = 1) + theme_minimal() +
+      coord_polar("y", start = 0) + geom_text(first = (provisoire_t %>%
+                                                         dplyr::filter(!is.na(class)) %>% dplyr::mutate_if(is.numeric,
+                                                                                                           round)), size = 3, aes(x = 1, y = ypos_ligne/100,
+                                                                                                                                  label = paste0(round(pourcentage), "%")), color = "black") +
+      theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(),
+            plot.margin = margin(0, 0, 0, 0))  +
+      labs(x = "", y = "") +  scale_fill_manual(values = pal) +
+      guides(fill = guide_legend(title = toupper(r))) +
+      facet_wrap("measurement_unit") +
+      theme(legend.position = "none")
+  }
+  else {
+    legend <- cowplot::get_legend(ggplot_i +
+                                    scale_fill_manual(values = pal))
+  }
+  if (title_yes_no) {
+    title <- ggdraw() + draw_label(paste0("Distribution in measurement_value for the dimension : ",
+                                          r), fontface = "bold", x = 0, hjust = 0) + theme(plot.margin = margin(0,
+                                                                                                                0, 0, 7))
+  }
+  else {
+    title <- ggdraw() + draw_label(" \n ")
+  }
+  if (!is.null(second)) {
+    graph <- plot_grid(ggplot_i + theme(legend.position = "none"),
+                       ggplot_t, nrow = 2, labels = c(gsub("\"", "", gsub("~\"",
+                                                                          "", deparse(substitute(name1)))), gsub("\"",
+                                                                                                                 "", gsub("~\"", "", deparse(substitute(name2))))),
+                       label_size = 10, vjust = 1.3, label_x = c(0, 0),
+                       label_y = 1.025, axis = "l", align = "v")
+    ploting_map <- plot_grid(title, nrow = 2, plot_grid(graph,
+                                                        legend, ncol = 2), rel_heights = c(0.1, 1)) + theme(plot.background = element_rect(color = "black"))
+    if (sum(!(round(provisoire_i$pourcentage) == round(provisoire_t$pourcentage))) ==
+        0) {
+      title <- ggdraw() + draw_label(paste0("Distribution in measurement_value for the dimension : ",
+                                            r, "\n(same distribution to the nearest rounding for both datasets : \n",
+                                            gsub("\"", "", gsub("~\"", "", deparse(substitute(name1)))),
+                                            " and \n", gsub("\"", "", gsub("~\"", "", deparse(substitute(name2)))),
+                                            ")"), fontface = "bold", x = 0, hjust = 0, vjust = 0.5,
+                                     size = 13) + theme(plot.margin = margin(0, 0,
+                                                                             0, 7))
+      graph <- ggplot_i + theme(legend.position = "none")
+    }
+  }
+  else {
+    graph <- plot_grid(ggplot_i + theme(legend.position = "none"),
+                       nrow = 1, labels = c(gsub("\"", "", gsub("~\"",
+                                                                "", deparse(substitute(name1))))), label_size = 10,
+                       vjust = 1.3, label_x = c(0, 0), label_y = 0.8, axis = "l",
+                       align = "v")
+  }
+  if (title_yes_no) {
+    if (exists("provisoire_t"))
+      if (sum(!(round(provisoire_i$pourcentage) == round(provisoire_t$pourcentage))) ==
+          0) {
+        title <- ggdraw() + draw_label(paste0("(same distribution to the nearest rounding for both datasets :\n",
+                                              gsub("\"", "", gsub("~\"", "", deparse(substitute(name1)))),
+                                              " and ", gsub("\"", "", gsub("~\"", "", deparse(substitute(name2)))),
+                                              ")"), fontface = "bold", x = 0, hjust = 0,
+                                       vjust = 0.5, size = 13) + theme(plot.margin = margin(0,
+                                                                                            0, 0, 7))
+      }
+    else {
+      title <- ggdraw() + draw_label(" \n ")
+    }
+  }
+  ploting_map <- plot_grid(title, nrow = 2, plot_grid(graph,
+                                                      legend, ncol = 2), rel_heights = c(0.1, 1)) + theme(plot.background = element_rect(color = "black"))
+  if (exists("summary_apparition") & dataframe) {
+    df <- data.frame(` ` = c("Stratas appearing", "Stratas disappearing"),
+                     Number = c(number_appearing_stratas, number_disappearing_stratas),
+                     Detail = c(toString(paste((appearing_stratas %>%
+                                                  dplyr::select(class) %>% mutate(class = gsub(" ",
+                                                                                               "", class)) %>% distinct())$class, sep = ";")),
+                                toString(paste((disappearing_stratas %>% dplyr::select(class) %>%
+                                                  mutate(class = gsub(" ", "", class)) %>% distinct())$class,
+                                               sep = ";"))), check.names = FALSE, fix.empty.names = FALSE)
+    if (number_disappearing_stratas == 0 & number_appearing_stratas ==
+        0) {
+      df <- df %>% dplyr::select(-Detail)
+    }
+    list_df_plot <- list(plot = ploting_map, df = df)
+    return(list_df_plot)
+  }
+  else {
+    return(ploting_map)
+  }
+}

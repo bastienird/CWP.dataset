@@ -7,28 +7,46 @@ Authors@R:
 Description: This package is to easily analyse standardized CWP data and
     to compare different datasets.
 License: MIT + file LICENSE
-URL: https://github.com/bastienird/CWP.dataset, https://bastienird.github.io/CWP.dataset
+URL: https://github.com/bastienird/CWP.dataset,
+    https://bastienird.github.io/CWP.dataset
 BugReports: https://github.com/bastienird/CWP.dataset/issues
 Imports: 
+    aplot,
+    bookdown,
     cowplot,
     data.table,
     dplyr,
     DT,
+    dygraphs,
     flextable,
     futile.logger,
+    ggplot2,
+    ggpubr,
+    googledrive,
     grid,
     gridExtra,
+    here,
+    janitor,
     knitr,
+    lubridate,
+    plotrix,
     purrr,
     qs,
+    readr,
     rlang,
-    sf
-Suggests: 
     rmarkdown,
+    scales,
+    sf,
+    tibble,
+    tidyr,
+    tmap,
+    utils,
+    xts
+Suggests: 
     testthat
 VignetteBuilder: 
     knitr
-Config/fusen/version: 0.7.0
+Config/fusen/version: 0.6.0.9003
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
