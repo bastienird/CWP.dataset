@@ -1309,21 +1309,14 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
 ```
 
 
-<!-- ```{r test-function_multiple_comparison} -->
-<!-- test_that("function_multiple_comparison handles identical datasets correctly", { -->
-<!--   # Mock input data -->
-<!--   mock_data <- list(a = 1, b = 2) # Replace with actual test inputs -->
-
-
 ```{r test-function_multiple_comparison}
-# Ajouter les tests pour function_multiple_comparison
+test_that("function_multiple_comparison handles identical datasets correctly", {
+  # Mock input data
+  mock_data <- list(a = 1, b = 2) # Replace with actual test inputs
+  result <- function_multiple_comparison(mock_data) # Update with required parameters
+  expect_true(is.na(result))
+})
 ```
-
-<!--   result <- function_multiple_comparison(mock_data) # Update with required parameters -->
-
-<!--   expect_true(is.na(result)) -->
-<!-- }) -->
-<!-- ``` -->
 
 
 ```{r development-inflate, eval=FALSE}
