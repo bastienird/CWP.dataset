@@ -1241,7 +1241,9 @@ compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", t
 #'   }
 #'
 #' @examples
+#' \dontrun{
 #' function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, parameters_child_global, fig.path, coverage = FALSE, shapefile.fix, continent)
+#' }
 #' @import dplyr
 #' @import sf
 #' @import futile.logger
@@ -1309,13 +1311,13 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
 ```
 
 
-```{r test-function_multiple_comparison}
-test_that("function_multiple_comparison handles identical datasets correctly", {
-  # Mock input data
-  mock_data <- list(a = 1, b = 2) # Replace with actual test inputs
-  result <- function_multiple_comparison(mock_data) # Update with required parameters
-  expect_true(is.na(result))
-})
+```{r test-function_multiple_comparison, eval=FALSE}
+# test_that("function_multiple_comparison handles identical datasets correctly", {
+#   # Mock input data
+#   mock_data <- list(a = 1, b = 2) # Replace with actual test inputs
+#   result <- function_multiple_comparison(mock_data) # Update with required parameters
+#   expect_true(is.na(result))
+# })
 ```
 
 

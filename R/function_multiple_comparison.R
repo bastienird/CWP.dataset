@@ -17,7 +17,10 @@
 #'     \item `"short"` : Only first characteristics, first differences and main table of steps
 #'   }
 #'
+#' @examples
+#' \dontrun{
 #' function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, parameters_child_global, fig.path, coverage = FALSE, shapefile.fix, continent)
+#' }
 #' @import dplyr
 #' @import sf
 #' @import futile.logger
