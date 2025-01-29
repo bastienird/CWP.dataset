@@ -133,7 +133,13 @@ last_path <- function(x){
 #' @return Logical value indicating whether all elements are NULL or empty.
 #' @export
 isNullList <- function(x) { all(!lengths(x))}
+
 ```
+
+```{r test-isNullList}
+# Ajouter les tests pour isNullList
+```
+
 
 ```{r function-filtering_function}
 #' Filter Dataframe based on provided Parameters /Dimensions
@@ -167,6 +173,11 @@ filtering_function <- function(dataframe_to_filter, parameter_filtering) {
 ```
 
 
+```{r test-filtering_function}
+# Ajouter les tests pour filtering_function
+```
+
+
 ```{r last_path_reduced}
 #' Reduce Last Path for Georeferenced Datasets
 #'
@@ -177,6 +188,7 @@ filtering_function <- function(dataframe_to_filter, parameter_filtering) {
 last_path_reduced <- function(x) {
   gsub("georef_dataset", "", last_path(x))
 }
+
 ```
 
 # Functions for reporting 
@@ -243,7 +255,12 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
     stop("Not a ggplot or tmap object")
   }
 }
+
 ```
+
+```{r test-knitting_plots_subfigures}
+```
+
 
 ```{r function-render_subfigures}
 #' Render Subfigures from a List of Plots
@@ -330,11 +347,18 @@ render_subfigures <- function(plots_list, titles_list, general_title) {
 
 ```
 
+
+```{r test-render_subfigures}
+
+
+```
+
 ## Plots and maps 
 
 ```{r function-bar_plot_default}
 #' Create Bar Plots from Measurement Data
-#'
+#' @name bar_plot_default
+#' @rdname bar_plot_default
 #' @description This function creates bar plots comparing measurement data for one or two datasets.
 #' @param first A data frame representing the first dataset.
 #' @param second An optional second data frame.
@@ -376,8 +400,32 @@ bar_plot_default <- function(first,
   first$dataset <- name1
   second$dataset <- name2
   dataset <- rbind(first, second)
-  # Function to generate summary and plot
-  generate_plot <- function(data, title, dimensioninside, topninside, dataset) {
+  # Generate plot for initial data
+  if(is.null(second)){
+    bar_plot <- generate_plot(first, title = NULL, dimensioninside = dimension, topninside = topn)
+  } else {
+
+    # If final data is provided, generate plot for final data and return combined plot
+    second[is.na(second)] <- "NA"
+    bar_plot <- generate_plot(dataset,title =NULL, dimensioninside = dimension, topninside = topn)
+    # bar_plot <- plot_grid(bar_plot, bar_plot_final, ncol = 2)
+  }
+  return(bar_plot)
+}
+```
+
+```{r test-bar_plot_default}
+
+```
+
+
+```{r function-generate_plot}
+#' Documentation to do 
+#' @name generate_plot
+#' @rdname generate_plot
+#' @description Documentation to do 
+#' @export
+generate_plot <- function(data, title, dimensioninside, topninside, dataset) {
 
     data_summary <- data %>%
       dplyr::group_by(dplyr::across(c(dimensioninside,   "measurement_unit", dataset))) %>% dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE)) %>% dplyr::group_by(measurement_unit, dataset) %>%
@@ -413,18 +461,10 @@ bar_plot_default <- function(first,
     return(plot)
   }
 
-  # Generate plot for initial data
-  if(is.null(second)){
-    bar_plot <- generate_plot(first, title = NULL, dimensioninside = dimension, topninside = topn)
-  } else {
+```
 
-    # If final data is provided, generate plot for final data and return combined plot
-    second[is.na(second)] <- "NA"
-    bar_plot <- generate_plot(dataset,title =NULL, dimensioninside = dimension, topninside = topn)
-    # bar_plot <- plot_grid(bar_plot, bar_plot_final, ncol = 2)
-  }
-  return(bar_plot)
-}
+```{r test-generate_plot}
+
 ```
 
 
@@ -653,6 +693,10 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
 }
 ```
 
+```{r test-pie_chart_2_default}
+
+```
+
 
 ```{r function-fonction_empreinte_spatiale}
 #' Spatial Footprint Function
@@ -718,6 +762,10 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
 }
 ```
 
+```{r test-fonction_empreinte_spatiale}
+
+```
+
 
 ```{r function-save_image}
 #' Save Plot as Image
@@ -752,6 +800,9 @@ save_image <- function(title, plott = last_plot(), folder = NULL, fig.pathinside
 }
 ```
 
+```{r test-save_image}
+```
+
 
 ```{r function-cat_title}
 #' Create a Title with Optional Child Header
@@ -777,6 +828,11 @@ cat_title <- function(x, child_headerinside = "") {
 ```
 
 
+
+```{r test-cat_title}
+# Ajouter les tests pour cat_title
+```
+
 ```{r function-is_ggplot}
 #' Check if an Object is a ggplot
 #'
@@ -788,6 +844,14 @@ is_ggplot <- function(obj) {
   inherits(obj, "gg") || inherits(obj, "ggplot")
 }
 ```
+
+
+
+```{r test-is_ggplot}
+# Ajouter les tests pour is_ggplot
+```
+
+
 
 ```{r function-qflextable2}
 #' Create and Save a Flextable
@@ -869,6 +933,10 @@ qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, col
 
 ```
 
+```{r test-qflextable2}
+# Ajouter les tests pour qflextable2
+```
+
 # Comparison between multiple CWP datasets
 
 
@@ -948,15 +1016,25 @@ fonction_groupement <- function(these_col, init, final) {
 }
 ```
 
+```{r test-fonction_groupement}
+
+```
+
 
 ```{r function-Negate}
 #' Negate `%in%` Operator
 #'
 #' @description This operator checks if elements are not present in a given vector.
+
 #' @param x A vector of elements to check.
 #' @param table A vector to check against.
 #' @return Logical vector indicating if each element of `x` is not in `table`.
 `%notin%` <- Negate(`%in%`)
+```
+
+
+```{r test-Negate}
+# Ajouter les tests pour Negate
 ```
 
 ```{r function-separate_chunks_and_text}
@@ -1134,9 +1212,15 @@ compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", t
 }
 ```
 
+
+```{r test-compute_summary_of_differences}
+# Ajouter les tests pour compute_summary_of_differences
+```
+
 ### Function Definitions
 
 #### Function: function_multiple_comparison
+
 
 ```{r function-function_multiple_comparison}
 #' function_multiple_comparison
@@ -1229,6 +1313,11 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
 <!-- test_that("function_multiple_comparison handles identical datasets correctly", { -->
 <!--   # Mock input data -->
 <!--   mock_data <- list(a = 1, b = 2) # Replace with actual test inputs -->
+
+
+```{r test-function_multiple_comparison}
+# Ajouter les tests pour function_multiple_comparison
+```
 
 <!--   result <- function_multiple_comparison(mock_data) # Update with required parameters -->
 

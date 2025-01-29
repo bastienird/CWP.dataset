@@ -22,15 +22,15 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
     stop("Please provide a shape for the polygons")
   }
 
-  selection <- function(x) {
+  selection_fnct_empre_spt <- function(x) {
     x[, .(geographic_identifier = as.character(geographic_identifier),
           measurement_value,
           GRIDTYPE,
           measurement_unit)]
   }
 
-  Initial_dataframe <- selection(as.data.table(initial_dataset))
-  Final_dataframe <- selection(as.data.table(final_dataset))
+  Initial_dataframe <- selection_fnct_empre_spt(as.data.table(initial_dataset))
+  Final_dataframe <- selection_fnct_empre_spt(as.data.table(final_dataset))
 
   Initial_dataframe[, source := "Initial_dataframe"]
   Final_dataframe[, source := "Final_dataframe"]

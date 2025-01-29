@@ -62,6 +62,7 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
   }
 }
 
+
 #' Render Subfigures from a List of Plots
 #'
 #' @description This function creates a grid of subfigures from a list of plots and titles.

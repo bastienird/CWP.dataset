@@ -18,6 +18,7 @@ flat_first.Rmd:
   state: active
   R:
   - R/bar_plot_default.R
+  - R/generate_plot.R
   - R/compute_summary_of_differences.R
   - R/isnulllist.R
   - R/fonction_groupement.R
@@ -27,7 +28,11 @@ flat_first.Rmd:
   - R/comparison-between-multiple-cwp-datasets.R
   tests:
   - tests/testthat/test-read_data.R
+  - tests/testthat/test-isnulllist.R
+  - tests/testthat/test-generate_plot.R
   - tests/testthat/test-fonction_groupement.R
+  - tests/testthat/test-compute_summary_of_differences.R
+  - tests/testthat/test-function_multiple_comparison.R
   vignettes: vignettes/first.Rmd
   inflate:
     flat_file: dev/flat_first.Rmd

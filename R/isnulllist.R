@@ -36,3 +36,4 @@ filtering_function <- function(dataframe_to_filter, parameter_filtering) {
 #' @return Logical value indicating whether all elements are NULL or empty.
 #' @export
 isNullList <- function(x) { all(!lengths(x))}
+

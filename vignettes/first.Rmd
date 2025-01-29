@@ -82,6 +82,8 @@ last_path <- function(x){
 
 
 
+
+
 ```{r last_path_reduced}
 #' Reduce Last Path for Georeferenced Datasets
 #'
@@ -92,10 +94,13 @@ last_path <- function(x){
 last_path_reduced <- function(x) {
   gsub("georef_dataset", "", last_path(x))
 }
+
 ```
 
 
 # Functions for reporting 
+
+
 
 
 ## Plots and maps 
@@ -106,7 +111,21 @@ last_path_reduced <- function(x) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 # Comparison between multiple CWP datasets
+
+
 
 
 
@@ -124,15 +143,18 @@ Create a chunk with 'development' actions
 These are only included in the present flat template file, their content will not be part of the package anywhere else.
 -->
 
+
 ### Function Definitions
 
 #### Function: function_multiple_comparison
+
 
 
 <!-- ```{r test-function_multiple_comparison} -->
 <!-- test_that("function_multiple_comparison handles identical datasets correctly", { -->
 <!--   # Mock input data -->
 <!--   mock_data <- list(a = 1, b = 2) # Replace with actual test inputs -->
+
 
 <!--   result <- function_multiple_comparison(mock_data) # Update with required parameters -->
 

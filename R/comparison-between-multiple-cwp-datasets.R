@@ -3,6 +3,7 @@
 #' Negate `%in%` Operator
 #'
 #' @description This operator checks if elements are not present in a given vector.
+
 #' @param x A vector of elements to check.
 #' @param table A vector to check against.
 #' @return Logical vector indicating if each element of `x` is not in `table`.
