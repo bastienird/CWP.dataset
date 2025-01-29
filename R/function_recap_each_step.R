@@ -38,8 +38,8 @@ function_recap_each_step <- function(step_name, rds_data, explanation = "No expl
   rds_data$measurement_value <- as.numeric(rds_data$measurement_value)
   
   # Filter data based on measurement units
-  rds_t <- rds_data %>% filter(measurement_unit %in% c("t", "MTNO", "MT"))
-  rds_no <- rds_data %>% filter(measurement_unit %in% c("no", "NOMT", "NO"))
+  rds_t <- rds_data %>% dplyr::filter(measurement_unit %in% c("t", "MTNO", "MT"))
+  rds_no <- rds_data %>% dplyr::filter(measurement_unit %in% c("no", "NOMT", "NO"))
   
   # Calculate sums
   sum_t <- sum(rds_t$measurement_value, na.rm = TRUE)

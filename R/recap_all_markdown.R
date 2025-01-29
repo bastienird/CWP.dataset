@@ -111,7 +111,7 @@ recap_all_markdown <- function(action, entity, config, options){
     # st_write(shapefile.fix, "data/world_sf.csv", layer_options = "GEOMETRY=AS_WKT", append= FALSE)
 
     # query <- "SELECT  * from area.areas_conversion_factors_numtoweigth_ird"
-    # areas_conversion_factors_numtoweigth_ird <- st_make_valid(st_read(con, query = query))%>% filter(!st_is_empty(.))
+    # areas_conversion_factors_numtoweigth_ird <- st_make_valid(st_read(con, query = query))%>% dplyr::filter(!st_is_empty(.))
     # st_write(areas_conversion_factors_numtoweigth_ird, "data/areas_conversion_factors_numtoweigth_ird.csv", layer_options = "GEOMETRY=AS_WKT", append= FALSE)
 
     dir.create(paste0("tableau_recap_global_action/figures"), recursive = TRUE, showWarnings = FALSE)
@@ -169,9 +169,6 @@ recap_all_markdown <- function(action, entity, config, options){
                       envir =  child_env_global,
                       output_file = "Recap.pdf",
                       output_dir = "tableau_recap_global_action")
-
-
-    source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/strata_in_georef_but_not_in_nominal_report_launching.R")
 
 
     gc()

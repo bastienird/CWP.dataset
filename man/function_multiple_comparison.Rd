@@ -2,7 +2,7 @@
 % Please edit documentation in R/function_multiple_comparison.R
 \name{function_multiple_comparison}
 \alias{function_multiple_comparison}
-\title{Summarising_step}
+\title{function_multiple_comparison}
 \usage{
 function_multiple_comparison(
   counting,
@@ -29,7 +29,9 @@ function_multiple_comparison(
 \item \code{"long"} (par défaut) : Long with coverage.
 \item \code{"middle"} : Long without coverage
 \item \code{"short"} : Only first characteristics, first differences and main table of steps
-}}
+}
+
+function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, parameters_child_global, fig.path, coverage = FALSE, shapefile.fix, continent)}
 }
 \value{
 NULL. The function has side effects, such as writing files and rendering reports.
@@ -37,7 +39,4 @@ NULL. The function has side effects, such as writing files and rendering reports
 \description{
 This function performs various summarizing steps on data related to species and gear types, retrieving data from a database,
 processing it, and rendering output reports.
-}
-\examples{
-Summarising_step(main_dir = "path/to/main/dir", connectionDB = db_connection, config = config_list)
 }

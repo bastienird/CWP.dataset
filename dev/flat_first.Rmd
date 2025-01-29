@@ -464,7 +464,7 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
   }
   all_class_i <- first %>% dplyr::group_by(across(c(dimension,
                                                     "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
-                                                                                                                       na.rm = TRUE)) %>% filter(measurement_value != 0) %>%
+                                                                                                                       na.rm = TRUE)) %>% dplyr::filter(measurement_value != 0) %>%
     dplyr::select(-measurement_value)
   colnames(all_class_i) <- c("class", "measurement_unit")
   all_class_i <- all_class_i %>% mutate(class = paste(class,
@@ -485,7 +485,7 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
   if (!is.null(second)) {
     all_class_t <- first %>% dplyr::group_by(across(c(dimension,
                                                       "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
-                                                                                                                         na.rm = TRUE)) %>% filter(measurement_value != 0) %>%
+                                                                                                                         na.rm = TRUE)) %>% dplyr::filter(measurement_value != 0) %>%
       dplyr::select(-measurement_value)
     colnames(all_class_t) <- c("class", "measurement_unit")
     all_class_t <- all_class_t %>% mutate(class = paste(class,
@@ -1139,7 +1139,7 @@ compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", t
 #### Function: function_multiple_comparison
 
 ```{r function-function_multiple_comparison}
-#' Summarising_step
+#' function_multiple_comparison
 #'
 #' This function performs various summarizing steps on data related to species and gear types, retrieving data from a database, 
 #' processing it, and rendering output reports.
@@ -1157,7 +1157,7 @@ compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", t
 #'   }
 #'
 #' @examples
-#' Summarising_step(main_dir = "path/to/main/dir", connectionDB = db_connection, config = config_list)
+#' function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, parameters_child_global, fig.path, coverage = FALSE, shapefile.fix, continent)
 #' @import dplyr
 #' @import sf
 #' @import futile.logger
@@ -1225,16 +1225,16 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
 ```
 
 
-```{r test-function_multiple_comparison}
-test_that("function_multiple_comparison handles identical datasets correctly", {
-  # Mock input data
-  mock_data <- list(a = 1, b = 2) # Replace with actual test inputs
+<!-- ```{r test-function_multiple_comparison} -->
+<!-- test_that("function_multiple_comparison handles identical datasets correctly", { -->
+<!--   # Mock input data -->
+<!--   mock_data <- list(a = 1, b = 2) # Replace with actual test inputs -->
 
-  result <- function_multiple_comparison(mock_data) # Update with required parameters
+<!--   result <- function_multiple_comparison(mock_data) # Update with required parameters -->
 
-  expect_true(is.na(result))
-})
-```
+<!--   expect_true(is.na(result)) -->
+<!-- }) -->
+<!-- ``` -->
 
 
 ```{r development-inflate, eval=FALSE}

@@ -40,7 +40,7 @@ time_coverage_analysis_dygraphs <- function(time_dimension_list_groupped, parame
   # Filter non-zero values if unique_analyse is TRUE
   if (unique_analyse) {
     time_dimension_list_groupped_diff <- lapply(time_dimension_list_groupped_diff, function(x) {
-      x %>% filter(Values != 0)
+      x %>% dplyr::filter(Values != 0)
     })
   }
   
@@ -48,8 +48,8 @@ time_coverage_analysis_dygraphs <- function(time_dimension_list_groupped, parame
   time_dimension_list_groupped_diff_image <- lapply(time_dimension_list_groupped_diff, function(x) {
     # Extract relevant data for dygraphs
     time_values <- x$Time
-    dataset1_values <- x %>% filter(Dataset == titre_1) %>% select(Values)
-    dataset2_values <- x %>% filter(Dataset == titre_2) %>% select(Values)
+    dataset1_values <- x %>% dplyr::filter(Dataset == titre_1) %>% select(Values)
+    dataset2_values <- x %>% dplyr::filter(Dataset == titre_2) %>% select(Values)
     
     # Create xts object for the first dataset
     first_xts <- xts(dataset1_values, order.by = time_values)

@@ -13,7 +13,7 @@ compare_temporal_differences_dygraphs <- function(parameter_time_dimension, init
   # Function to create a dygraph for each measurement unit
   create_dygraph_for_unit <- function(data, filtering_unit, measurement_unit) {
     filtered_data <- data %>%
-      filter(Dimension == filtering_unit, measurement_unit == measurement_unit) %>%
+      dplyr::filter(Dimension == filtering_unit, measurement_unit == measurement_unit) %>%
       dplyr::mutate(Time = as.Date(Precision)) %>% 
       arrange(Time) %>%  # Make sure data is sorted by time
       distinct(Time, .keep_all = TRUE)  # Ensure unique time values

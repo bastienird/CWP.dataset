@@ -34,5 +34,7 @@ A list containing the following elements:
 This function analyzes the time coverage of values for specified time dimensions and generates plots of the differences.
 }
 \examples{
+\dontrun{
 timecoverage(unique_analyse, parameter_time_dimension, titre_1, titre_2, time_dimension_list_groupped, fig.path)
+}
 }

@@ -37,7 +37,7 @@ time_coverage_analysis <- function(time_dimension_list_groupped, parameter_time_
   
   if (unique_analyse) {
     time_dimension_list_groupped_diff <- lapply(time_dimension_list_groupped_diff, function(x) {
-      x %>% filter(Values != 0)
+      x %>% dplyr::filter(Values != 0)
     })
   }
   

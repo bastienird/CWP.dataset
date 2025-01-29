@@ -221,7 +221,7 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
   }
   all_class_i <- first %>% dplyr::group_by(across(c(dimension,
                                                     "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
-                                                                                                                       na.rm = TRUE)) %>% filter(measurement_value != 0) %>%
+                                                                                                                       na.rm = TRUE)) %>% dplyr::filter(measurement_value != 0) %>%
     dplyr::select(-measurement_value)
   colnames(all_class_i) <- c("class", "measurement_unit")
   all_class_i <- all_class_i %>% mutate(class = paste(class,
@@ -242,7 +242,7 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
   if (!is.null(second)) {
     all_class_t <- first %>% dplyr::group_by(across(c(dimension,
                                                       "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
-                                                                                                                         na.rm = TRUE)) %>% filter(measurement_value != 0) %>%
+                                                                                                                         na.rm = TRUE)) %>% dplyr::filter(measurement_value != 0) %>%
       dplyr::select(-measurement_value)
     colnames(all_class_t) <- c("class", "measurement_unit")
     all_class_t <- all_class_t %>% mutate(class = paste(class,

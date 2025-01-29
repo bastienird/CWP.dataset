@@ -129,6 +129,17 @@ These are only included in the present flat template file, their content will no
 #### Function: function_multiple_comparison
 
 
+<!-- ```{r test-function_multiple_comparison} -->
+<!-- test_that("function_multiple_comparison handles identical datasets correctly", { -->
+<!--   # Mock input data -->
+<!--   mock_data <- list(a = 1, b = 2) # Replace with actual test inputs -->
+
+<!--   result <- function_multiple_comparison(mock_data) # Update with required parameters -->
+
+<!--   expect_true(is.na(result)) -->
+<!-- }) -->
+<!-- ``` -->
+
 
 # Inflate your package
 

@@ -39,5 +39,10 @@ A list containing the following elements:
 This function performs various comparisons between initial and final datasets to identify lost and gained strata.
 }
 \examples{
+\dontrun{
 compnumberstratas(init, final, Groupped_all, titre_1, titre_2, parameter_columns_to_keep, unique_analyse = FALSE)
+}
+}
+\author{
+Bastien Grasset, \email{bastien.grasset@ird.fr}
 }

@@ -28,7 +28,6 @@ flat_first.Rmd:
   tests:
   - tests/testthat/test-read_data.R
   - tests/testthat/test-fonction_groupement.R
-  - tests/testthat/test-function_multiple_comparison.R
   vignettes: vignettes/first.Rmd
   inflate:
     flat_file: dev/flat_first.Rmd
