@@ -32,4 +32,10 @@ my_fun()
 
 
 
+## Package structure
+```{r}
+fusen::draw_package_structure()
+```
+
+
 

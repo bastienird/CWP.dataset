@@ -1,47 +1,3 @@
-library(dplyr)
-library(qs)
-library(ggplot2)
-library(cowplot)
-# source(here::here("launching_jsons_creating_GTA.R"))
-
-file_path_url <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions"
-source(file.path(file_path_url,"tidying_GTA_data_for_comparison.R"))
-source(file.path(file_path_url,"Functions_markdown.R"), local = TRUE)
-source(file.path(file_path_url,"compare_temporal_differences_dygraphs.R"), local = TRUE)
-source(file.path(file_path_url,"other_dimension_analysis_dygraphs.R"), local = TRUE)
-source(file.path(file_path_url,"Groupping_differences.R"), local = TRUE)
-source(file.path(file_path_url,"compare_strata_differences.R"), local = TRUE)
-source(file.path(file_path_url,"compare_dimension_differences.R"), local = TRUE)
-source(file.path(file_path_url,"compare_temporal_differences.R"), local = TRUE)
-source(file.path(file_path_url,"geographic_diff.R"), local = TRUE)
-source(file.path(file_path_url,"time_coverage_analysis.R"), local = TRUE)
-source(file.path(file_path_url,"spatial_coverage_analysis.R"), local = TRUE)
-source(file.path(file_path_url,"other_dimension_analysis.R"), local = TRUE)
-source(file.path(file_path_url,"comprehensive_cwp_dataframe_analysis.R"), local = TRUE)
-source(file.path(file_path_url,"process_fisheries_data.R"), local = TRUE)
-
-# Function to map species to aggregated categories based on source_authority
-map_species_to_aggregated <- function(df) {
-  # Ensure the input dataframe has the necessary columns
-  if (!all(c('species', 'source_authority') %in% colnames(df))) {
-    stop("The input dataframe must contain 'species' and 'source_authority' columns.")
-  }
-
-  # Join the input dataframe with the lookup table to get the aggregated species data
-  df <- df %>%
-    left_join(species_lookup, by = c("species", "source_authority"))
-
-  # If there are species that didn't match, fill the aggregated columns with "Unknown"
-  df <- df %>%
-    mutate(
-      species_aggregated_code = ifelse(is.na(species_aggregated_code), species, species_aggregated_code),
-      species_aggregated_name = ifelse(is.na(species_aggregated_name), species, species_aggregated_name)
-    )
-
-  return(df)
-}
-
-
 process_fisheries_data_by_species <- function(sub_list_dir_2, parameter_fact, species_list, aggregatespecies = FALSE ) {
 
   # Liste pour stocker les résultats par espèce
@@ -50,8 +6,8 @@ process_fisheries_data_by_species <- function(sub_list_dir_2, parameter_fact, sp
   # Charger les datasets une seule fois
   nominal_dataset <- if (dir.exists("Markdown")) {
     if(file.exists("data/global_nominal_catch_firms_level0.csv")){
-    readr::read_csv("data/global_nominal_catch_firms_level0.csv")} else if(file.exists("data/global_nominal_catch_firms_level0.csv")){
-      readr::read_csv("data/global_nominal_catch_firms_level0.csv")}
+      readr::read_csv("data/global_nominal_catch_firms_level0.csv")} else if(file.exists("data/global_nominal_catch_firms_level0.csv")){
+        readr::read_csv("data/global_nominal_catch_firms_level0.csv")}
   } else {
     NULL
   }
@@ -71,10 +27,10 @@ process_fisheries_data_by_species <- function(sub_list_dir_2, parameter_fact, sp
 
     main <- qs::qread(paste0(sub_list_dir_2[1], "/data.qs"))
 
-      if(aggregatespecies){
-        main <- map_species_to_aggregated(main)
+    if(aggregatespecies){
+      main <- map_species_to_aggregated(main)
 
-      }
+    }
 
 
     main <- filtering_function(main, parameter_filtering = parameter_filtering) %>%
@@ -85,7 +41,7 @@ process_fisheries_data_by_species <- function(sub_list_dir_2, parameter_fact, sp
     lines_init <- nrow(main)
 
     nominal_dataset_filtered <- filtering_function(nominal_dataset, parameter_filtering = parameter_filtering) %>%
-    # dplyr::filter(source_authority == "IOTC") %>%
+      # dplyr::filter(source_authority == "IOTC") %>%
       dplyr::ungroup()
 
     nominal_total <- sum(nominal_dataset_filtered$measurement_value)
@@ -183,59 +139,59 @@ process_fisheries_data_by_species <- function(sub_list_dir_2, parameter_fact, sp
 # sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
 # a <- process_fisheries_data_by_species(sub_list_dir_2 = sub_list_dir_3, parameter_fact = "catch", species_list = specieslist)
 #
-create_combined_flextable <- function(a) {
-  # 1. Combiner tous les tableaux en un seul avec une colonne pour l'espèce
-  combined_df <- bind_rows(
-    lapply(names(a), function(species_code) {
-      df <- a[[species_code]]
-      df$Species <- species_code
-      return(df)
-    })
-  )
-
-  # 2. Ajouter une colonne indiquant si l'espèce a au moins un pourcentage supérieur à 100
-  combined_df <- combined_df %>%
-    group_by(Species) %>%
-    mutate(Above_100 = if_else(any(Percentage_of_nominal > 100), "Yes", "No")) %>%
-    ungroup()
-
-  # 3. Créer une flextable à partir de ce dataframe
-  flex_table <- flextable(combined_df) %>%
-    autofit() %>%
-    bold(j = "Above_100", bold = TRUE) %>%  # Mettre en gras la colonne "Above_100"
-    theme_vanilla()  # Utiliser un thème plus esthétique
-
-  return(flex_table)
-}
+# create_combined_flextable <- function(a) {
+#   # 1. Combiner tous les tableaux en un seul avec une colonne pour l'espèce
+#   combined_df <- bind_rows(
+#     lapply(names(a), function(species_code) {
+#       df <- a[[species_code]]
+#       df$Species <- species_code
+#       return(df)
+#     })
+#   )
 #
-# flex_table <- create_combined_flextable(a)
+#   # 2. Ajouter une colonne indiquant si l'espèce a au moins un pourcentage supérieur à 100
+#   combined_df <- combined_df %>%
+#     group_by(Species) %>%
+#     mutate(Above_100 = if_else(any(Percentage_of_nominal > 100), "Yes", "No")) %>%
+#     ungroup()
 #
-create_combined_dataframe <- function(a) {
-  # 1. Combiner tous les tableaux en un seul avec une colonne pour l'espèce
-  combined_df <- bind_rows(
-    lapply(names(a), function(species_code) {
-      df <- a[[species_code]]
-      df$Species <- species_code
-      return(df)
-    })
-  )
-
-  # 2. Ajouter une colonne indiquant si l'espèce a au moins un pourcentage supérieur à 100
-  combined_df <- combined_df %>%
-    group_by(Species) %>%
-    mutate(Above_100 = if_else(any(Percentage_of_nominal > 100), "Yes", "No")) %>%
-    ungroup()
-
-  # 3. Trier les données pour mettre les espèces avec "Yes" en premier
-  combined_df <- combined_df %>%
-    arrange(desc(Above_100), Species, Step_number)
-
-  return(combined_df)
-}
+#   # 3. Créer une flextable à partir de ce dataframe
+#   flex_table <- flextable(combined_df) %>%
+#     autofit() %>%
+#     bold(j = "Above_100", bold = TRUE) %>%  # Mettre en gras la colonne "Above_100"
+#     theme_vanilla()  # Utiliser un thème plus esthétique
 #
-# # Exemple d'utilisation avec le résultat 'a'
-# combined_df <- create_combined_dataframe(a)
+#   return(flex_table)
+# }
+# #
+# # flex_table <- create_combined_flextable(a)
+# #
+# create_combined_dataframe <- function(a) {
+#   # 1. Combiner tous les tableaux en un seul avec une colonne pour l'espèce
+#   combined_df <- bind_rows(
+#     lapply(names(a), function(species_code) {
+#       df <- a[[species_code]]
+#       df$Species <- species_code
+#       return(df)
+#     })
+#   )
 #
-# # Afficher le dataframe
-# View(combined_df)
+#   # 2. Ajouter une colonne indiquant si l'espèce a au moins un pourcentage supérieur à 100
+#   combined_df <- combined_df %>%
+#     group_by(Species) %>%
+#     mutate(Above_100 = if_else(any(Percentage_of_nominal > 100), "Yes", "No")) %>%
+#     ungroup()
+#
+#   # 3. Trier les données pour mettre les espèces avec "Yes" en premier
+#   combined_df <- combined_df %>%
+#     arrange(desc(Above_100), Species, Step_number)
+#
+#   return(combined_df)
+# }
+# #
+# # # Exemple d'utilisation avec le résultat 'a'
+# # combined_df <- create_combined_dataframe(a)
+# #
+# # # Afficher le dataframe
+# # View(combined_df)
 

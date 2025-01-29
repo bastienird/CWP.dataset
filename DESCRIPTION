@@ -43,6 +43,7 @@ Imports:
     utils,
     xts
 Suggests: 
+    fusen,
     testthat
 VignetteBuilder: 
     knitr

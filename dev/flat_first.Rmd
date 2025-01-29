@@ -259,6 +259,7 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
 ```
 
 ```{r test-knitting_plots_subfigures}
+
 ```
 
 

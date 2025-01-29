@@ -42,6 +42,12 @@ test_that("my_fun works", {
 })
 ```
 
+## Package structure
+
+```{r}
+fusen::draw_package_structure()
+```
+
 
 ```{r development-inflate, eval=FALSE}
 # Run but keep eval=FALSE to avoid infinite loop
