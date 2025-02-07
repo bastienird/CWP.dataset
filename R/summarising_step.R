@@ -112,7 +112,17 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
     if (opts$fact == "effort") {
       flog.warn("Effort dataset not displayed for now")
+      parameter_colnames_to_keep_fact = c("source_authority", "fishing_mode", "geographic_identifier","fishing_fleet", "gear_type",
+                                          "measurement_unit", "measurement_value", "GRIDTYPE","species_group")
+      topnumberfact = 3
     } else {
+      parameter_colnames_to_keep_fact = c("source_authority", "species", "gear_type", "fishing_fleet",
+                                          "fishing_mode", "geographic_identifier",
+                                          "measurement_unit", "measurement_value", "GRIDTYPE",
+                                          "species_group", "Gear")
+      topnumberfact = 6
+
+    }
       entity_name <- basename(entity_dir)
       setwd(here::here(entity_dir))
       copy_project_files(original_repo_path = here::here("Analysis_markdown"), new_repo_path = getwd())
@@ -255,7 +265,11 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
       render_env$sub_list_dir_3 <- sub_list_dir_3
+      if(opts$fact = "effort"){
+        process_fisheries_data_list <- process_fisheries_effort_data(sub_list_dir_3,  parameter_filtering)
+        } else {
       process_fisheries_data_list <- process_fisheries_data(sub_list_dir_3, parameter_fact = "catch", parameter_filtering)
+        }
       flog.info("Processed process_fisheries_data_list")
 
       render_env$process_fisheries_data_list <- process_fisheries_data_list
@@ -326,7 +340,6 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
     sprintf("entity: %s is done", entity_dir)
 
-    }
     }
   try(setwd(ancient_wd))
   flog.info("Finished Summarising_step function")
