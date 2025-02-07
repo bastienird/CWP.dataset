@@ -265,7 +265,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
       render_env$sub_list_dir_3 <- sub_list_dir_3
-      if(opts$fact = "effort"){
+      if(opts$fact == "effort"){
         process_fisheries_data_list <- process_fisheries_effort_data(sub_list_dir_3,  parameter_filtering)
         } else {
       process_fisheries_data_list <- process_fisheries_data(sub_list_dir_3, parameter_fact = "catch", parameter_filtering)
