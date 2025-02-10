@@ -106,9 +106,6 @@
 
 If it is the first time you use {fusen}, after 'description', you can directly run the last chunk of the present file with inflate() inside.
 -->
-<div class="section level2">
-<h2 id="include-some-data-examples-in-your-package">Include some data examples in your package<a class="anchor" aria-label="anchor" href="#include-some-data-examples-in-your-package"></a>
-</h2>
 <!-- 
  Store your dataset in a directory named "inst/" at the root of your project.
  Use it for your tests in this Rmd thanks to `pkgload::load_all()` to make it available
@@ -133,7 +130,6 @@ After inflating the template
 <code class="sourceCode R"><span><span class="co"># Example: Reading a CSV file</span></span>
 <span><span class="co"># csv_data &lt;- read_data(here::here("inst/CWP_dataset.csv"))</span></span>
 <span><span class="co"># head(csv_data)  # Display the first few rows</span></span></code></pre></div>
-</div>
 <div class="section level2">
 <h2 id="last-path-to-be-handled-in-workflow">Last path to be handled in workflow<a class="anchor" aria-label="anchor" href="#last-path-to-be-handled-in-workflow"></a>
 </h2>
@@ -162,8 +158,40 @@ After inflating the template
 <div class="section level2">
 <h2 id="functions-for-reporting">Functions for reporting<a class="anchor" aria-label="anchor" href="#functions-for-reporting"></a>
 </h2>
+</div>
+<div class="section level2">
+<h2 id="render_subfigures">render_subfigures<a class="anchor" aria-label="anchor" href="#render_subfigures"></a>
+</h2>
 <div class="section level3">
-<h3 id="plots-and-maps">Plots and maps<a class="anchor" aria-label="anchor" href="#plots-and-maps"></a>
+<h3 id="bar_plot_default">bar_plot_default<a class="anchor" aria-label="anchor" href="#bar_plot_default"></a>
+</h3>
+</div>
+<div class="section level3">
+<h3 id="generate_plot">generate_plot<a class="anchor" aria-label="anchor" href="#generate_plot"></a>
+</h3>
+</div>
+<div class="section level3">
+<h3 id="pie_chart_2_default">pie_chart_2_default<a class="anchor" aria-label="anchor" href="#pie_chart_2_default"></a>
+</h3>
+</div>
+<div class="section level3">
+<h3 id="fonction_empreinte_spatiale">fonction_empreinte_spatiale<a class="anchor" aria-label="anchor" href="#fonction_empreinte_spatiale"></a>
+</h3>
+</div>
+<div class="section level3">
+<h3 id="save_image">save_image<a class="anchor" aria-label="anchor" href="#save_image"></a>
+</h3>
+</div>
+<div class="section level3">
+<h3 id="cat_title">cat_title<a class="anchor" aria-label="anchor" href="#cat_title"></a>
+</h3>
+</div>
+<div class="section level3">
+<h3 id="is_ggplot">is_ggplot<a class="anchor" aria-label="anchor" href="#is_ggplot"></a>
+</h3>
+</div>
+<div class="section level3">
+<h3 id="qflextable2">qflextable2<a class="anchor" aria-label="anchor" href="#qflextable2"></a>
 </h3>
 <!-- # Comparison between multiple CWP datasets -->
 <!--
@@ -182,6 +210,18 @@ These are only included in the present flat template file, their content will no
 </h4>
 <div class="section level5">
 <h5 id="function-function_multiple_comparison">Function: function_multiple_comparison<a class="anchor" aria-label="anchor" href="#function-function_multiple_comparison"></a>
+</h5>
+</div>
+<div class="section level5">
+<h5 id="function-compute_summary_of_differences">Function: compute_summary_of_differences<a class="anchor" aria-label="anchor" href="#function-compute_summary_of_differences"></a>
+</h5>
+</div>
+<div class="section level5">
+<h5 id="function-fonction_groupement">Function: fonction_groupement<a class="anchor" aria-label="anchor" href="#function-fonction_groupement"></a>
+</h5>
+</div>
+<div class="section level5">
+<h5 id="function-separate_chunks_and_text">Function: separate_chunks_and_text<a class="anchor" aria-label="anchor" href="#function-separate_chunks_and_text"></a>
 </h5>
 </div>
 </div>
