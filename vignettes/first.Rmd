@@ -30,8 +30,6 @@ library(CWP.dataset)
 If it is the first time you use {fusen}, after 'description', you can directly run the last chunk of the present file with inflate() inside.
 --> 
 
-# Include some data examples in your package
-
 <!-- 
  Store your dataset in a directory named "inst/" at the root of your project.
  Use it for your tests in this Rmd thanks to `pkgload::load_all()` to make it available
@@ -101,34 +99,36 @@ last_path_reduced <- function(x) {
 # Functions for reporting 
 
 
+# render_subfigures
 
 
-## Plots and maps 
+## bar_plot_default
+
+
+## generate_plot
+
+
+## pie_chart_2_default
+
+
+## fonction_empreinte_spatiale
+
+
+## save_image
+
+
+## cat_title
 
 
 
+## is_ggplot
 
 
 
-
-
-
-
-
-
-
-
-
-
-
+## qflextable2
 
 
 <!-- # Comparison between multiple CWP datasets -->
-
-
-
-
-
 
 
 <!--
@@ -143,10 +143,19 @@ Create a chunk with 'development' actions
 These are only included in the present flat template file, their content will not be part of the package anywhere else.
 -->
 
-
 ### Function Definitions
 
 #### Function: function_multiple_comparison
+
+
+
+#### Function: compute_summary_of_differences
+
+
+#### Function: fonction_groupement
+
+
+#### Function: separate_chunks_and_text
 
 
 

@@ -23,8 +23,6 @@ If it is the first time you use {fusen}, after 'description', you can directly r
 pkgload::load_all(export_all = FALSE)
 ```
 
-# Include some data examples in your package
-
 <!-- 
  Store your dataset in a directory named "inst/" at the root of your project.
  Use it for your tests in this Rmd thanks to `pkgload::load_all()` to make it available
@@ -140,6 +138,7 @@ isNullList <- function(x) { all(!lengths(x))}
 # Ajouter les tests pour isNullList
 ```
 
+# filtering_function
 
 ```{r function-filtering_function}
 #' Filter Dataframe based on provided Parameters /Dimensions
@@ -262,6 +261,7 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
 
 ```
 
+# render_subfigures
 
 ```{r function-render_subfigures}
 #' Render Subfigures from a List of Plots
@@ -354,7 +354,7 @@ render_subfigures <- function(plots_list, titles_list, general_title) {
 
 ```
 
-## Plots and maps 
+## bar_plot_default
 
 ```{r function-bar_plot_default}
 #' Create Bar Plots from Measurement Data
@@ -419,6 +419,7 @@ bar_plot_default <- function(first,
 
 ```
 
+## generate_plot
 
 ```{r function-generate_plot}
 #' Documentation to do 
@@ -468,6 +469,7 @@ generate_plot <- function(data, title, dimensioninside, topninside, dataset) {
 
 ```
 
+## pie_chart_2_default
 
 ```{r function-pie_chart_2_default}
 #' Create Pie Charts from Data
@@ -698,6 +700,7 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
 
 ```
 
+## fonction_empreinte_spatiale
 
 ```{r function-fonction_empreinte_spatiale}
 #' Spatial Footprint Function
@@ -767,6 +770,7 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
 
 ```
 
+## save_image
 
 ```{r function-save_image}
 #' Save Plot as Image
@@ -804,6 +808,7 @@ save_image <- function(title, plott = last_plot(), folder = NULL, fig.pathinside
 ```{r test-save_image}
 ```
 
+## cat_title
 
 ```{r function-cat_title}
 #' Create a Title with Optional Child Header
@@ -834,6 +839,8 @@ cat_title <- function(x, child_headerinside = "") {
 # Ajouter les tests pour cat_title
 ```
 
+## is_ggplot
+
 ```{r function-is_ggplot}
 #' Check if an Object is a ggplot
 #'
@@ -852,7 +859,7 @@ is_ggplot <- function(obj) {
 # Ajouter les tests pour is_ggplot
 ```
 
-
+## qflextable2
 
 ```{r function-qflextable2}
 #' Create and Save a Flextable
@@ -940,6 +947,193 @@ qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, col
 
 <!-- # Comparison between multiple CWP datasets -->
 
+```{r function-Negate}
+#' Negate `%in%` Operator
+#'
+#' @description This operator checks if elements are not present in a given vector.
+
+#' @param x A vector of elements to check.
+#' @param table A vector to check against.
+#' @return Logical vector indicating if each element of `x` is not in `table`.
+`%notin%` <- Negate(`%in%`)
+```
+
+
+```{r test-Negate}
+# Ajouter les tests pour Negate
+```
+
+<!--
+# There can be development actions
+
+Create a chunk with 'development' actions
+
+- The chunk needs to be named `development` or `dev`
+- It contains functions that are used for package development only
+- Note that you may want to store most of these functions in the 0-dev_history.Rmd file
+
+These are only included in the present flat template file, their content will not be part of the package anywhere else.
+-->
+
+### Function Definitions
+
+#### Function: function_multiple_comparison
+
+
+```{r function-function_multiple_comparison}
+#' function_multiple_comparison
+#'
+#' This function performs various summarizing steps on data related to species and gear types, retrieving data from a database, 
+#' processing it, and rendering output reports.
+#'
+#' @param main_dir Character. The main directory containing the entities. (jobs/entities)
+#' @param connectionDB Object. The database connection.
+#' @param config List. Configuration list containing metadata and options for processing.
+#' @param source_authoritylist Vector. Vector of source_authority to filter on, "all" being all of them.
+#' @return NULL. The function has side effects, such as writing files and rendering reports.
+#' @param size Character string. La taille peut prendre les valeurs suivantes :
+#'   \itemize{
+#'     \item `"long"` (par défaut) : Long with coverage.
+#'     \item `"middle"` : Long without coverage
+#'     \item `"short"` : Only first characteristics, first differences and main table of steps
+#'   }
+#'
+#' @examples
+#' \dontrun{
+#' function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, parameters_child_global, fig.path, coverage = FALSE, shapefile.fix, continent)
+#' }
+#' @import dplyr
+#' @import sf
+#' @import futile.logger
+#' @export
+function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, parameters_child_global, fig.path, coverage = FALSE, shapefile.fix, continent) {
+  gc()
+  step_mapping <- sum(which(sub_list_dir == "Markdown/mapping_codelist"))
+  parameter_init <- paste0(sub_list_dir[counting], "/data.qs")
+  parameter_final <- paste0(sub_list_dir[counting + 1], "/data.qs")
+  parameter_titre_dataset_1 <- basename(sub_list_dir[counting])
+  parameter_titre_dataset_2 <- basename(sub_list_dir[counting + 1])
+
+  new_path <- file.path(fig.path, "Comparison", paste0(basename(sub_list_dir[counting]), "_", basename(sub_list_dir[counting + 1])))
+  dir.create(new_path, recursive = TRUE)
+
+  flog.info(paste("Starting comparison between:", parameter_titre_dataset_1, " and ", parameter_titre_dataset_2, " with coverage being: ", coverage))
+
+  formals(filtering_function, envir = environment())$parameter_filtering = parameter_filtering
+  initfiltered <- filtering_function(qs::qread(parameter_init))
+  finalfiltered <- filtering_function(qs::qread(parameter_final))
+  if (!identical(initfiltered, finalfiltered)) {
+    rm(initfiltered)
+    rm(finalfiltered)
+    flog.info(paste("Datasets are different:", parameter_titre_dataset_1, "and", parameter_titre_dataset_2))
+
+    child_env_result <- comprehensive_cwp_dataframe_analysis(
+      parameter_init = parameter_init,
+      parameter_final = parameter_final,
+      fig.path = new_path,
+      parameter_fact = "catch",
+      plotting_type = "view",
+      parameter_colnames_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet",
+                                     "fishing_mode", "geographic_identifier",
+                                     "measurement_unit", "measurement_value", "GRIDTYPE",
+                                     "species_group", "Gear"),
+      shapefile_fix = shapefile.fix,
+      continent = continent,
+      coverage = coverage,
+      parameter_resolution_filter = parameters_child_global$parameter_resolution_filter,
+      parameter_filtering = parameters_child_global$parameter_filtering,
+      parameter_titre_dataset_1 = parameter_titre_dataset_1,
+      parameter_titre_dataset_2 = parameter_titre_dataset_2,
+      unique_analyse = FALSE
+    )
+
+    flog.info(paste("Analysis completed for:", parameter_titre_dataset_1, "vs", parameter_titre_dataset_2))
+
+    child_env_result$step_title_t_f <- TRUE
+    child_env_result$step_title <- paste0(" Treatment : ", basename(sub_list_dir[counting + 1]))
+    child_env_result$step <- counting
+    child_env_result$parameter_titre_dataset_1 <- basename(sub_list_dir[counting])
+    child_env_result$parameter_titre_dataset_2 <- basename(sub_list_dir[counting + 1])
+    child_env_result$child_header <- "##"
+
+    gc()
+    flog.info(paste("New result saved to:", new_path))
+    return(child_env_result)
+  } else {
+    rm(initfiltered)
+    rm(finalfiltered)
+    flog.info(paste("Datasets are identical, skipping comparison for:", parameter_titre_dataset_1, "and", parameter_titre_dataset_2))
+    return(NA)
+  }
+}
+```
+
+
+```{r test-function_multiple_comparison, eval=FALSE}
+# test_that("function_multiple_comparison handles identical datasets correctly", {
+#   # Mock input data
+#   mock_data <- list(a = 1, b = 2) # Replace with actual test inputs
+#   result <- function_multiple_comparison(mock_data) # Update with required parameters
+#   expect_true(is.na(result))
+# })
+```
+
+#### Function: compute_summary_of_differences
+
+```{r function-compute_summary_of_differences}
+#' Compute Summary of Differences
+#'
+#' This function computes the summary of differences in measurement values
+#' between two datasets by grouping them by measurement unit and calculating
+#' the sum of values. It also computes the percentage difference.
+#'
+#' @param init A data.table containing the initial measurement data.
+#' @param final A data.table containing the final measurement data.
+#' @param titre_1 A character string for the title of the first dataset (default: "Dataset 1").
+#' @param titre_2 A character string for the title of the second dataset (default: "Dataset 2").
+#'
+#' @return A data.table summarizing the differences between the two datasets,
+#'         including total measurements and percentage differences.
+#' @export
+compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", titre_2 = "Dataset 2") {
+
+  # Ensure input data are data.tables
+  init <- as.data.table(init)
+  final <- as.data.table(final)
+
+  # Group and summarize initial dataset
+  init_group <- init[, .(titre_test1 = sum(measurement_value, na.rm = TRUE)), by = measurement_unit]
+
+  # Group and summarize final dataset
+  final_group <- final[, .(titre_test2 = sum(measurement_value, na.rm = TRUE)), by = measurement_unit]
+
+  # Compute summary of differences
+  summary <- merge(init_group, final_group, by = "measurement_unit", all = TRUE)
+
+  # Replace NA with 0 in numeric columns and calculate differences
+  summary[is.na(titre_test1), titre_test1 := 0]
+  summary[is.na(titre_test2), titre_test2 := 0]
+
+  summary[, Difference := -titre_test1 + titre_test2]
+  summary[, `Difference (in %)` := 100 * (Difference / titre_test1)]
+
+  # Rename columns for clarity
+  setnames(summary, "titre_test1", titre_1)
+  setnames(summary, "titre_test2", titre_2)
+
+  # Arrange the summary by measurement_unit
+  setorder(summary, measurement_unit)
+
+  return(summary)
+}
+```
+
+
+```{r test-compute_summary_of_differences}
+# Ajouter les tests pour compute_summary_of_differences
+```
+
+#### Function: fonction_groupement
 
 ```{r function-fonction_groupement}
 #' Group and Summarize Data
@@ -1021,22 +1215,7 @@ fonction_groupement <- function(these_col, init, final) {
 
 ```
 
-
-```{r function-Negate}
-#' Negate `%in%` Operator
-#'
-#' @description This operator checks if elements are not present in a given vector.
-
-#' @param x A vector of elements to check.
-#' @param table A vector to check against.
-#' @return Logical vector indicating if each element of `x` is not in `table`.
-`%notin%` <- Negate(`%in%`)
-```
-
-
-```{r test-Negate}
-# Ajouter les tests pour Negate
-```
+#### Function: separate_chunks_and_text
 
 ```{r function-separate_chunks_and_text}
 #' Separate R Code Chunks and Text from an RMarkdown (.Rmd) File and Optionally Save Them
@@ -1153,173 +1332,6 @@ test_that("separate_chunks_and_text works correctly", {
 
 ```
 
-<!--
-# There can be development actions
-
-Create a chunk with 'development' actions
-
-- The chunk needs to be named `development` or `dev`
-- It contains functions that are used for package development only
-- Note that you may want to store most of these functions in the 0-dev_history.Rmd file
-
-These are only included in the present flat template file, their content will not be part of the package anywhere else.
--->
-
-```{r function-compute_summary_of_differences}
-#' Compute Summary of Differences
-#'
-#' This function computes the summary of differences in measurement values
-#' between two datasets by grouping them by measurement unit and calculating
-#' the sum of values. It also computes the percentage difference.
-#'
-#' @param init A data.table containing the initial measurement data.
-#' @param final A data.table containing the final measurement data.
-#' @param titre_1 A character string for the title of the first dataset (default: "Dataset 1").
-#' @param titre_2 A character string for the title of the second dataset (default: "Dataset 2").
-#'
-#' @return A data.table summarizing the differences between the two datasets,
-#'         including total measurements and percentage differences.
-#' @export
-compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", titre_2 = "Dataset 2") {
-
-  # Ensure input data are data.tables
-  init <- as.data.table(init)
-  final <- as.data.table(final)
-
-  # Group and summarize initial dataset
-  init_group <- init[, .(titre_test1 = sum(measurement_value, na.rm = TRUE)), by = measurement_unit]
-
-  # Group and summarize final dataset
-  final_group <- final[, .(titre_test2 = sum(measurement_value, na.rm = TRUE)), by = measurement_unit]
-
-  # Compute summary of differences
-  summary <- merge(init_group, final_group, by = "measurement_unit", all = TRUE)
-
-  # Replace NA with 0 in numeric columns and calculate differences
-  summary[is.na(titre_test1), titre_test1 := 0]
-  summary[is.na(titre_test2), titre_test2 := 0]
-
-  summary[, Difference := -titre_test1 + titre_test2]
-  summary[, `Difference (in %)` := 100 * (Difference / titre_test1)]
-
-  # Rename columns for clarity
-  setnames(summary, "titre_test1", titre_1)
-  setnames(summary, "titre_test2", titre_2)
-
-  # Arrange the summary by measurement_unit
-  setorder(summary, measurement_unit)
-
-  return(summary)
-}
-```
-
-
-```{r test-compute_summary_of_differences}
-# Ajouter les tests pour compute_summary_of_differences
-```
-
-### Function Definitions
-
-#### Function: function_multiple_comparison
-
-
-```{r function-function_multiple_comparison}
-#' function_multiple_comparison
-#'
-#' This function performs various summarizing steps on data related to species and gear types, retrieving data from a database, 
-#' processing it, and rendering output reports.
-#'
-#' @param main_dir Character. The main directory containing the entities. (jobs/entities)
-#' @param connectionDB Object. The database connection.
-#' @param config List. Configuration list containing metadata and options for processing.
-#' @param source_authoritylist Vector. Vector of source_authority to filter on, "all" being all of them.
-#' @return NULL. The function has side effects, such as writing files and rendering reports.
-#' @param size Character string. La taille peut prendre les valeurs suivantes :
-#'   \itemize{
-#'     \item `"long"` (par défaut) : Long with coverage.
-#'     \item `"middle"` : Long without coverage
-#'     \item `"short"` : Only first characteristics, first differences and main table of steps
-#'   }
-#'
-#' @examples
-#' \dontrun{
-#' function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, parameters_child_global, fig.path, coverage = FALSE, shapefile.fix, continent)
-#' }
-#' @import dplyr
-#' @import sf
-#' @import futile.logger
-#' @export
-function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, parameters_child_global, fig.path, coverage = FALSE, shapefile.fix, continent) {
-  gc()
-  step_mapping <- sum(which(sub_list_dir == "Markdown/mapping_codelist"))
-  parameter_init <- paste0(sub_list_dir[counting], "/data.qs")
-  parameter_final <- paste0(sub_list_dir[counting + 1], "/data.qs")
-  parameter_titre_dataset_1 <- basename(sub_list_dir[counting])
-  parameter_titre_dataset_2 <- basename(sub_list_dir[counting + 1])
-
-  new_path <- file.path(fig.path, "Comparison", paste0(basename(sub_list_dir[counting]), "_", basename(sub_list_dir[counting + 1])))
-  dir.create(new_path, recursive = TRUE)
-
-  flog.info(paste("Starting comparison between:", parameter_titre_dataset_1, " and ", parameter_titre_dataset_2, " with coverage being: ", coverage))
-
-  formals(filtering_function, envir = environment())$parameter_filtering = parameter_filtering
-  initfiltered <- filtering_function(qs::qread(parameter_init))
-  finalfiltered <- filtering_function(qs::qread(parameter_final))
-  if (!identical(initfiltered, finalfiltered)) {
-    rm(initfiltered)
-    rm(finalfiltered)
-    flog.info(paste("Datasets are different:", parameter_titre_dataset_1, "and", parameter_titre_dataset_2))
-
-    child_env_result <- comprehensive_cwp_dataframe_analysis(
-      parameter_init = parameter_init,
-      parameter_final = parameter_final,
-      fig.path = new_path,
-      parameter_fact = "catch",
-      plotting_type = "view",
-      parameter_colnames_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet",
-                                     "fishing_mode", "geographic_identifier",
-                                     "measurement_unit", "measurement_value", "GRIDTYPE",
-                                     "species_group", "Gear"),
-      shapefile_fix = shapefile.fix,
-      continent = continent,
-      coverage = coverage,
-      parameter_resolution_filter = parameters_child_global$parameter_resolution_filter,
-      parameter_filtering = parameters_child_global$parameter_filtering,
-      parameter_titre_dataset_1 = parameter_titre_dataset_1,
-      parameter_titre_dataset_2 = parameter_titre_dataset_2,
-      unique_analyse = FALSE
-    )
-
-    flog.info(paste("Analysis completed for:", parameter_titre_dataset_1, "vs", parameter_titre_dataset_2))
-
-    child_env_result$step_title_t_f <- TRUE
-    child_env_result$step_title <- paste0(" Treatment : ", basename(sub_list_dir[counting + 1]))
-    child_env_result$step <- counting
-    child_env_result$parameter_titre_dataset_1 <- basename(sub_list_dir[counting])
-    child_env_result$parameter_titre_dataset_2 <- basename(sub_list_dir[counting + 1])
-    child_env_result$child_header <- "##"
-
-    gc()
-    flog.info(paste("New result saved to:", new_path))
-    return(child_env_result)
-  } else {
-    rm(initfiltered)
-    rm(finalfiltered)
-    flog.info(paste("Datasets are identical, skipping comparison for:", parameter_titre_dataset_1, "and", parameter_titre_dataset_2))
-    return(NA)
-  }
-}
-```
-
-
-```{r test-function_multiple_comparison, eval=FALSE}
-# test_that("function_multiple_comparison handles identical datasets correctly", {
-#   # Mock input data
-#   mock_data <- list(a = 1, b = 2) # Replace with actual test inputs
-#   result <- function_multiple_comparison(mock_data) # Update with required parameters
-#   expect_true(is.na(result))
-# })
-```
 
 
 ```{r development-inflate, eval=FALSE}
