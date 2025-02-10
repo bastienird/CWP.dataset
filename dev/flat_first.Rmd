@@ -938,7 +938,7 @@ qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, col
 # Ajouter les tests pour qflextable2
 ```
 
-# Comparison between multiple CWP datasets
+<!-- # Comparison between multiple CWP datasets -->
 
 
 ```{r function-fonction_groupement}

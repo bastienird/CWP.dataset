@@ -12,3 +12,51 @@
 # Ajouter les tests pour is_ggplot
 
 # Ajouter les tests pour qflextable2
+
+
+
+# Ajouter les tests pour Negate
+
+# Test suite for extract_non_chunk_content function
+test_that("separate_chunks_and_text works correctly", {
+  # Create a temporary .Rmd file for testing
+  temp_rmd <- tempfile(fileext = ".Rmd")
+  
+  # Write sample content to the temporary .Rmd file
+  writeLines(c(
+    "# Title of the document",
+    "",
+    "This is some text before the chunk.",
+    "```{r}",
+    "x <- 1:10",
+    "summary(x)",
+    "```",
+    "",
+    "This is some text after the chunk."
+  ), temp_rmd)
+  
+  # Expected output (non-chunk content only)
+  expected_chunks <- "x <- 1:10\nsummary(x)"
+  expected_text <- "# Title of the document\n\nThis is some text before the chunk.\n\nThis is some text after the chunk."
+  
+  # Apply the function without saving files
+  result <- separate_chunks_and_text(temp_rmd, save_files = FALSE)
+  
+  # Test if the function's output matches the expected content
+  expect_equal(paste(result$chunks, collapse = "\n"), expected_chunks)
+  expect_equal(paste(result$text, collapse = "\n"), expected_text)
+  
+  # Apply the function with saving files
+  result <- separate_chunks_and_text(temp_rmd, save_files = TRUE)
+  
+  # Check if the .R and .txt files were created
+  r_file <- sub("\\.Rmd$", ".R", temp_rmd)
+  txt_file <- sub("\\.Rmd$", ".txt", temp_rmd)
+  
+  expect_true(file.exists(r_file))
+  expect_true(file.exists(txt_file))
+  
+  # Clean up the temporary files
+  unlink(c(temp_rmd, r_file, txt_file))
+})
+
