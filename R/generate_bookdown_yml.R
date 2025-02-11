@@ -29,8 +29,10 @@ generate_bookdown_yml <- function(destination = system.file("rmd", package = "CW
     paste0('  - "', destination, '/index.Rmd"'),
     paste0('  - "', destination, '/first_and_first_to_last_and_process.Rmd"'),
     paste0('  - "', destination, '/all_child_process.Rmd"'),
-    paste0('  - "', destination, '/Annexenew.Rmd"')
+    paste0('  - "', destination, '/Annexenew.Rmd"'),
+    paste0('template: "', system.file("rmd/template.tex", package = "CWP.dataset"), '"')
   )
+
 
   writeLines(yml_content, file.path(getwd(), "_bookdown.yml"))
 }
