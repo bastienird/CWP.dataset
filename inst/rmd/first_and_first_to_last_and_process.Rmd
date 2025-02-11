@@ -9,7 +9,7 @@ res <- knitr::knit_child(system.file("rmd/Setup_markdown.Rmd", package = "CWP.da
 
 child_env_last <- list2env(as.list(child_env_last_result), parent = new.env())
 
-res_last <- knitr::knit_child(system.file("rmd/comparison.Rmd", package = "CWP.dataset"), quiet = TRUE, envir = environment())
+res_last <- knitr::knit_child(system.file("rmd/comparison.Rmd", package = "CWP.dataset"), quiet = TRUE, envir = child_env_last)
 
 # rm(child_env_last_result, envir = environment())
 rm(child_env_last, envir = environment())
@@ -41,7 +41,7 @@ gc()
 
 child_env_first_to_last <- list2env(as.list(child_env_first_to_last_result), parent = new.env())
 
-res_comparison_first_to_last <- knitr::knit_child(system.file("rmd/comparison.Rmd", package = "CWP.dataset"), quiet = TRUE, envir = environment())
+res_comparison_first_to_last <- knitr::knit_child(system.file("rmd/comparison.Rmd", package = "CWP.dataset"), quiet = TRUE, envir = child_env_first_to_last)
 rm(child_env_first_to_last)
 # rm(child_env_first_to_last_result)
 gc()
