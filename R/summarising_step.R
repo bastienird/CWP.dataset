@@ -166,6 +166,9 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
               data <- data %>% dplyr::left_join(fishing_fleet_label %>% dplyr::select(code,fishing_fleet_label = label), by = c("fishing_fleet" = "code"))
               data <- data %>% dplyr::left_join(species_label %>% dplyr::select(code,species_label = label, species_definition = definition), by = c("species" = "code"))
+              if(opts$fact == "effort"){
+                data <- data %>% dplyr::filter(measurement_unit%in%c("HOOKS", "FDAYS", "SETS", "NO.HOOKS", "NO.LINES", "NETS")) #only two first measuremnt_unit for each dataset
+              }
               qs::qsave(data, file = file)
             flog.info("Processed and saved data for file: %s", file)
           }
