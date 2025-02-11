@@ -314,10 +314,10 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       set_flextable_defaults(fonts_ignore=TRUE)
       base::options(knitr.duplicate.label = "allow")
+      rmd_path <- system.file("rmd/index.Rmd", package = "CWP.dataset")
+
       if(sizepdf != "short"){
       flog.info("gitbook")
-        rmd_path <- system.file("rmd/index.Rmd", package = "tonpackage")
-
         if (nzchar(rmd_path)) {  # Vérifie que le chemin existe
           bookdown::render_book(
             input = rmd_path,
