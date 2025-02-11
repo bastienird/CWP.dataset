@@ -316,6 +316,20 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       base::options(knitr.duplicate.label = "allow")
       if(sizepdf != "short"){
       flog.info("gitbook")
+        rmd_path <- system.file("rmd/index.Rmd", package = "tonpackage")
+
+        if (nzchar(rmd_path)) {  # Vérifie que le chemin existe
+          bookdown::render_book(
+            input = rmd_path,
+            envir = render_env,
+            output_format = "bookdown::gitbook",
+            output_dir = nameoutput
+          )
+        } else {
+          stop("Le fichier index.Rmd est introuvable dans le package.")
+        }
+
+
       bookdown::render_book("index.Rmd", envir = render_env, output_format = "bookdown::gitbook",
                             output_dir =nameoutput)
 
