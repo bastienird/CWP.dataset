@@ -330,13 +330,13 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         }
 
 
-      bookdown::render_book("index.Rmd", envir = render_env, output_format = "bookdown::gitbook",
-                            output_dir =nameoutput)
+      # bookdown::render_book(rmd_path, envir = render_env, output_format = "bookdown::gitbook",
+      #                       output_dir =nameoutput)
 
       gc()
       }
       flog.info("pdfdocument")
-      bookdown::render_book("index.Rmd", envir = render_env,
+      bookdown::render_book(rmd_path, envir = render_env,
                             output_format = "bookdown::pdf_document2",
                             output_dir = nameoutput)
       nameoutput <- NULL
