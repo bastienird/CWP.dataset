@@ -31,7 +31,7 @@ output:
     extra_dependencies: ["adjustbox", "subfig", "flafter", "makecell"]
     toc: TRUE
     keep_tex: TRUE
-    template: "`r system.file('rmd/template.tex', package = 'CWP.dataset')`"
+    template: "`r template_path`"
     #md_extensions: "-autolink_bare_uris"
     number_sections: TRUE
     citation_package: default # Can also be "natbib"
@@ -60,3 +60,6 @@ fancyhdr:
     headrulewidth: 1pt
     footrulewidth: 0pt
 ---
+```{r}
+template_path <- system.file("rmd/template.tex", package = "CWP.dataset")
+```
