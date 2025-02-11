@@ -20,12 +20,13 @@ flat_first.Rmd:
   - R/bar_plot_default.R
   - R/cat_title.R
   - R/compute_summary_of_differences.R
-  - R/isnulllist.R
+  - R/filtering_function.R
   - R/fonction_empreinte_spatiale.R
   - R/fonction_groupement.R
   - R/function_multiple_comparison.R
   - R/generate_plot.R
   - R/is_ggplot.R
+  - R/isnulllist.R
   - R/knitting_plots_subfigures.R
   - R/pie_chart_2_default.R
   - R/qflextable2.R
@@ -36,6 +37,7 @@ flat_first.Rmd:
   tests:
   - tests/testthat/test-read_data.R
   - tests/testthat/test-isnulllist.R
+  - tests/testthat/test-filtering_function.R
   - tests/testthat/test-cat_title.R
   - tests/testthat/test-is_ggplot.R
   - tests/testthat/test-qflextable2.R
