@@ -8,8 +8,7 @@ save_image(
   title,
   plott = last_plot(),
   folder = NULL,
-  fig.pathinside = fig.path,
-  find_and_print = FALSE
+  fig.pathinside = fig.path
 )
 }
 \arguments{
@@ -20,8 +19,6 @@ save_image(
 \item{folder}{The folder where the image will be saved.}
 
 \item{fig.pathinside}{The path for saving the figure.}
-
-\item{find_and_print}{Logical indicating if results should be printed.}
 }
 \value{
 None

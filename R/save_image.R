@@ -7,10 +7,9 @@
 #' @param plott The plot object to save.
 #' @param folder The folder where the image will be saved.
 #' @param fig.pathinside The path for saving the figure.
-#' @param find_and_print Logical indicating if results should be printed.
 #' @return None
 #' @export
-save_image <- function(title, plott = last_plot(), folder = NULL, fig.pathinside = fig.path, find_and_print = FALSE){
+save_image <- function(title, plott = last_plot(), folder = NULL, fig.pathinside = fig.path){
   current <- tmap_mode()
   title <- eval(title)
   if(!is.null(folder)){
