@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setuprmd,include = FALSE, echo=FALSE}
-
+knitr::opts_chunk$set(warning = FALSE)
 res <- knitr::knit_child(system.file("rmd/Setup_markdown.Rmd", package = "CWP.dataset"), quiet = TRUE, envir = environment())
 # envir = parent.frame() ne marche pas bien car il faut appeler dans le nouveau markdown (child) envir$obj
 ```

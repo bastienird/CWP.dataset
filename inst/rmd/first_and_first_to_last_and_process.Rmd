@@ -1,4 +1,6 @@
 ```{r setuprmd, include = FALSE, echo=FALSE}
+
+knitr::opts_chunk$set(warning = FALSE)
 res <- knitr::knit_child(system.file("rmd/Setup_markdown.Rmd", package = "CWP.dataset"), quiet = TRUE, envir = environment())
 
 ```

@@ -125,7 +125,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
     }
       entity_name <- basename(entity_dir)
       setwd(here::here(entity_dir))
-      copy_project_files(original_repo_path = here::here("Analysis_markdown"), new_repo_path = getwd())
+      # copy_project_files(original_repo_path = here::here("Analysis_markdown"), new_repo_path = getwd())
 
       sub_list_dir_2 <- list.files("Markdown", recursive = TRUE, pattern = "data.qs", full.names = TRUE)
       details <- file.info(sub_list_dir_2)
@@ -314,13 +314,13 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       set_flextable_defaults(fonts_ignore=TRUE)
       base::options(knitr.duplicate.label = "allow")
-      rmd_path <- system.file("rmd/index.Rmd", package = "CWP.dataset")
+      CWP.dataset::generate_bookdown_yml()
 
       if(sizepdf != "short"){
       flog.info("gitbook")
         if (nzchar(rmd_path)) {  # Vérifie que le chemin existe
           bookdown::render_book(
-            input = rmd_path,
+            input = ".",
             envir = render_env,
             output_format = "bookdown::gitbook",
             output_dir = nameoutput
@@ -330,15 +330,13 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         }
 
 
-      # bookdown::render_book(rmd_path, envir = render_env, output_format = "bookdown::gitbook",
-      #                       output_dir =nameoutput)
-
       gc()
       }
       flog.info("pdfdocument")
-      bookdown::render_book(rmd_path, envir = render_env,
+      bookdown::render_book(".", envir = render_env,
                             output_format = "bookdown::pdf_document2",
                             output_dir = nameoutput)
+      unlink("_bookdown.yml")
       nameoutput <- NULL
       rm(child_env_last_result, envir = render_env)
       rm(child_env_first_to_last_result, envir = render_env)

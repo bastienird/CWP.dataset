@@ -31,7 +31,7 @@ output:
     extra_dependencies: ["adjustbox", "subfig", "flafter", "makecell"]
     toc: TRUE
     keep_tex: TRUE
-    template: template.tex
+    template: "`r system.file('rmd/template.tex', package = 'CWP.dataset')`"
     #md_extensions: "-autolink_bare_uris"
     number_sections: TRUE
     citation_package: default # Can also be "natbib"

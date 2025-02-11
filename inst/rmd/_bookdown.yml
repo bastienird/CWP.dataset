@@ -3,7 +3,7 @@ output_dir: "_book"
 delete_merged_file: true
 new_session: false
 rmd_files:
-  - "rmd/index.Rmd"
-  - "rmd/first_and_first_to_last_and_process.Rmd"
-  - "rmd/all_child_process.Rmd"
-  - "rmd/Annexenew.Rmd"
+  - "/home/jovyan/firms-gta/geoflow-tunaatlas/renv/library/R-4.2/x86_64-pc-linux-gnu/CWP.dataset/rmd/index.Rmd"
+  - "/home/jovyan/firms-gta/geoflow-tunaatlas/renv/library/R-4.2/x86_64-pc-linux-gnu/CWP.dataset/rmd/first_and_first_to_last_and_process.Rmd"
+  - "/home/jovyan/firms-gta/geoflow-tunaatlas/renv/library/R-4.2/x86_64-pc-linux-gnu/CWP.dataset/rmd/all_child_process.Rmd"
+  - "/home/jovyan/firms-gta/geoflow-tunaatlas/renv/library/R-4.2/x86_64-pc-linux-gnu/CWP.dataset/rmd/Annexenew.Rmd"
