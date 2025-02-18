@@ -26,7 +26,7 @@ process_list_item <- function(list_item, template) {
 # Iterate over all items in all_list and process each one
 
 if(!is.null(all_list)){
-results <- lapply(all_list, process_list_item, template = "comparison.Rmd")
+results <- lapply(all_list, process_list_item, template = system.file("rmd/comparison.Rmd", package = "CWP.dataset"))
 
 # Perform garbage collection
 gc()

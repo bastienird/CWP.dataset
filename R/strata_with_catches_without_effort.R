@@ -90,7 +90,7 @@ strata_with_catches_without_effort = function(main.dir, connectionDB,uploadgoogl
             child_env_global = new.env()
 
             list2env(parameters_child_global, envir = child_env_global)
-            rmarkdown::render("comparison.Rmd",
+            rmarkdown::render(system.file("rmd/comparison.Rmd", package = "CWP.dataset"),
                               envir = child_env_global,
                               output_file = "catch_no_effort.html", output_format = "html_document2",
                               output_dir = file.path("catch_no_effort/",i, "/", name))

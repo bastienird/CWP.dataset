@@ -30,7 +30,8 @@ comprehensive_cwp_dataframe_analysis(
   parameter_titre_dataset_1 = "Dataset 1",
   parameter_titre_dataset_2 = "Dataset 2",
   unique_analyse = FALSE,
-  removemap = FALSE
+  removemap = FALSE,
+  topnumber = 6
 )
 }
 \arguments{
@@ -69,6 +70,8 @@ comprehensive_cwp_dataframe_analysis(
 \item{parameter_titre_dataset_2}{Title for dataset 2.}
 
 \item{unique_analyse}{Whether the analysis is unique.}
+
+\item{topnumber}{Number of first caracteristics of each dimensions to display without groupping}
 
 \item{init}{Initial dataset.}
 

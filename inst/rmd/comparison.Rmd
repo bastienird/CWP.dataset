@@ -6,8 +6,8 @@ output: html_document
 ---
 
 ```{r setuprmd,include = FALSE, echo=FALSE}
-
-res <- knitr::knit_child("Setup_markdown.Rmd", quiet = TRUE, envir = environment())
+knitr::opts_chunk$set(warning = FALSE)
+res <- knitr::knit_child(system.file("rmd/Setup_markdown.Rmd", package = "CWP.dataset"), quiet = TRUE, envir = environment())
 # envir = parent.frame() ne marche pas bien car il faut appeler dans le nouveau markdown (child) envir$obj
 ```
 
@@ -22,8 +22,7 @@ cat(res)
 
 ```{r explenation, results='asis'}
 
-res <- knitr::knit_child("Explenation.Rmd", quiet = TRUE, envir = environment())
-
+res <- knitr::knit_child(system.file("rmd/Explenation.Rmd", package = "CWP.dataset"), quiet = TRUE, envir = environment())
 cat(res)
 
 ```
@@ -43,8 +42,7 @@ if(!unique_analyse && parameter_short == FALSE && coverage){
 
 ```{r Compnumberstratas, eval=!unique_analyse, echo=FALSE, results='asis'}
 
-res <- knitr::knit_child("Compnumberstratas.Rmd", quiet = TRUE, envir = environment())
-
+res <- knitr::knit_child(system.file("rmd/Compnumberstratas.Rmd", package = "CWP.dataset"), quiet = TRUE, envir = environment())
 cat(res, sep =  "\\clearpage")
 
 ```
@@ -66,8 +64,7 @@ if (parameter_short){knitr::knit_exit(exit, fully = FALSE)}
 
 ```{r timediffchild, results='asis', eval = !unique_analyse && (exists("plot_titles_list") && !is.null(plot_titles_list))}
 
-res <- knitr::knit_child("Differenceintimedata.Rmd", quiet = TRUE, envir = environment())
-
+res <- knitr::knit_child(system.file("rmd/Differenceintimedata.Rmd", package = "CWP.dataset"), quiet = TRUE, envir = environment())
 cat(res, sep =  "\\clearpage")
 
 ```
@@ -79,7 +76,7 @@ cat(res, sep =  "\\clearpage")
 
 ```{r Geodiff, results='asis', eval = !unique_analyse && (exists("Geographicdiff") && !is.null(Geographicdiff))}
 
-res <- knitr::knit_child("Geographicdiff.Rmd", quiet = TRUE, envir = environment())
+res <- knitr::knit_child(system.file("rmd/Geographicdiff.Rmd", package = "CWP.dataset"), quiet = TRUE, envir = environment())
 cat(res, sep =  "\\clearpage")
 
 ```
@@ -91,8 +88,7 @@ cat(res, sep =  "\\clearpage")
 
 ```{r Diff-for-other-dimensions, results='asis', eval = !unique_analyse && (exists("compare_dimension_differences_list") && !is.null(compare_dimension_differences_list))}
 
-res <- knitr::knit_child("Differencesforeachdimensions.Rmd", quiet = TRUE, envir = environment())
-
+res <- knitr::knit_child(system.file("rmd/Differencesforeachdimensions.Rmd", package = "CWP.dataset"), quiet = TRUE, envir = environment())
 cat(res, sep =  "\\clearpage")
 
 ```
@@ -107,8 +103,7 @@ knitr::knit_exit(fully = FALSE)
 
 ```{r Maincharactofdataset, results='asis', eval = coverage}
 
-res <- knitr::knit_child("Main_caracteristics_of_dataset.Rmd", quiet = TRUE, envir = environment())
-
+res <- knitr::knit_child(system.file("rmd/Main_caracteristics_of_dataset.Rmd", package = "CWP.dataset"), quiet = TRUE, envir = environment())
 cat(res, sep =  "\\clearpage")
 
 ```

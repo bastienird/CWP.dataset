@@ -7,7 +7,7 @@ output: html_document
 
 ```{r summarydiffplotting,echo=FALSE, results='asis', out.width="100%"}
 
-qflextable2(summary_of_differences, captionn = "Summary of the difference between the two datasets", columns_to_color = c("Difference"), save_folder = "Summary", interactive_plot = FALSE)
+CWP.dataset::qflextable2(summary_of_differences, captionn = "Summary of the difference between the two datasets", columns_to_color = c("Difference"), save_folder = "Summary", interactive_plot = FALSE)
 
 ```
 
@@ -37,12 +37,12 @@ if (nrow(compare_strata_differences_list$strates_perdues_first_10) != 0) {
 
 ```{r disapandapflextable, eval = (nrow(compare_strata_differences_list$strates_perdues_first_10) != 0), results="asis"}
 
-qflextable2(compare_strata_differences_list$disapandap, captionn = compare_strata_differences_list$title, columns_to_color = c("Difference in millions"), grouped_data = c("Dimension", "measurement_unit", "Loss / Gain"), save_folder = "Diffstratas", fig.pathinside = fig.path, interactive_plot = FALSE, find_and_print = FALSE)
+CWP.dataset::qflextable2(compare_strata_differences_list$disapandap, captionn = compare_strata_differences_list$title, columns_to_color = c("Difference in millions"), grouped_data = c("Dimension", "measurement_unit", "Loss / Gain"), save_folder = "Diffstratas", fig.pathinside = fig.path, interactive_plot = FALSE)
 
 ```
 
 ```{r compnumberstratascolumns, results='asis', out.width="100%"}
 
-qflextable2(compare_strata_differences_list$number_init_column_final_column, captionn = "Comparison of number of stratas between the two datasets", columns_to_color = c("Difference"), save_folder = "Diffstratas", fig.pathinside = fig.path, interactive_plot = FALSE)
+CWP.dataset::qflextable2(compare_strata_differences_list$number_init_column_final_column, captionn = "Comparison of number of stratas between the two datasets", columns_to_color = c("Difference"), save_folder = "Diffstratas", fig.pathinside = fig.path, interactive_plot = FALSE)
 
 ```

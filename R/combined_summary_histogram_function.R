@@ -16,13 +16,16 @@ combined_summary_histogram_function <- function(init, parameter_titre_dataset_1 
   # Calcul des totaux pour chaque dataset
   total_rows <- combined_summary[, .(Total_rows = sum(Number_different_stratas)), by = data_source]
   combined_summary <- merge(combined_summary, total_rows, by = "data_source")
+  unique_units <- unique(combined_summary$measurement_unit)
+  color_palette <- scales::hue_pal()(length(unique_units))
+  names(color_palette) <- unique_units
 
   # Créer le graphique principal (histogramme)
   combined_summary_histogram <- ggplot(combined_summary,
                                        aes(x = factor(data_source),
                                            y = Percent, fill = measurement_unit)) +
     geom_bar(stat = "identity", position = "fill") +  # Barres empilées avec échelle à 100%
-    scale_fill_manual(values = c("Tons" = "#4C72B0", "Number of fish" = "#55A868")) +  # Couleurs personnalisées
+    scale_fill_manual(values = color_palette) +
     scale_y_continuous(labels = scales::percent_format()) +
     geom_text(aes(label = paste0(round(Percent, 1), "%")),
               position = position_fill(vjust = 0.5), color = "black") + # Texte à l'intérieur des barres

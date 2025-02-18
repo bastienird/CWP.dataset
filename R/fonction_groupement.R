@@ -2,141 +2,74 @@
 
 #' Group and Summarize Data
 #'
-#' This function takes two data.tables and groups them by specified columns,
-#' summing the measurement values for each group, and then compares the results
-#' from both data.tables. It computes the loss or gain in measurement values
+#' This function takes two data.tables and groups them by specified columns, 
+#' summing the measurement values for each group, and then compares the results 
+#' from both data.tables. It computes the loss or gain in measurement values 
 #' and provides additional metrics related to the comparison.
 #'
 #' @param these_col A character vector of column names to group by.
 #' @param init A data.table containing the initial measurement data.
 #' @param final A data.table containing the final measurement data.
 #'
-#' @return A data.table containing the results of the comparison between the
-#'         two input data.tables, including summed values, losses or gains,
+#' @return A data.table containing the results of the comparison between the 
+#'         two input data.tables, including summed values, losses or gains, 
 #'         and percentage differences.
 #' @export
 fonction_groupement <- function(these_col, init, final) {
-
+  
   # Ensure input data are data.tables
   init <- as.data.table(init)
   final <- as.data.table(final)
-
-  # Compute sum of values for each combination of the columns in "these_col"
+  
+  # Compute sum of values for each combination of the columns in "these_col" 
   # and "measurement_unit" in the "init" data.table
   groupement_1 <- init[, .(value_sum_1 = round(sum(measurement_value, na.rm = TRUE), digits = 3),
-                           number_lines1 = .N),
+                           number_lines1 = .N), 
                        by = c(these_col, "measurement_unit")]
-
+  
   groupement_1[, measurement_unit := as.character(measurement_unit)]
   groupement_1[is.na(value_sum_1), value_sum_1 := 0]
-
-  # Compute sum of values for each combination of the columns in "these_col"
+  
+  # Compute sum of values for each combination of the columns in "these_col" 
   # and "measurement_unit" in the "final" data.table
   groupement_2 <- final[, .(value_sum_2 = round(sum(measurement_value, na.rm = TRUE), digits = 3),
-                            number_lines2 = .N),
+                            number_lines2 = .N), 
                         by = c(these_col, "measurement_unit")]
-
+  
   groupement_2[, measurement_unit := as.character(measurement_unit)]
   groupement_2[is.na(value_sum_2), value_sum_2 := 0]
-
+  
   # Join the two data.tables based on the columns in "these_col" and "measurement_unit"
-  fulljoin <- merge(groupement_1, groupement_2,
-                    by = c(these_col, "measurement_unit"),
-                    all = TRUE,
+  fulljoin <- merge(groupement_1, groupement_2, 
+                    by = c(these_col, "measurement_unit"), 
+                    all = TRUE, 
                     suffixes = c("_1", "_2"))
-
+  
   fulljoin[is.na(value_sum_1), value_sum_1 := 0]
   fulljoin[is.na(value_sum_2), value_sum_2 := 0]
-
+  
   # Calculate losses and gains
   fulljoin[, loss := value_sum_1 - value_sum_2]
-  fulljoin[, `Loss / Gain` := fifelse(abs(loss) <= 1, "Egal",
+  fulljoin[, `Loss / Gain` := fifelse(abs(loss) <= 1, "Egal", 
                                       fifelse(loss > 1, "Loss", "Gain"))]
   fulljoin[, Loss_pourcent := -100 * (loss / value_sum_1)]
-
+  
   # Handle NA values in Loss_pourcent
   fulljoin[is.na(Loss_pourcent) | Loss_pourcent == -Inf, Loss_pourcent := 100]
-
+  
   # Add additional columns
   fulljoin[, Dimension := names(groupement_1)[1]]
-  setnames(fulljoin, "measurement_unit", "Precision")
+  setnames(fulljoin, names(groupement_1)[1], "Precision")
   fulljoin[, Precision := as.character(Precision)]
-
+  
   # Calculate differences
   fulljoin[, loss_nb_ligne := - (number_lines1 - number_lines2)]
   fulljoin[, `Difference in value` := - (value_sum_1 - value_sum_2)]
   setnames(fulljoin, "Loss_pourcent", "Difference (in %)")
   setnames(fulljoin, "loss_nb_ligne", "Difference in number of lines")
-
+  
   # Replace NA with 0 for numeric columns
   fulljoin[, lapply(.SD, function(x) replace(x, is.na(x), 0)), .SDcols = where(is.numeric)]
-
+  
   return(fulljoin)
 }
-
-#' Separate R Code Chunks and Text from an RMarkdown (.Rmd) File and Optionally Save Them
-#'
-#' This function reads an RMarkdown file and separates the code chunks from the text.
-#' It returns a list with two elements: `chunks` (R code chunks) and `text` (non-code content).
-#' Optionally, it saves the chunks to an `.R` file and the text to a `.txt` file.
-#'
-#' @param rmd_file A character string specifying the path to the .Rmd file.
-#' @param save_files Logical. If TRUE, saves the chunks to an `.R` file and the text to a `.txt` file.
-#' Default is FALSE.
-#' @return A list containing two elements:
-#' \item{chunks}{A character vector with the content of all R code chunks.}
-#' \item{text}{A character vector with the content outside of R code chunks.}
-#'
-#' @export
-separate_chunks_and_text <- function(rmd_file, save_files = FALSE) {
-  # Read the RMarkdown file
-  lines <- readLines(rmd_file)
-  
-  # Initialize vectors to store chunks and text
-  chunks <- c()
-  text <- c()
-  
-  # Boolean to track whether we are inside a chunk or not
-  in_chunk <- FALSE
-  
-  # Initialize a temporary container for a chunk
-  current_chunk <- c()
-  
-  # Loop through the lines of the file
-  for (line in lines) {
-    # Detect the start and end of code chunks (marked by ```)
-    if (grepl("^```", line)) {
-      in_chunk <- !in_chunk  # Toggle chunk state
-      
-      if (!in_chunk) {
-        # If we just exited a chunk, save the accumulated chunk
-        chunks <- c(chunks, paste(current_chunk, collapse = "\n"))
-        current_chunk <- c()  # Reset the current chunk
-      }
-    } else {
-      if (in_chunk) {
-        # Accumulate lines that are part of a chunk
-        current_chunk <- c(current_chunk, line)
-      } else {
-        # Accumulate lines that are outside chunks (text)
-        text <- c(text, line)
-      }
-    }
-  }
-  
-  # If the save_files option is TRUE, save the chunks and text to separate files
-  if (save_files) {
-    # Extract the base name from the file path (without extension)
-    base_name <- sub("\\.Rmd$", "", rmd_file)
-    
-    # Save the chunks to a .R file
-    writeLines(chunks, paste0(base_name, ".R"))
-    
-    # Save the text to a .txt file
-    writeLines(text, paste0(base_name, ".txt"))
-  }
-  
-  # Return the separated chunks and text as a list
-  return(list(chunks = chunks, text = text))
-}
-

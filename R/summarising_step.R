@@ -112,10 +112,20 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
     if (opts$fact == "effort") {
       flog.warn("Effort dataset not displayed for now")
+      parameter_colnames_to_keep_fact = c("source_authority", "fishing_mode", "geographic_identifier","fishing_fleet", "gear_type",
+                                          "measurement_unit", "measurement_value", "GRIDTYPE","species_group")
+      topnumberfact = 3
     } else {
+      parameter_colnames_to_keep_fact = c("source_authority", "species", "gear_type", "fishing_fleet",
+                                          "fishing_mode", "geographic_identifier",
+                                          "measurement_unit", "measurement_value", "GRIDTYPE",
+                                          "species_group", "Gear")
+      topnumberfact = 6
+
+    }
       entity_name <- basename(entity_dir)
       setwd(here::here(entity_dir))
-      copy_project_files(original_repo_path = here::here("Analysis_markdown"), new_repo_path = getwd())
+      # copy_project_files(original_repo_path = here::here("Analysis_markdown"), new_repo_path = getwd())
 
       sub_list_dir_2 <- list.files("Markdown", recursive = TRUE, pattern = "data.qs", full.names = TRUE)
       details <- file.info(sub_list_dir_2)
@@ -156,6 +166,9 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
               data <- data %>% dplyr::left_join(fishing_fleet_label %>% dplyr::select(code,fishing_fleet_label = label), by = c("fishing_fleet" = "code"))
               data <- data %>% dplyr::left_join(species_label %>% dplyr::select(code,species_label = label, species_definition = definition), by = c("species" = "code"))
+              if(opts$fact == "effort"){
+                data <- data %>% dplyr::filter(measurement_unit%in%c("HOOKS", "FDAYS", "SETS", "NO.HOOKS", "NO.LINES", "NETS")) #only two first measuremnt_unit for each dataset
+              }
               qs::qsave(data, file = file)
             flog.info("Processed and saved data for file: %s", file)
           }
@@ -199,11 +212,8 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         parameter_init = sub_list_dir_2[length(sub_list_dir_2)],
         parameter_final = NULL,
         fig.path = parameters_child_global$fig.path,
-        parameter_fact = "catch",
-        parameter_colnames_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet",
-                                       "fishing_mode", "geographic_identifier",
-                                       "measurement_unit", "measurement_value", "GRIDTYPE",
-                                       "species_group", "Gear"),
+        parameter_fact = opts$fact,
+        parameter_colnames_to_keep = parameter_colnames_to_keep_fact,
         coverage = TRUE,
         shapefile_fix = shapefile.fix,
         continent = continent,
@@ -229,10 +239,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         parameter_final = sub_list_dir_2[length(sub_list_dir_2)],
         fig.path = parameters_child_global$fig.path,
         parameter_fact = "catch",
-        parameter_colnames_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet",
-                                       "fishing_mode", "geographic_identifier",
-                                       "measurement_unit", "measurement_value", "GRIDTYPE",
-                                       "species_group", "Gear"),
+        parameter_colnames_to_keep = parameter_colnames_to_keep_fact,
         shapefile_fix = shapefile.fix,
         continent = continent,
         coverage = TRUE,
@@ -255,7 +262,11 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
       render_env$sub_list_dir_3 <- sub_list_dir_3
+      if(opts$fact == "effort"){
+        process_fisheries_data_list <- process_fisheries_effort_data(sub_list_dir_3,  parameter_filtering)
+        } else {
       process_fisheries_data_list <- process_fisheries_data(sub_list_dir_3, parameter_fact = "catch", parameter_filtering)
+        }
       flog.info("Processed process_fisheries_data_list")
 
       render_env$process_fisheries_data_list <- process_fisheries_data_list
@@ -303,17 +314,29 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       set_flextable_defaults(fonts_ignore=TRUE)
       base::options(knitr.duplicate.label = "allow")
+      CWP.dataset::generate_bookdown_yml()
+
       if(sizepdf != "short"){
       flog.info("gitbook")
-      bookdown::render_book("index.Rmd", envir = render_env, output_format = "bookdown::gitbook",
-                            output_dir =nameoutput)
+        if (nzchar(rmd_path)) {  # Vérifie que le chemin existe
+          bookdown::render_book(
+            input = ".",
+            envir = render_env,
+            output_format = "bookdown::gitbook",
+            output_dir = nameoutput
+          )
+        } else {
+          stop("Le fichier index.Rmd est introuvable dans le package.")
+        }
+
 
       gc()
       }
       flog.info("pdfdocument")
-      bookdown::render_book("index.Rmd", envir = render_env,
+      bookdown::render_book(".", envir = render_env,
                             output_format = "bookdown::pdf_document2",
                             output_dir = nameoutput)
+      unlink("_bookdown.yml")
       nameoutput <- NULL
       rm(child_env_last_result, envir = render_env)
       rm(child_env_first_to_last_result, envir = render_env)
@@ -326,7 +349,6 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
     sprintf("entity: %s is done", entity_dir)
 
-    }
     }
   try(setwd(ancient_wd))
   flog.info("Finished Summarising_step function")
