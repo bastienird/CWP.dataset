@@ -1,0 +1,171 @@
+---
+title: "Report_on_data_on_land"
+author: "BastienG"
+date: "2023-10-12"
+output: html_document
+---
+  
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE, error = FALSE
+)
+
+
+```
+
+
+# Overview of data located on land
+
+Only the squares where the integrity of the area is located on land are considered in the analysis.
+
+```{r cache=FALSE}
+
+all_the_data <- inner_join(shapefile.fix)  %>% ungroup() %>% dplyr::group_by(geographic_identifier, st_area, unit, source_authority, area_competence) %>% dplyr::summarise(value= sum(value, na.rm = TRUE))%>% dplyr::distinct() %>% dplyr::inner_join(world_sf2 , by = c("geographic_identifier", "st_area") ) 
+
+
+all_the_data <- all_the_data %>% dplyr::select(geographic_identifier, st_area, value, geom, unit, source_authority,area_competence)
+
+
+if (nrow(mislocated_continent)==0){knitr::knit_exit()}else{
+  
+  
+  image <- tm_shape(st_as_sf(mislocated_continent %>% dplyr::mutate(st_area = as.factor(st_area))))+tm_fill("value")+tm_facets(by=c("st_area","unit"), free.coords = FALSE)+tm_shape(continent)+tm_borders()#+tm_text("source_authority")#+tm_shape(continent)+tm_borders() 
+  
+  
+  image2 <- tm_shape(st_as_sf(mislocated_continent %>% dplyr::mutate(st_area = as.factor(st_area))))+tm_fill("source_authority")+tm_facets(by=c("st_area","unit"), free.coords = FALSE)+tm_shape(continent)+tm_borders()
+}
+
+
+```
+
+```{r results='asis'}
+
+qflextable2(mislocated_continent %>%  group_by(unit) %>% summarise(value = sum(value)), captionn = "Value of data reported on continent by unit ")
+
+```
+
+Those next maps will presents where and by who the mislocated data is reported.
+
+
+# Distribution of mislocated data 
+
+
+```{r}
+
+image <- tm_shape(st_as_sf(mislocated_continent %>% dplyr::mutate(st_area = as.factor(st_area))))+tm_fill("value")+tm_facets(by=c("st_area","unit"), free.coords = FALSE)+tm_borders("grey", lw = 0.1)+tm_shape(continent)+tm_borders()#+tm_text("source_authority")#+tm_shape(continent)+tm_borders() 
+
+
+image2 <- tm_shape(st_as_sf(mislocated_continent %>% dplyr::mutate(st_area = as.factor(st_area))))+tm_fill("source_authority")+tm_borders("red", lw = 0.1)+tm_facets(by=c("st_area","unit"), free.coords = FALSE)+tm_shape(continent)+tm_borders()
+
+map_unit <- list(list(image, image2))
+
+
+
+```
+
+
+```{r eval=TRUE}
+map_unit_knit = function(map){
+  assign("map_for_knit_where", map[1][[1]], envir = environment())
+  assign("map_for_knit_who", map[2][[1]], envir = environment())
+  knitr::knit_child(text = c(
+    '',
+    '',
+    '```{r echo = FALSE, fig.cap = paste0("Distribution of mislocated data in value")}',
+    '',
+    'map_for_knit_where',
+    '```',
+    '',
+    '```{r echo = FALSE, fig.cap = paste0("Contributor of mislocated data")}',
+    '',
+    'map_for_knit_who',
+    '```',
+    '',
+    
+    ''
+  ), envir = environment(), quiet= TRUE)
+}
+```
+
+
+```{r results='asis'}
+try(map_unit_knit_list <- lapply(map_unit, FUN = map_unit_knit ))
+```
+
+```{r results='asis'}
+cat(unlist(map_unit_knit_list), sep = "\n")
+```
+
+
+```{r}
+
+list_pie_chart <- list("fishingfleet","source_authority")
+
+pie_charts_multiple <- lapply(list_pie_chart,FUN = function_pie_chart_df, first= mislocated_continent %>% ungroup() %>% select(geographic_identifier) %>% inner_join(data, by = "geographic_identifier"), topn = 3, title_yes_no = FALSE, titre_1 = "Mislocated data" )
+
+figures<- lapply(pie_charts_multiple, function(x){x$pie_chart})
+
+dimension_title_subfigures <- lapply(pie_charts_multiple, function(x){paste0("Distribution in value for the dimension ", x$dimension)})
+
+
+
+
+
+```
+
+```{r echo=FALSE, fig.cap='Repartition of the mislocated data for several dimensions', fig.subcap=c(unlist(gsub("_","..",dimension_title_subfigures))), fig.ncol = 2, out.width = "50%", fig.align = "center"}
+
+for (i in figures){plot(i)}
+
+```
+
+```{r eval=FALSE}
+
+mislocated_continent2 <- mislocated_continent %>% dplyr::group_by(unit, source_authority) %>% arrange(unit,desc(source_authority)) %>% dplyr::summarise(value = sum(value, na.rm = TRUE))  %>% ungroup() %>% dplyr::group_by(unit) %>%  dplyr::mutate(pourcentage = prop.table(value)*100)%>%
+  dplyr::mutate(labels = paste0(pourcentage," ",  " % "))%>% arrange(unit,desc( source_authority)) %>% 
+  dplyr::mutate(ypos_ligne = cumsum(pourcentage)- 0.5*pourcentage ) %>%
+  dplyr::distinct()
+ggplot(mislocated_continent2) +aes(
+  x = "",
+  fill = source_authority,
+  colour = source_authority,
+  group = source_authority,
+  weight = pourcentage
+) +
+  geom_bar(position = "fill") +
+  scale_fill_hue(direction = 1) +
+  scale_color_hue(direction = 1) +
+  theme_minimal()+ coord_polar("y", start=0)+ geom_text(data = (mislocated_continent2 %>% mutate_if(is.numeric, round)), size = 3,
+                                                        aes( x = 1 ,y = ypos_ligne/100, label = paste0(pourcentage,"%")), color = "black")+
+  theme(axis.ticks.x = element_blank(),
+        axis.text.x = element_blank())+
+  labs(x = "", y="") + facet_wrap("unit")
+
+```
+
+```{r}
+
+all_the_data3 <- all_the_data %>% dplyr::mutate(continent = ifelse(area_competence != "continent", "ocean", "continent"))
+
+```
+
+
+```{r}
+final <- all_the_data3 %>% dplyr::group_by(continent, unit) %>% dplyr::summarise(value = sum(value))
+
+
+en_nombre_continent <- pull(final %>% dplyr::filter(unit == "Number of fish") %>% dplyr::filter(continent == "continent"))
+en_nombre_ocean <- pull(final %>% dplyr::filter(unit == "Number of fish") %>% dplyr::filter(continent == "ocean"))
+en_tonne_continent <- pull(final %>% dplyr::filter(unit == "Tons") %>% dplyr::filter(continent == "continent"))
+en_tonne_ocean <- pull(final %>% dplyr::filter(unit == "Tons") %>% dplyr::filter(continent == "ocean"))
+
+perte_en_nombre <- (en_nombre_continent / (en_nombre_ocean+en_nombre_continent))*100
+perte_en_tonne <- (en_tonne_continent/ (en_tonne_continent+en_tonne_ocean))*100
+
+
+```
+
+The data displayed on land represents `r perte_en_nombre` % in number and `r perte_en_tonne` % in tons of the total of declared data. 

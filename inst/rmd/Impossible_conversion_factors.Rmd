@@ -1,0 +1,106 @@
+---
+title: "Impossible_conversion_factors"
+author: "BastienG"
+date: "2023-10-12"
+output: html_document
+---
+
+
+# Impossible conversion factors
+
+We analyse here the data with impossible conversion factors, meaning being superior to the maximum catch reported for the fish of this species.
+
+```{r}
+rawdata <- data_init
+```
+
+
+A total of `r nrow(conversion_factor_level0)` values of conversion factors are calculated from the data provided, corresponding to combinations of species, gear, fishing fleet, statistical square, time (in month-year). Among them, `r percent_outside` (i.e., `r nrow(outside_limit_conv_factor)` occurrences) were found to be higher than the maximal weight recorded for the species concerned (@Katsuwon47:online, @Thunnust30:online, @Thunnusa63:online, @Thunnusa72:online, @Thunnuso14:online) (\@ref(tab:maxconversionfactor))
+
+<!-- Most of these impossible conversion factors are provided by ICCAT (\@ref(fig:piesourceauth)), 26% results of IOTC declaration. The IOTC captures corresponding are joined in annex (188 declarations). This conversion factors concern mostly Albacore, Bigeye tuna and yellowfin. (\@ref(fig:piespecies)) -->
+
+
+
+```{r doubledeclarisonformatting}
+
+strata_nomt <- data_init %>% filter(unit %in% c("NOMT"))
+strata_mtno <- data_init %>% filter(unit %in% c("MTNO"))
+
+
+
+anti_join_nomt <- anti_join(strata_nomt  %>% select(-c(unit)), strata_mtno %>% select(-c(unit)), by = c("fishingfleet", "gear", "time_start", "time_end",
+"geographic_identifier", "schooltype", "species", "catchtype",
+"source_authority")) %>% mutate(unit = "NOMT") #these are the stratas provided in nomt without equivalent in mtno
+
+anti_join_mtno <- anti_join(strata_mtno %>% select(-c(unit)), strata_nomt %>% select(-c(unit)), by = c("fishingfleet", "gear", "time_start", "time_end",
+"geographic_identifier", "schooltype", "species", "catchtype",
+"source_authority"))%>% mutate(unit = "MTNO") %>% distinct() #these are the stratas provided in nomt without equivalent in mtno
+
+```
+
+
+```{r doublecomparisoncalculs}
+
+alone_unity <- rbind(anti_join_nomt, anti_join_mtno)
+
+double_unity <- rbind(strata_nomt, strata_mtno)
+
+
+percent_nomt_alone <- 100*nrow(anti_join_nomt)/nrow(double_unity%>% select(-c(value,unit)) %>% distinct())
+percent_nomt_alone_capt <-100*sum(anti_join_nomt$value)/sum(double_unity$value)
+percent_mtno_alone <- 100*nrow(anti_join_mtno)/nrow(double_unity%>% select(-c(value,unit)) %>% distinct())
+percent_mtno_alone_capt <-100*sum(anti_join_mtno$value)/sum(double_unity$value)
+
+
+distinct_species <- rbind(double_unity %>% select(species, "tRFMOs" = source_authority) %>% group_by(tRFMOs)%>%summarise( "Number of different species"= n_distinct(species) ) %>% distinct(), c("Total", length(unique(double_unity$species))))
+
+
+
+```
+
+
+
+```{r doubleunittable}
+
+qflextable2(distinct_species, captionn="Table of species concerned by double unit declarations")
+
+```
+
+```{r maxconversionfactor}
+
+qflextable2(max_conversion_factor %>% mutate(max_weight= 1000*max_weight)%>%  select(species, "Maximum recorded weight (kg)"= max_weight)%>% filter(species %in% c("BFT", "SKJ", "ALB", "BET", "YFT")), captionn = "Maximum recorded captures for the specie")
+
+```
+
+
+
+
+```{r}
+
+titre_1 <- "Impossible conversion factors"
+absurd_conversion_factor_tons <- outside_limit_conv_factor  %>% filter(conform != "INSIDE") %>% dplyr::rename(value=MT) %>% dplyr::mutate(unit="MTNO") %>% mutate(value=as.numeric(value))
+
+strange <- studycatchesird::pie_chart_2(fishingfleet,first=absurd_conversion_factor_tons %>% select(colnames(rawdata)),second=rawdata %>% filter(unit%in%c("MTNO")), titre_1 = "Impossible conversion factors", titre_2 = "Mapped data")
+
+```
+
+\clearpage
+
+We compare the data of this impossible conversion factors, with the total data to see any pattern.
+
+```{r echo=FALSE,  fig.cap='Repartition of fishingfleet for impossible conversion factors'}
+
+strange
+
+```
+
+
+
+
+<!-- ```{r echo=FALSE, fig.cap='Comparison of the repartition fishingfleet for impossible conversion factors and original data'} -->
+
+<!-- plot_grid(strange, original) -->
+
+<!-- ``` -->
+
+

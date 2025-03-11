@@ -1,0 +1,41 @@
+---
+title: "Outside juridiction"
+author: "BastienG"
+date: "2023-10-12"
+output: html_document
+---
+
+
+# Outside juridiction area
+
+The data displayed by tRFMOs is supposed to concern the spatial area of the juridiction of the tRFMO. However, some data is displayed outside.
+
+```{r}
+
+mislocated <- readRDS("outside_juridiction.rds")
+child_env_last <- list2env(as.list(child_env_base), parent = child_env_base)
+child_env_last$parameter_init <- mislocated
+
+child_env_last$parameter_titre_dataset_1 <- "outside_juridiction_area"
+
+new_path <- file.path(fig.path, "outside_juridiction")
+dir.create(new_path, recursive = TRUE)
+child_env_last$fig.path = new_path
+
+comparison <- system.file("rmd", "comparison.Rmd", package = "CWP.dataset")
+res2 <- knitr::knit_child(comparison, envir = child_env_last, quiet = TRUE)
+
+
+rm(child_env_last)
+gc()
+
+```
+
+```{r echo=FALSE, results='asis'}
+
+cat(res2, sep =  "\\clearpage")
+
+```
+
+
+

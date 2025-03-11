@@ -1,0 +1,34 @@
+---
+title: "Mapping_recap"
+author: "BastienG"
+date: "2023-10-13"
+output: html_document
+---
+
+# Mapping codelist
+
+```{r}
+
+source("https://github.com/firms-gta/geoflow-tunaatlas/Analysis_markdown/Functions_markdown.R")
+
+fig.path = paste0(getwd(), "/Recap_mapping")
+
+```
+
+
+```{r}
+
+t <- df_mapping_final_this_dimension %>% dplyr::select(-trg_codingsystem)%>%dplyr::group_by(across(everything())) %>%  dplyr::mutate(src_codingsystem = unlist(str_split(src_codingsystem, "_"))[1]) %>% ungroup() %>% dplyr::mutate(src_code = as.character(src_code)) %>% dplyr::ungroup() %>%  dplyr::group_by(source_authority) %>%  dplyr::mutate(row = row_number()) %>% dplyr::filter(src_code != trg_code)
+
+i <-pivot_wider(t %>% dplyr::group_by(source_authority) , names_from = source_authority, names_prefix = "Ancient name for ", values_from = "src_code")  %>% dplyr::rename("New code" = trg_code) %>% dplyr::rename(Dimension = src_codingsystem)%>%
+    dplyr::relocate(Dimension) %>% dplyr::select(-row)
+
+ster <- i %>% dplyr::group_by(Dimension, `New code`) %>% dplyr::summarise_at(vars(-group_cols()),.funs = function(x){toString(x[!duplicated(x)])}) %>% mutate_all(.funs = function(x){gsub(",$", "",gsub(c("NA", ",NA", " NA"), "", gsub("  ","",gsub("NA,", "", x))))})
+
+```
+
+```{r echo=FALSE, results='asis'}
+
+qflextable2(ster, captionn = "Replacement code during the mapping codelist treatment", grouped_data = c("Dimension"))
+
+```
