@@ -1,4 +1,5 @@
-# Workflow dérivé de https://github.com/r-lib/actions/tree/v2/examples
+# Workflow GitHub Actions pour R-CMD-check
+
 on:
   push:
     branches: [main, master]
@@ -48,4 +49,4 @@ jobs:
         with:
           upload-snapshots: true
           build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
-          error-on: 'error'  # ✅ Ignore warnings et notes, ne bloque que sur erreurs critiques
+          warnings_are_errors: false  # ✅ Ignore les warnings et notes
