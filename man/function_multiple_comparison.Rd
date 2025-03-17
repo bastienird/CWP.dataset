@@ -2,7 +2,7 @@
 % Please edit documentation in R/function_multiple_comparison.R
 \name{function_multiple_comparison}
 \alias{function_multiple_comparison}
-\title{function_multiple_comparison}
+\title{Perform Multiple Comparisons Between Datasets}
 \usage{
 function_multiple_comparison(
   counting,
@@ -16,30 +16,45 @@ function_multiple_comparison(
 )
 }
 \arguments{
-\item{main_dir}{Character. The main directory containing the entities. (jobs/entities)}
+\item{counting}{Integer. The step number in the comparison process.}
 
-\item{connectionDB}{Object. The database connection.}
+\item{parameter_short}{Character. A short version of the parameter name.}
 
-\item{config}{List. Configuration list containing metadata and options for processing.}
+\item{sub_list_dir}{Character vector. A list of directories containing data to be compared.}
 
-\item{source_authoritylist}{Vector. Vector of source_authority to filter on, "all" being all of them.}
+\item{parameters_child_global}{List. A list of global child parameters for filtering and resolution settings.}
 
-\item{size}{Character string. La taille peut prendre les valeurs suivantes :
-\itemize{
-\item \code{"long"} (par défaut) : Long with coverage.
-\item \code{"middle"} : Long without coverage
-\item \code{"short"} : Only first characteristics, first differences and main table of steps
-}}
+\item{fig.path}{Character. Path to save comparison figures.}
+
+\item{coverage}{Logical. Whether to include coverage analysis in the comparison (default: \code{FALSE}).}
+
+\item{shapefile.fix}{Object. A fixed shapefile for spatial adjustments.}
+
+\item{continent}{Object. A continent shape for plotting worldmaps.}
 }
 \value{
-NULL. The function has side effects, such as writing files and rendering reports.
+A list containing comparison results, metadata, and visualization elements. If the datasets are identical, it returns \code{NA}.
 }
 \description{
-This function performs various summarizing steps on data related to species and gear types, retrieving data from a database,
-processing it, and rendering output reports.
+This function performs various summarizing steps on datasets related to species and gear types.
+It retrieves data from a database, processes it, and generates comparison reports.
+}
+\details{
+The function compares datasets between two consecutive steps, applying data filtering and analysis.
+It generates structured output reports stored in \code{fig.path}.
 }
 \examples{
 \dontrun{
-function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, parameters_child_global, fig.path, coverage = FALSE, shapefile.fix, continent)
+result <- function_multiple_comparison(
+  counting = 1,
+  parameter_short = "gear_analysis",
+  sub_list_dir = c("step1", "step2"),
+  parameters_child_global = list(parameter_resolution_filter = 1, parameter_filtering = "strict"),
+  fig.path = "output/",
+  coverage = FALSE,
+  shapefile.fix = NULL,
+  continent = "Europe"
+)
 }
+
 }

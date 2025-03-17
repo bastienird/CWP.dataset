@@ -164,7 +164,6 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   readr::write_csv(all_recap_mapping_data, file.path(path, "all_recap_mapping.csv"))
 
   # PART 3: Generate a summary CSV for all entity
-  `%notin%` <- Negate(`%in%`)
   all_data <- list()
   for (entity_dir in entity_dirs) {
     entity_name <- basename(entity_dir)

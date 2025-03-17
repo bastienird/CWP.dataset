@@ -1,4 +1,4 @@
-# Workflow GitHub Actions pour R-CMD-check
+# Workflow dérivé de https://github.com/r-lib/actions/tree/v2/examples
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
 
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    name: R ${{ matrix.config.r }} | ${{ matrix.config.os }}
 
     strategy:
       fail-fast: false
@@ -21,9 +21,9 @@ jobs:
         config:
           - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
-          - {os: ubuntu-latest,   r: 'release'}
-          - {os: ubuntu-latest,   r: 'oldrel-1'}
+          - {os: ubuntu-latest,  r: 'devel', http-user-agent: 'release'}
+          - {os: ubuntu-latest,  r: 'release'}
+          - {os: ubuntu-latest,  r: 'oldrel-1'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -32,6 +32,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install system dependencies (Linux only)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y qpdf make libsodium-dev libicu-dev libxml2-dev libssl-dev pandoc librdf0-dev libcurl4-gnutls-dev libpq-dev zlib1g-dev libnetcdf-dev libgdal-dev gdal-bin libgeos-dev libproj-dev libsqlite3-dev libudunits2-dev
 
       - name: Set up Pandoc
         uses: r-lib/actions/setup-pandoc@v2
@@ -43,21 +47,15 @@ jobs:
           http-user-agent: ${{ matrix.config.http-user-agent }}
           use-public-rspm: true
 
-      - name: Install system dependencies on Linux
-        if: runner.os == 'Linux'
-        run: sudo apt-get install -y qpdf make libsodium-dev libicu-dev libxml2-dev \
-            libssl-dev pandoc librdf0-dev libnode-dev libcurl4-gnutls-dev \
-            libmysqlclient-dev libpq-dev zlib1g-dev make libjq-dev \
-            libsecret-1-dev libnetcdf-dev libpng-dev libgdal-dev gdal-bin \
-            libgeos-dev libproj-dev libsqlite3-dev libudunits2-dev
-
       - name: Install R dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
 
-      - name: Run R CMD check (ignore warnings)
-        run: |
-          R CMD build .
-          R CMD check --no-manual --compact-vignettes=gs+qpdf *.tar.gz || true
+      - name: Check R package
+        uses: r-lib/actions/check-r-package@v2
+        with:
+          upload-snapshots: true
+          build_args: 'c("--no-manual", "--compact-vignettes=gs+qpdf")'
+          error-on: 'warning'

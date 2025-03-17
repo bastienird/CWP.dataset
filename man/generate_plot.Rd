@@ -4,7 +4,16 @@
 \alias{generate_plot}
 \title{Documentation to do}
 \usage{
-generate_plot(data, title, dimensioninside, topninside, dataset)
+generate_plot(data, title, dimensioninside, topninside)
+}
+\arguments{
+\item{data}{A data frame representing the first dataset cleaned}
+
+\item{title}{Title for the plot}
+
+\item{dimensioninside}{The dimension for the plot}
+
+\item{topninside}{An integer for the number of top categories to display.}
 }
 \description{
 Documentation to do

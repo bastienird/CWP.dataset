@@ -13,8 +13,7 @@ spatial_coverage_analysis(
   plotting_type,
   continent,
   print_map = TRUE,
-  GrouppedGRIDTYPE,
-  savingimages
+  GrouppedGRIDTYPE
 )
 }
 \arguments{
@@ -35,10 +34,6 @@ spatial_coverage_analysis(
 \item{print_map}{Logical indicating whether to print the map.}
 
 \item{GrouppedGRIDTYPE}{Data frame containing grouped GRIDTYPE data.}
-
-\item{units}{A vector of spatial units to analyze.}
-
-\item{fig.path}{Path to save the figures.}
 }
 \value{
 A list containing the spatial coverage maps and related information.

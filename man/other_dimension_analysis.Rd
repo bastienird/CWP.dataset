@@ -29,6 +29,8 @@ other_dimension_analysis(
 \item{unique_analyse}{Logical indicating whether the analysis is unique.}
 
 \item{fig.path}{Path to save the figures.}
+
+\item{topn}{An integer for the number of top categories to display.}
 }
 \value{
 A list containing the pie charts and bar charts for each dimension.

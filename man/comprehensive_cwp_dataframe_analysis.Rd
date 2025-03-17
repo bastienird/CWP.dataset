@@ -2,7 +2,7 @@
 % Please edit documentation in R/comprehensive_cwp_dataframe_analysis.R
 \name{comprehensive_cwp_dataframe_analysis}
 \alias{comprehensive_cwp_dataframe_analysis}
-\title{This function performs a comprehensive analysis of initial and final datasets, including summary of differences, grouping differences, dimension comparisons, temporal and spatial analyses.}
+\title{Comprehensive Analysis of Initial and Final Datasets}
 \usage{
 comprehensive_cwp_dataframe_analysis(
   parameter_init,
@@ -35,51 +35,72 @@ comprehensive_cwp_dataframe_analysis(
 )
 }
 \arguments{
-\item{fig.path}{Path to save figures.}
+\item{parameter_init}{Data frame. The initial dataset.}
 
-\item{parameter_fact}{Fact parameter, default is "#catch".}
+\item{parameter_final}{Data frame. The final dataset.}
 
-\item{parameter_short}{Whether to use short parameter names, default is FALSE.}
+\item{fig.path}{Character. Path to save output figures. Default is the working directory.}
 
-\item{parameter_columns_to_keep}{Columns to keep in the comparison.}
+\item{parameter_fact}{Character. Fact parameter, default is \code{"catch"}.}
 
-\item{parameter_diff_value_or_percent}{Difference value or percent, default is "Difference (in \%)".}
+\item{parameter_short}{Logical. Whether to use short parameter names. Default is \code{FALSE}.}
 
-\item{parameter_UNK_for_not_standards_unit}{Whether to use UNK for non-standard units, default is TRUE.}
+\item{parameter_columns_to_keep}{Character vector. Columns to retain for comparison.}
 
-\item{parameter_filtering}{Filtering parameters.}
+\item{parameter_diff_value_or_percent}{Character. Difference calculation method: \code{"Difference (in \%)"} (default) or \code{"Difference in value"}.}
 
-\item{parameter_time_dimension}{Time dimension parameters, default is c("time_start").}
+\item{parameter_UNK_for_not_standards_unit}{Logical. Whether to use \code{"UNK"} for non-standard measurement units. Default is \code{TRUE}.}
 
-\item{parameter_geographical_dimension}{Geographical dimension parameter, default is "geographic_identifier".}
+\item{parameter_filtering}{List. Filtering parameters for species and fishing fleet. Default is \code{list(species = NULL, fishing_fleet = NULL)}.}
 
-\item{parameter_geographical_dimension_groupping}{Geographical dimension grouping parameter, default is "GRIDTYPE".}
+\item{parameter_time_dimension}{Character vector. Time-related columns to include. Default is \code{c("time_start")}.}
 
-\item{parameter_colnames_to_keep}{Column names to keep in the parameter.}
+\item{parameter_geographical_dimension}{Character. Column name for geographic identifiers. Default is \code{"geographic_identifier"}.}
 
-\item{outputonly}{Whether to output only.}
+\item{parameter_geographical_dimension_groupping}{Character. Grouping column for geographical dimensions. Default is \code{"GRIDTYPE"}.}
 
-\item{print_map}{Whether to print the map, default is FALSE.}
+\item{parameter_colnames_to_keep}{Character or \code{"all"}. Column names to retain. Default is \code{"all"}.}
 
-\item{coverage}{Whether to analysis the time, geo and other dimension (if no analysing only summary)}
+\item{outputonly}{Logical. Whether to return only the analysis output without visualization. Default is \code{FALSE}.}
 
-\item{parameter_resolution_filter}{Resolution filter parameter.}
+\item{plotting_type}{Character. Type of visualization (\code{"view"} by default).}
 
-\item{parameter_titre_dataset_1}{Title for dataset 1.}
+\item{print_map}{Logical. Whether to print the map visualization. Default is \code{TRUE}.}
 
-\item{parameter_titre_dataset_2}{Title for dataset 2.}
+\item{shapefile_fix}{Object. Optional shapefile for spatial analysis. Default is \code{NULL}.}
 
-\item{unique_analyse}{Whether the analysis is unique.}
+\item{continent}{Character. Optional filter for a specific continent. Default is \code{NULL}.}
 
-\item{topnumber}{Number of first caracteristics of each dimensions to display without groupping}
+\item{coverage}{Logical. Whether to analyze time, geographic, and other dimensions. If \code{FALSE}, only a summary is performed. Default is \code{TRUE}.}
 
-\item{init}{Initial dataset.}
+\item{parameter_resolution_filter}{Object. Resolution filtering parameter. Default is \code{NULL}.}
 
-\item{final}{Final dataset.}
+\item{parameter_titre_dataset_1}{Character. Title for dataset 1 in outputs. Default is \code{"Dataset 1"}.}
+
+\item{parameter_titre_dataset_2}{Character. Title for dataset 2 in outputs. Default is \code{"Dataset 2"}.}
+
+\item{unique_analyse}{Logical. Whether the analysis is unique. Default is \code{FALSE}.}
+
+\item{removemap}{Logical. Whether to remove the map from outputs. Default is \code{FALSE}.}
+
+\item{topnumber}{Integer. Number of top characteristics to display without grouping. Default is \code{6}.}
 }
 \value{
-A list containing results of various analyses.
+A list containing:
+\itemize{
+\item \strong{Summary of dataset differences}
+\item \strong{Grouped differences}
+\item \strong{Comparisons across time, space, and other dimensions}
+\item \strong{Optional visualizations}
+}
 }
 \description{
-This function performs a comprehensive analysis of initial and final datasets, including summary of differences, grouping differences, dimension comparisons, temporal and spatial analyses.
+This function performs a detailed comparative analysis between initial and final datasets.
+It includes:
+\itemize{
+\item A summary of differences
+\item Grouping differences
+\item Dimension comparisons (temporal, spatial, and categorical)
+\item Visualization options
+}
 }

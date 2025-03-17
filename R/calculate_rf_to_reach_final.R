@@ -6,8 +6,8 @@
 #' as nominal data should generally exceed georeferenced data; here, both conversion and raising occur. However, if the conversion factors
 #' are very low, an inconsistency between the datasets is likely.
 #'
-#' @param nominal_df A dataframe containing nominal data with columns for measurement units and measurement values.
-#' @param lvl0_conv_df A dataframe containing georeferenced data with both "number" and "tons" units, from which conversion factors will be calculated.
+#' @param df_to_reach A dataframe containing nominal data with columns for measurement units and measurement values.
+#' @param df_to_convert A dataframe containing georeferenced data with both "number" and "tons" units, from which conversion factors will be calculated.
 #' @param strata_cols A character vector of column names used for stratifying the data (e.g., `species`, `gear_type`, `fishing_fleet`, `year`).
 #'
 #' @return A dataframe with calculated raising factors for each stratum where conversion is applicable. If conversion factors are too high,

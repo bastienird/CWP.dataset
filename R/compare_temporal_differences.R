@@ -9,7 +9,6 @@
 #' @param titre_1 Title for the first dataset.
 #' @param titre_2 Title for the second dataset.
 #' @param unique_analyse Logical value indicating whether the analysis is unique.
-#' @param fig.path Path to save the figures.
 #'
 #' @return A list containing ggplot objects for visualizing the temporal differences.
 #' @examples
@@ -25,10 +24,10 @@ compare_temporal_differences <- function(parameter_time_dimension, init, final, 
   for (i in parameter_time_dimension) {
     temporaire <- fonction_groupement(i, init, final)
     assign(paste0("Groupped", i), temporaire)
-    
+
     Groupped_all_time <- rbind(Groupped_all_time, temporaire)
   }
-  
+
   timediffplot <- lapply(parameter_time_dimension, function(filtering_unit, dataframe) {
     ggplot(dataframe %>% dplyr::filter(Dimension == filtering_unit) %>% dplyr::mutate(Time = as.Date(Precision))) +
       aes(x = Time, y = `Difference (in %)`) +
@@ -39,8 +38,8 @@ compare_temporal_differences <- function(parameter_time_dimension, init, final, 
       labs(x = filtering_unit) +
       facet_grid("measurement_unit", scales = "free_y")
   }, dataframe = Groupped_all_time)
-  
+
   titles <- paste0("Difference in percent of value for the dimension ", parameter_time_dimension, " for ", titre_1, " and ", titre_2, " dataset ")
-  
+
   return(list(plots = timediffplot, titles = titles ))
 }

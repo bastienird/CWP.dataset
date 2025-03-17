@@ -25,8 +25,6 @@ compare_temporal_differences(
 \item{titre_2}{Title for the second dataset.}
 
 \item{unique_analyse}{Logical value indicating whether the analysis is unique.}
-
-\item{fig.path}{Path to save the figures.}
 }
 \value{
 A list containing ggplot objects for visualizing the temporal differences.

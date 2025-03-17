@@ -1,28 +1,46 @@
-#' This function performs a comprehensive analysis of initial and final datasets, including summary of differences, grouping differences, dimension comparisons, temporal and spatial analyses.
+#' Comprehensive Analysis of Initial and Final Datasets
 #'
-#' @param init Initial dataset.
-#' @param final Final dataset.
-#' @param fig.path Path to save figures.
-#' @param parameter_fact Fact parameter, default is "#catch".
-#' @param parameter_short Whether to use short parameter names, default is FALSE.
-#' @param parameter_columns_to_keep Columns to keep in the comparison.
-#' @param parameter_diff_value_or_percent Difference value or percent, default is "Difference (in %)".
-#' @param parameter_UNK_for_not_standards_unit Whether to use UNK for non-standard units, default is TRUE.
-#' @param parameter_filtering Filtering parameters.
-#' @param parameter_time_dimension Time dimension parameters, default is c("time_start").
-#' @param parameter_geographical_dimension Geographical dimension parameter, default is "geographic_identifier".
-#' @param parameter_geographical_dimension_groupping Geographical dimension grouping parameter, default is "GRIDTYPE".
-#' @param parameter_colnames_to_keep Column names to keep in the parameter.
-#' @param outputonly Whether to output only.
-#' @param print_map Whether to print the map, default is FALSE.
-#' @param parameter_resolution_filter Resolution filter parameter.
-#' @param parameter_titre_dataset_1 Title for dataset 1.
-#' @param parameter_titre_dataset_2 Title for dataset 2.
-#' @param unique_analyse Whether the analysis is unique.
-#' @param coverage Whether to analysis the time, geo and other dimension (if no analysing only summary)
-#' @param topnumber Number of first caracteristics of each dimensions to display without groupping
-#' @return A list containing results of various analyses.
+#' This function performs a detailed comparative analysis between initial and final datasets.
+#' It includes:
+#' - A summary of differences
+#' - Grouping differences
+#' - Dimension comparisons (temporal, spatial, and categorical)
+#' - Visualization options
+#'
+#' @param parameter_init Data frame. The initial dataset.
+#' @param parameter_final Data frame. The final dataset.
+#' @param fig.path Character. Path to save output figures. Default is the working directory.
+#' @param parameter_fact Character. Fact parameter, default is `"catch"`.
+#' @param parameter_short Logical. Whether to use short parameter names. Default is `FALSE`.
+#' @param parameter_columns_to_keep Character vector. Columns to retain for comparison.
+#' @param parameter_diff_value_or_percent Character. Difference calculation method: `"Difference (in %)"` (default) or `"Difference in value"`.
+#' @param parameter_UNK_for_not_standards_unit Logical. Whether to use `"UNK"` for non-standard measurement units. Default is `TRUE`.
+#' @param parameter_filtering List. Filtering parameters for species and fishing fleet. Default is `list(species = NULL, fishing_fleet = NULL)`.
+#' @param parameter_time_dimension Character vector. Time-related columns to include. Default is `c("time_start")`.
+#' @param parameter_geographical_dimension Character. Column name for geographic identifiers. Default is `"geographic_identifier"`.
+#' @param parameter_geographical_dimension_groupping Character. Grouping column for geographical dimensions. Default is `"GRIDTYPE"`.
+#' @param parameter_colnames_to_keep Character or `"all"`. Column names to retain. Default is `"all"`.
+#' @param outputonly Logical. Whether to return only the analysis output without visualization. Default is `FALSE`.
+#' @param plotting_type Character. Type of visualization (`"view"` by default).
+#' @param print_map Logical. Whether to print the map visualization. Default is `TRUE`.
+#' @param shapefile_fix Object. Optional shapefile for spatial analysis. Default is `NULL`.
+#' @param continent Character. Optional filter for a specific continent. Default is `NULL`.
+#' @param coverage Logical. Whether to analyze time, geographic, and other dimensions. If `FALSE`, only a summary is performed. Default is `TRUE`.
+#' @param parameter_resolution_filter Object. Resolution filtering parameter. Default is `NULL`.
+#' @param parameter_titre_dataset_1 Character. Title for dataset 1 in outputs. Default is `"Dataset 1"`.
+#' @param parameter_titre_dataset_2 Character. Title for dataset 2 in outputs. Default is `"Dataset 2"`.
+#' @param unique_analyse Logical. Whether the analysis is unique. Default is `FALSE`.
+#' @param removemap Logical. Whether to remove the map from outputs. Default is `FALSE`.
+#' @param topnumber Integer. Number of top characteristics to display without grouping. Default is `6`.
+#'
+#' @return A list containing:
+#' - **Summary of dataset differences**
+#' - **Grouped differences**
+#' - **Comparisons across time, space, and other dimensions**
+#' - **Optional visualizations**
+#'
 #' @export
+#'
 #' @import ggplot2
 #' @import data.table
 #' @import aplot

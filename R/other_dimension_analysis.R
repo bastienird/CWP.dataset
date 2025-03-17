@@ -10,6 +10,7 @@
 #' @param titre_2 Title for the second dataset.
 #' @param unique_analyse Logical indicating whether the analysis is unique.
 #' @param fig.path Path to save the figures.
+#' @param topn An integer for the number of top categories to display.
 #'
 #' @return A list containing the pie charts and bar charts for each dimension.
 #' @examples
@@ -29,7 +30,7 @@ other_dimension_analysis <- function(Other_dimensions, init, final, titre_1, tit
   } else {
     figures <- lapply(Other_dimensions, FUN = pie_chart_2_default, first = init, topn = topn, title_yes_no = FALSE, titre_1 = titre_1)
   }
-  
+
   dimension_title_subfigures <- gsub("_", ".", paste0("Distribution in value for the dimension: ", Other_dimensions))
 
   if (!unique_analyse) {
@@ -39,7 +40,7 @@ other_dimension_analysis <- function(Other_dimensions, init, final, titre_1, tit
     barplots <- NULL #to fix
     # barplots <- lapply(Other_dimensions, FUN = bar_plot_default, first = init, topn = topn, titre_1 = titre_1, titre_2 = NULL)
   }
-  
+
   return(list(
     figures = figures,
     dimension_title_subfigures = dimension_title_subfigures,

@@ -24,12 +24,18 @@ summarising_step(
 
 \item{source_authoritylist}{Vector. Vector of source_authority to filter on, "all" being all of them.}
 
-\item{size}{Character string. La taille peut prendre les valeurs suivantes :
+\item{sizepdf}{Character string. La taille peut prendre les valeurs suivantes :
 \itemize{
 \item \code{"long"} (par défaut) : Long with coverage.
 \item \code{"middle"} : Long without coverage
 \item \code{"short"} : Only first characteristics, first differences and main table of steps
 }}
+
+\item{savestep}{Logical TRUE/FALSE, should the .qs result of this be saved ?}
+
+\item{nameoutput}{Character, name of the .qs if saved}
+
+\item{usesave}{Logical Should we use the nameoutput .qs instead of rerunning everything ?}
 }
 \value{
 NULL. The function has side effects, such as writing files and rendering reports.

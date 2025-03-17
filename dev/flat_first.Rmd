@@ -177,7 +177,7 @@ filtering_function <- function(dataframe_to_filter, parameter_filtering) {
 ```
 
 
-```{r last_path_reduced}
+```{r function-last_path_reduced}
 #' Reduce Last Path for Georeferenced Datasets
 #'
 #' @description This function modifies the last path by removing specific substrings for clarity.
@@ -190,6 +190,10 @@ last_path_reduced <- function(x) {
 
 ```
 
+```{r test-last_path_reduced}
+# No test
+
+```
 # Functions for reporting 
 
 ```{r function-knitting_plots_subfigures}
@@ -258,7 +262,7 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
 ```
 
 ```{r test-knitting_plots_subfigures}
-
+# No test
 ```
 
 # render_subfigures
@@ -350,7 +354,7 @@ render_subfigures <- function(plots_list, titles_list, general_title) {
 
 
 ```{r test-render_subfigures}
-
+# Pas de test pour cette fonction
 
 ```
 
@@ -416,7 +420,7 @@ bar_plot_default <- function(first,
 ```
 
 ```{r test-bar_plot_default}
-
+# Pas de test pour cette fonction
 ```
 
 ## generate_plot
@@ -426,8 +430,12 @@ bar_plot_default <- function(first,
 #' @name generate_plot
 #' @rdname generate_plot
 #' @description Documentation to do 
+#' @param data A data frame representing the first dataset cleaned
+#' @param title Title for the plot
+#' @param dimensioninside The dimension for the plot
+#' @param topninside An integer for the number of top categories to display.
 #' @export
-generate_plot <- function(data, title, dimensioninside, topninside, dataset) {
+generate_plot <- function(data, title, dimensioninside, topninside) {
 
     data_summary <- data %>%
       dplyr::group_by(dplyr::across(c(dimensioninside,   "measurement_unit", dataset))) %>% dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE)) %>% dplyr::group_by(measurement_unit, dataset) %>%
@@ -466,7 +474,7 @@ generate_plot <- function(data, title, dimensioninside, topninside, dataset) {
 ```
 
 ```{r test-generate_plot}
-
+# Pas de test pour cette fonction
 ```
 
 ## pie_chart_2_default
@@ -697,7 +705,7 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
 ```
 
 ```{r test-pie_chart_2_default}
-
+# Pas de test pour cette fonction
 ```
 
 ## fonction_empreinte_spatiale
@@ -773,7 +781,7 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
 ```
 
 ```{r test-fonction_empreinte_spatiale}
-
+# Pas de test pour cette fonction
 ```
 
 ## save_image
@@ -811,6 +819,7 @@ save_image <- function(title, plott = last_plot(), folder = NULL, fig.pathinside
 ```
 
 ```{r test-save_image}
+# Pas de test pour cette fonction
 ```
 
 ## cat_title
@@ -955,12 +964,21 @@ qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, col
 ```{r function-Negate}
 #' Negate `%in%` Operator
 #'
-#' @description This operator checks if elements are not present in a given vector.
-
+#' This operator checks if elements are not present in a given vector.
+#'
 #' @param x A vector of elements to check.
 #' @param table A vector to check against.
 #' @return Logical vector indicating if each element of `x` is not in `table`.
-`%notin%` <- Negate(`%in%`)
+#' @export
+#'
+#' @examples
+#' 5 %notin% c(1, 2, 3) # TRUE
+#' "a" %notin% c("b", "c") # TRUE
+#' 2 %notin% c(1, 2, 3) # FALSE
+#'
+`%notin%` <- function(x, table) {
+  !(x %in% table)
+}
 ```
 
 
@@ -986,51 +1004,67 @@ These are only included in the present flat template file, their content will no
 
 
 ```{r function-function_multiple_comparison}
-#' function_multiple_comparison
+#' Perform Multiple Comparisons Between Datasets
 #'
-#' This function performs various summarizing steps on data related to species and gear types, retrieving data from a database, 
-#' processing it, and rendering output reports.
+#' This function performs various summarizing steps on datasets related to species and gear types. 
+#' It retrieves data from a database, processes it, and generates comparison reports.
 #'
-#' @param main_dir Character. The main directory containing the entities. (jobs/entities)
-#' @param connectionDB Object. The database connection.
-#' @param config List. Configuration list containing metadata and options for processing.
-#' @param source_authoritylist Vector. Vector of source_authority to filter on, "all" being all of them.
-#' @return NULL. The function has side effects, such as writing files and rendering reports.
-#' @param size Character string. La taille peut prendre les valeurs suivantes :
-#'   \itemize{
-#'     \item `"long"` (par défaut) : Long with coverage.
-#'     \item `"middle"` : Long without coverage
-#'     \item `"short"` : Only first characteristics, first differences and main table of steps
-#'   }
+#' @param counting Integer. The step number in the comparison process.
+#' @param parameter_short Character. A short version of the parameter name.
+#' @param sub_list_dir Character vector. A list of directories containing data to be compared.
+#' @param parameters_child_global List. A list of global child parameters for filtering and resolution settings.
+#' @param fig.path Character. Path to save comparison figures.
+#' @param coverage Logical. Whether to include coverage analysis in the comparison (default: `FALSE`).
+#' @param shapefile.fix Object. A fixed shapefile for spatial adjustments.
+#' @param continent Object. A continent shape for plotting worldmaps.
+#'
+#' @return A list containing comparison results, metadata, and visualization elements. If the datasets are identical, it returns `NA`.
+#'
+#' @details The function compares datasets between two consecutive steps, applying data filtering and analysis. 
+#' It generates structured output reports stored in `fig.path`.
 #'
 #' @examples
 #' \dontrun{
-#' function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, parameters_child_global, fig.path, coverage = FALSE, shapefile.fix, continent)
+#' result <- function_multiple_comparison(
+#'   counting = 1,
+#'   parameter_short = "gear_analysis",
+#'   sub_list_dir = c("step1", "step2"),
+#'   parameters_child_global = list(parameter_resolution_filter = 1, parameter_filtering = "strict"),
+#'   fig.path = "output/",
+#'   coverage = FALSE,
+#'   shapefile.fix = NULL,
+#'   continent = "Europe"
+#' )
 #' }
+#'
 #' @import dplyr
 #' @import sf
 #' @import futile.logger
+#' @import qs
 #' @export
-function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, parameters_child_global, fig.path, coverage = FALSE, shapefile.fix, continent) {
+function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, 
+                                         parameters_child_global, fig.path, coverage = FALSE, 
+                                         shapefile.fix, continent) {
   gc()
-  step_mapping <- sum(which(sub_list_dir == "Markdown/mapping_codelist"))
-  parameter_init <- paste0(sub_list_dir[counting], "/data.qs")
-  parameter_final <- paste0(sub_list_dir[counting + 1], "/data.qs")
+  
+  parameter_init <- file.path(sub_list_dir[counting], "data.qs")
+  parameter_final <- file.path(sub_list_dir[counting + 1], "data.qs")
   parameter_titre_dataset_1 <- basename(sub_list_dir[counting])
   parameter_titre_dataset_2 <- basename(sub_list_dir[counting + 1])
 
-  new_path <- file.path(fig.path, "Comparison", paste0(basename(sub_list_dir[counting]), "_", basename(sub_list_dir[counting + 1])))
-  dir.create(new_path, recursive = TRUE)
+  new_path <- file.path(fig.path, "Comparison", 
+                        paste0(parameter_titre_dataset_1, "_", parameter_titre_dataset_2))
+  dir.create(new_path, recursive = TRUE, showWarnings = FALSE)
 
-  flog.info(paste("Starting comparison between:", parameter_titre_dataset_1, " and ", parameter_titre_dataset_2, " with coverage being: ", coverage))
+  flog.info("Starting comparison between: %s and %s | Coverage: %s", 
+            parameter_titre_dataset_1, parameter_titre_dataset_2, coverage)
 
-  formals(filtering_function, envir = environment())$parameter_filtering = parameter_filtering
   initfiltered <- filtering_function(qs::qread(parameter_init))
   finalfiltered <- filtering_function(qs::qread(parameter_final))
+
   if (!identical(initfiltered, finalfiltered)) {
-    rm(initfiltered)
-    rm(finalfiltered)
-    flog.info(paste("Datasets are different:", parameter_titre_dataset_1, "and", parameter_titre_dataset_2))
+    rm(initfiltered, finalfiltered)
+    flog.info("Datasets are different: %s vs %s", parameter_titre_dataset_1, parameter_titre_dataset_2)
 
     child_env_result <- comprehensive_cwp_dataframe_analysis(
       parameter_init = parameter_init,
@@ -1052,22 +1086,22 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
       unique_analyse = FALSE
     )
 
-    flog.info(paste("Analysis completed for:", parameter_titre_dataset_1, "vs", parameter_titre_dataset_2))
+    flog.info("Analysis completed for: %s vs %s", parameter_titre_dataset_1, parameter_titre_dataset_2)
 
     child_env_result$step_title_t_f <- TRUE
     child_env_result$step_title <- paste0(" Treatment : ", basename(sub_list_dir[counting + 1]))
     child_env_result$step <- counting
-    child_env_result$parameter_titre_dataset_1 <- basename(sub_list_dir[counting])
-    child_env_result$parameter_titre_dataset_2 <- basename(sub_list_dir[counting + 1])
+    child_env_result$parameter_titre_dataset_1 <- parameter_titre_dataset_1
+    child_env_result$parameter_titre_dataset_2 <- parameter_titre_dataset_2
     child_env_result$child_header <- "##"
 
     gc()
-    flog.info(paste("New result saved to:", new_path))
+    flog.info("New result saved to: %s", new_path)
     return(child_env_result)
   } else {
-    rm(initfiltered)
-    rm(finalfiltered)
-    flog.info(paste("Datasets are identical, skipping comparison for:", parameter_titre_dataset_1, "and", parameter_titre_dataset_2))
+    rm(initfiltered, finalfiltered)
+    flog.info("Datasets are identical, skipping comparison for: %s vs %s", 
+              parameter_titre_dataset_1, parameter_titre_dataset_2)
     return(NA)
   }
 }
@@ -1217,7 +1251,7 @@ fonction_groupement <- function(these_col, init, final) {
 ```
 
 ```{r test-fonction_groupement}
-
+# No test
 ```
 
 #### Function: separate_chunks_and_text

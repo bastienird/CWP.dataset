@@ -3,7 +3,6 @@
 #' This function processes fisheries data (catch or effort), applies filtering, calculates statistics, and generates plots of the results.
 #'
 #' @param sub_list_dir_2 List of directories containing the data files.
-#' @param parameter_fact Character string specifying the type of data ("catch" or "effort").
 #' @param parameter_filtering List of filtering parameters to be passed to the filtering function.
 #'
 #' @return A list containing the processed data frame and the generated plots.

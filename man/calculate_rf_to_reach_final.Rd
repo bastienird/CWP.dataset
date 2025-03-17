@@ -7,11 +7,11 @@
 calculate_rf_to_reach_final(df_to_reach, df_to_convert, strata_cols)
 }
 \arguments{
+\item{df_to_reach}{A dataframe containing nominal data with columns for measurement units and measurement values.}
+
+\item{df_to_convert}{A dataframe containing georeferenced data with both "number" and "tons" units, from which conversion factors will be calculated.}
+
 \item{strata_cols}{A character vector of column names used for stratifying the data (e.g., \code{species}, \code{gear_type}, \code{fishing_fleet}, \code{year}).}
-
-\item{nominal_df}{A dataframe containing nominal data with columns for measurement units and measurement values.}
-
-\item{lvl0_conv_df}{A dataframe containing georeferenced data with both "number" and "tons" units, from which conversion factors will be calculated.}
 }
 \value{
 A dataframe with calculated raising factors for each stratum where conversion is applicable. If conversion factors are too high,

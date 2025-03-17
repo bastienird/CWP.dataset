@@ -23,6 +23,8 @@ function_recap_each_step(
 \item{functions}{A character string listing the functions used in the step.}
 
 \item{option_list}{A list of options used in the step.}
+
+\item{entity}{A geoflow entity}
 }
 \value{
 None

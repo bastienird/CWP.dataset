@@ -7,8 +7,11 @@
 #' @param connectionDB Object. The database connection.
 #' @param config List. Configuration list containing metadata and options for processing.
 #' @param source_authoritylist Vector. Vector of source_authority to filter on, "all" being all of them.
+#' @param savestep Logical TRUE/FALSE, should the .qs result of this be saved ?
+#' @param nameoutput Character, name of the .qs if saved
+#' @param usesave Logical Should we use the nameoutput .qs instead of rerunning everything ?
 #' @return NULL. The function has side effects, such as writing files and rendering reports.
-#' @param size Character string. La taille peut prendre les valeurs suivantes :
+#' @param sizepdf Character string. La taille peut prendre les valeurs suivantes :
 #'   \itemize{
 #'     \item `"long"` (par défaut) : Long with coverage.
 #'     \item `"middle"` : Long without coverage

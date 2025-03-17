@@ -10,8 +10,6 @@ process_fisheries_effort_data(sub_list_dir_2, parameter_filtering)
 \item{sub_list_dir_2}{List of directories containing the data files.}
 
 \item{parameter_filtering}{List of filtering parameters to be passed to the filtering function.}
-
-\item{parameter_fact}{Character string specifying the type of data ("catch" or "effort").}
 }
 \value{
 A list containing the processed data frame and the generated plots.
