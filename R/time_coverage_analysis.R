@@ -14,19 +14,19 @@
 #' \dontrun{
 #' time_coverage_analysis(time_dimension_list_groupped, "Year", "Dataset1", "Dataset2", FALSE, "path/to/save")
 #' }
+#' @import dplyr
+#' @import ggplot2
 #' @export
 #' @author
 #' Bastien Grasset, \email{bastien.grasset@@ird.fr}
 time_coverage_analysis <- function(time_dimension_list_groupped, parameter_time_dimension, titre_1, titre_2, unique_analyse = FALSE) {
-  library(dplyr)
-  library(ggplot2)
-  
+
   titles_time <- if (unique_analyse) {
     paste0("Evolutions of values for the dimension ", parameter_time_dimension, " for ", titre_1, " dataset ")
   } else {
     paste0("Evolutions of values for the dimension ", parameter_time_dimension, " for ", titre_1, " and ", titre_2, " dataset ")
   }
-  
+
   time_dimension_list_groupped_diff <- lapply(time_dimension_list_groupped, function(x) {
     x %>% dplyr::mutate(Time = as.Date(Precision)) %>%
       dplyr::rename(`Values dataset 1` = "value_sum_1", `Values dataset 2` = "value_sum_2") %>%
@@ -34,13 +34,13 @@ time_coverage_analysis <- function(time_dimension_list_groupped, parameter_time_
       dplyr::mutate(Dataset = dplyr::case_when(Dataset == "Values dataset 1" ~ titre_1, TRUE ~ titre_2)) %>%
       dplyr::distinct()
   })
-  
+
   if (unique_analyse) {
     time_dimension_list_groupped_diff <- lapply(time_dimension_list_groupped_diff, function(x) {
       x %>% dplyr::filter(Values != 0)
     })
   }
-  
+
   time_dimension_list_groupped_diff_image <- lapply(time_dimension_list_groupped_diff, function(x) {
     ggplot(x) +
       aes(x = Time, y = Values, fill = Dataset, colour = Dataset, group = Dataset) +
@@ -53,6 +53,6 @@ time_coverage_analysis <- function(time_dimension_list_groupped, parameter_time_
       labs(x = unique(x$Dimension), y = "Values") +
       facet_grid("measurement_unit", scales = "free_y")
   })
-  
+
   return(list(titles = titles_time, plots = time_dimension_list_groupped_diff_image))
 }

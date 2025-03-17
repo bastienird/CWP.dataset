@@ -18,12 +18,12 @@
 #' \dontrun{
 #' spatial_coverage_analysis(units, init, final, "Dataset1", "Dataset2", shapefile.fix, "plot", continent, TRUE, GrouppedGRIDTYPE, "path/to/save")
 #' }
+#' @import dplyr
+#' @import knitr
 #' @export
 #' @author
 #' Bastien Grasset, \email{bastien.grasset@@ird.fr}
 spatial_coverage_analysis <- function(init, final, titre_1 = "Dataset 1", titre_2 = "Dataset 2", shapefile.fix, plotting_type, continent,print_map = TRUE, GrouppedGRIDTYPE) {
-  library(dplyr)
-  library(knitr)
   units <- unique(c(unique(init$measurement_unit), unique(final$measurement_unit)))
   map_unit <- lapply(units, FUN = fonction_empreinte_spatiale, initial_dataset = init, final_dataset = final, titre_1 = titre_1, titre_2 = titre_2, shapefile.fix = shapefile.fix, plotting_type = plotting_type, continent = continent)
   titles <- paste0("Distribution in value for the unit: ", units)

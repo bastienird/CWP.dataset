@@ -49,7 +49,6 @@ combined_summary_histogram_function <- function(init, parameter_titre_dataset_1 
   # )
   #
   # # Utiliser patchwork pour combiner le graphique et le tableau
-  # library(patchwork)
   # final_plot <- combined_summary_histogram / table_plot + plot_layout(heights = c(3, 1))
 
   return(combined_summary_histogram)

@@ -27,9 +27,6 @@ render_subfigures <- function(plots_list, titles_list, general_title) {
   
   if (in_knitr) {
     if (output_format == "html") {
-      # Use gridExtra for HTML output
-      library(gridExtra)
-      library(grid)
       
       # Combine plots with captions using gridExtra::arrangeGrob
       plot_grobs <- lapply(seq_along(plots_list), function(i) {

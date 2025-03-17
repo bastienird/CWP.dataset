@@ -35,3 +35,6 @@ of the values over time for each dataset using dygraphs.
 time_coverage_analysis_dygraphs(time_dimension_list_groupped, "Year", "Dataset1", "Dataset2", FALSE)
 }
 }
+\author{
+Bastien Grasset, \email{bastien.grasset@ird.fr}
+}

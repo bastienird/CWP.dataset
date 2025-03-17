@@ -15,11 +15,13 @@
 #' \dontrun{
 #' compare_temporal_differences(c("Year"), init, final, "Dataset1", "Dataset2", FALSE, "path/to/save")
 #' }
+#' @import ggplot2
+#' @import dplyr
+#' @import tmap
 #' @export
+#' @author
+#' Bastien Grasset, \email{bastien.grasset@@ird.fr}
 compare_temporal_differences <- function(parameter_time_dimension, init, final, titre_1, titre_2, unique_analyse = FALSE) {
-  require(ggplot2)
-  require(dplyr)
-  require(tmap)
   Groupped_all_time <- data.frame()
   for (i in parameter_time_dimension) {
     temporaire <- fonction_groupement(i, init, final)
