@@ -38,3 +38,6 @@ and provides visualizations of the differences in percent for each year.
 compare_temporal_differences(c("Year"), init, final, "Dataset1", "Dataset2", FALSE, "path/to/save")
 }
 }
+\author{
+Bastien Grasset, \email{bastien.grasset@ird.fr}
+}

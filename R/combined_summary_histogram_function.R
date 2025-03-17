@@ -1,3 +1,30 @@
+#' Create a Summary Histogram of Measurement Units by Dataset
+#'
+#' This function generates a histogram comparing the distribution of different measurement units
+#' across two datasets. The histogram displays the percentage of each measurement unit type
+#' relative to the total number of different strata in each dataset.
+#'
+#' @param init A data.table containing the initial dataset.
+#' @param parameter_titre_dataset_1 A character string specifying the title for the initial dataset.
+#'                                  Default is `"Init"`.
+#' @param final A data.table containing the final dataset.
+#' @param parameter_titre_dataset_2 A character string specifying the title for the final dataset.
+#'                                  Default is `"Final"`.
+#'
+#' @return A ggplot2 histogram object displaying the percentage distribution of measurement units
+#' across the two datasets.
+#'
+#' @details
+#' - Converts both `init` and `final` datasets to `data.table`.
+#' - Counts the number of unique strata for each measurement unit.
+#' - Computes the percentage of each measurement unit within each dataset.
+#' - Creates a histogram with stacked bars, displaying the percentage of each measurement unit.
+#' - Uses a consistent color palette for different measurement units.
+#'
+#' @import ggplot2
+#' @import data.table
+#' @importFrom scales hue_pal percent_format
+#' @export
 combined_summary_histogram_function <- function(init, parameter_titre_dataset_1 = "Init",
                                                 final, parameter_titre_dataset_2 = "Final") {
   # Convertir en data.table

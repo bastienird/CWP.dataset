@@ -3,11 +3,11 @@
 |-------------------------|
 | output: github_document |
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
+<!-- README.md is generated from README.Rmd. Please edit that file --test>
+&#10;
+&#10;
 # CWP.dataset
-
-<!-- badges: start -->
+&#10;<!-- badges: start -->
 
 [![R-CMD-check](https://github.com/bastienird/CWP.dataset/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bastienird/CWP.dataset/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
@@ -40,10 +40,10 @@ Full documentation website on:
 
 ``` r
 fusen::draw_package_structure()
-#> ── Reading NAMESPACE file ───────────────────────────────────────────
-#> ── flat_additional.Rmd ──────────────────────────────────────────────
-#> ── flat_first.Rmd ───────────────────────────────────────────────────
-#> ── keep ─────────────────────────────────────────────────────────────
+#> ── Reading NAMESPACE file ──────────────────────────────────────────────────────────────
+#> ── flat_additional.Rmd ─────────────────────────────────────────────────────────────────
+#> ── flat_first.Rmd ──────────────────────────────────────────────────────────────────────
+#> ── keep ────────────────────────────────────────────────────────────────────────────────
 #> 
 #> - flat_additional.Rmd
 #>   - flat_title
@@ -132,17 +132,15 @@ fusen::draw_package_structure()
 #>     - R/calculate_rf_to_reach_final.R
 #>       + 👀 calculate_rf_to_reach_final
 #>     - R/combined_summary_histogram_function.R
-#>       + 🙈 combined_summary_histogram_function
+#>       + 👀 combined_summary_histogram_function
 #>     - R/compare_dimension_differences.R
 #>       + 👀 compare_dimension_differences
 #>     - R/compare_georef_nominal.R
 #>       + 👀 compare_georef_nominal
 #>     - R/compare_nominal_georef_corrected.R
-#>       + 🙈 compare_nominal_georef_corrected
+#>       + 👀 compare_nominal_georef_corrected
 #>     - R/compare_strata_differences.R
 #>       + 👀 compare_strata_differences
-#>     - R/compare_temporal_differences_dygraphs.R
-#>       + 🙈 compare_temporal_differences_dygraphs
 #>     - R/compare_temporal_differences.R
 #>       + 👀 compare_temporal_differences
 #>     - R/compnumberstratas.R
@@ -206,7 +204,7 @@ fusen::draw_package_structure()
 #>     - R/tidying_data.R
 #>       + 👀 tidying_data
 #>     - R/tidying_GTA_data_for_comparison.R
-#>       + 🙈 tidying_GTA_data_for_comparison
+#>       + 👀 tidying_GTA_data_for_comparison
 #>     - R/time_coverage_analysis_dygraphs.R
 #>       + 👀 time_coverage_analysis_dygraphs
 #>     - R/time_coverage_analysis.R
