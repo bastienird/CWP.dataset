@@ -12,8 +12,10 @@
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/bar_plot_default.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/calculate_rf_to_reach_final.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/cat_title.html</loc></url>
+<url><loc>https://bastienird.github.io/CWP.dataset/reference/combined_summary_histogram_function.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/compare_dimension_differences.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/compare_georef_nominal.html</loc></url>
+<url><loc>https://bastienird.github.io/CWP.dataset/reference/compare_nominal_georef_corrected.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/compare_strata_differences.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/compare_temporal_differences.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/compnumberstratas.html</loc></url>
@@ -52,6 +54,7 @@
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/spatial_coverage_analysis.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/strata_in_georef_but_not_in_nominal_report_launching.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/summarising_step.html</loc></url>
+<url><loc>https://bastienird.github.io/CWP.dataset/reference/tidying_GTA_data_for_comparison.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/tidying_data.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/time_coverage_analysis.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/time_coverage_analysis_dygraphs.html</loc></url>
