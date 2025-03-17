@@ -20,7 +20,13 @@ knitr::opts_chunk$set(
 [![Codecov test coverage](https://codecov.io/gh/bastienird/CWP.dataset/graph/badge.svg)](https://app.codecov.io/gh/bastienird/CWP.dataset)
 <!-- badges: end -->
 
-The goal of CWP.dataset is to ...
+CWP.dataset is an R package designed for analyzing and comparing fisheries datasets which are compliant with the CWP standards.
+
+It includes functions for:
+✔ Data harmonization and structuring
+✔ Spatiotemporal analyses
+✔ Conversion between different measurement units (e.g., tons ↔ numbers)
+✔ Comparing nominal and georeferenced datasets
 
 ## Installation
 
