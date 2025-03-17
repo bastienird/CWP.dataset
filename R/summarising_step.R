@@ -210,7 +210,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       output_file_name <- paste0(entity_name, "_report.html")
 
       render_env <- list2env(as.list(child_env), parent = child_env)
-      list2env(parameters_child_global, render_env)
+      list2env(parameters_child_global, envir = render_env)
       child_env_last_result <- comprehensive_cwp_dataframe_analysis(
         parameter_init = sub_list_dir_2[length(sub_list_dir_2)],
         parameter_final = NULL,

@@ -155,7 +155,7 @@ recap_all_markdown <- function(action, entity, config, options){
                                     parameter_resolution_filter = parameter_resolution_filter)
 
     child_env_global = new.env()
-    list2env(parameters_child_global, env = child_env_global)
+    list2env(parameters_child_global, envir = child_env_global)
 
 
     # source(knitr::purl(file.path(url_analysis_markdown, "Functions_markdown.Rmd")), child_env_global)
