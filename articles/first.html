@@ -148,16 +148,6 @@ After inflating the template
 <div class="section level2">
 <h2 id="filtering_function">filtering_function<a class="anchor" aria-label="anchor" href="#filtering_function"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#' Reduce Last Path for Georeferenced Datasets</span></span>
-<span><span class="co">#'</span></span>
-<span><span class="co">#' @description This function modifies the last path by removing specific substrings for clarity.</span></span>
-<span><span class="co">#' @param x A character string representing the file path.</span></span>
-<span><span class="co">#' @return A character string representing the modified last path.</span></span>
-<span><span class="co">#' @export</span></span>
-<span><span class="va">last_path_reduced</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">gsub</a></span><span class="op">(</span><span class="st">"georef_dataset"</span>, <span class="st">""</span>, <span class="fu"><a href="../reference/last_path.html">last_path</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="functions-for-reporting">Functions for reporting<a class="anchor" aria-label="anchor" href="#functions-for-reporting"></a>
