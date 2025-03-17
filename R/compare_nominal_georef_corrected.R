@@ -32,7 +32,6 @@
 #'
 #' @examples
 #' \dontrun{
-#' library(data.table)
 #'
 #' nominal <- data.table(
 #'   species = c("YFT", "BET"),

@@ -17,11 +17,11 @@
 #' \dontrun{
 #' other_dimension_analysis(c("Dimension1", "Dimension2"), init, final, "Dataset1", "Dataset2", FALSE, "path/to/save")
 #' }
+#' @import dplyr
 #' @export
 #' @author
 #' Bastien Grasset, \email{bastien.grasset@@ird.fr}
 other_dimension_analysis <- function(Other_dimensions, init, final, titre_1, titre_2, unique_analyse = FALSE, fig.path,topn = 7) {
-  library(dplyr)
   if(nrow(final) == 0){
     unique_analyse <- TRUE
   }
