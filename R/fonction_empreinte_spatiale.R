@@ -50,22 +50,23 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
                                 by = c("geographic_identifier" = "code")))
 
   if (nrow(inner_join_data%>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
-      # inner_join_data <- inner_join_data %>%
-      #   dplyr::mutate(Group = paste0(GRIDTYPE, "_", source))
+    inner_join_data <- inner_join_data %>%
+      dplyr::mutate(facet_group = paste(source, GRIDTYPE, sep = " | "))
 
-    # Création de l'image en fonction du type de tracé
     if (plotting_type == "view") {
       image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
         tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, midpoint = 0,
-                fill.scale = tm_scale_continuous()) +  # Correction du style pour éviter les warnings
+                fill.scale = tm_scale_continuous()) +
         tm_layout(legend.outside = FALSE) +
-        tm_facets(by = c("GRIDTYPE", "source"))
+        tm_facets(by = "facet_group", free.scales = FALSE,
+                  ncol = length(unique(inner_join_data$GRIDTYPE)))  # Nombre de colonnes basé sur GRIDTYPE
     } else {
       image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
         tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, midpoint = 0,
-                fill.scale = tm_scale_continuous()) +  # Correction du style pour éviter les warnings
+                fill.scale = tm_scale_continuous()) +
         tm_layout(legend.outside = FALSE) +
-        tm_facets(by = c("GRIDTYPE", "source")) +
+        tm_facets(by = "facet_group", free.scales = FALSE,
+                  ncol = length(unique(inner_join_data$GRIDTYPE))) +  # Nombre de colonnes basé sur GRIDTYPE
         tm_shape(continent) +
         tm_borders()
     }
