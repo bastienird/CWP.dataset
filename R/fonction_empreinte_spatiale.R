@@ -42,33 +42,33 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
                                fifelse(source == "Final_dataframe", titre_2, "Error"))]
 
   inner_join_data <- geo_data[, .(measurement_value = sum(measurement_value, na.rm = TRUE)),
-                              by = .(geographic_identifier, measurement_unit, source, GRIDTYPE)][
-                                measurement_value != 0]
+                         by = .(geographic_identifier, measurement_unit, source, GRIDTYPE)][
+                           measurement_value != 0]
 
   inner_join_data <- st_as_sf(inner_join(inner_join_data,
-                                         shapefile.fix %>% select(code, geom),
-                                         by = c("geographic_identifier" = "code")))
+                                shapefile.fix %>% select(code, geom),
+                                by = c("geographic_identifier" = "code")))
 
   if (nrow(inner_join_data%>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
-    # inner_join_data <- inner_join_data %>%
-    #   dplyr::mutate(Group = paste0(GRIDTYPE, "_", source))
+      # inner_join_data <- inner_join_data %>%
+      #   dplyr::mutate(Group = paste0(GRIDTYPE, "_", source))
 
+    # Création de l'image en fonction du type de tracé
     if (plotting_type == "view") {
       image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
-        tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0, fill.free = TRUE) +
+        tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, midpoint = 0,
+                fill.scale = tm_scale_continuous()) +  # Correction du style pour éviter les warnings
         tm_layout(legend.outside = FALSE) +
         tm_facets(by = c("GRIDTYPE", "source"))
-
     } else {
       image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
-        tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0, fill.free = TRUE) +
+        tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, midpoint = 0,
+                fill.scale = tm_scale_continuous()) +  # Correction du style pour éviter les warnings
         tm_layout(legend.outside = FALSE) +
-        tm_facets(by = c("GRIDTYPE", "source")) +  # Suppression de `free.scales = TRUE`
+        tm_facets(by = c("GRIDTYPE", "source")) +
         tm_shape(continent) +
         tm_borders()
-
     }
-
     return(image)
   }
 }

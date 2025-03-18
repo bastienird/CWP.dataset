@@ -37,6 +37,7 @@ Imports:
     rmarkdown,
     scales,
     sf,
+    stringr,
     tibble,
     tidyr,
     tmap,
