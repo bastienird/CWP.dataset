@@ -122,8 +122,8 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
   }
   parameter_colnames_to_keep <- unique(c(parameter_colnames_to_keep, parameter_geographical_dimension_groupping, parameter_geographical_dimension, parameter_time_dimension))
 
-  init <- tidying_data(init, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep, time_dimension = parameter_time_dimension)
-  final <- tidying_data(final, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep, time_dimension = parameter_time_dimension)
+  init <- CWP.dataset::tidying_data(init, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep, time_dimension = parameter_time_dimension)
+  final <- CWP.dataset::tidying_data(final, parameter_colnames_to_keep_dataframe = parameter_colnames_to_keep, time_dimension = parameter_time_dimension)
 
   colnames_intersect <- intersect(colnames(init), colnames(final))
 
@@ -131,17 +131,17 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
   final <- final %>% dplyr::select(colnames_intersect)
 
   #cat("Renaming geographic identifiers and handling non-standard units...\n")
-  formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$geo_dim = parameter_geographical_dimension
-  formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$parameter_fact = parameter_fact
-  formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$parameter_UNK_for_not_standards_unit = parameter_UNK_for_not_standards_unit
-  formals(function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$geo_dim_group = "GRIDTYPE"
+  formals(CWP.dataset::function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$geo_dim = parameter_geographical_dimension
+  formals(CWP.dataset::function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$parameter_fact = parameter_fact
+  formals(CWP.dataset::function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$parameter_UNK_for_not_standards_unit = parameter_UNK_for_not_standards_unit
+  formals(CWP.dataset::function_geographic_identifier_renaming_and_not_standards_unit, envir = environment())$geo_dim_group = "GRIDTYPE"
 
-  init <- function_geographic_identifier_renaming_and_not_standards_unit(init)
-  final <- function_geographic_identifier_renaming_and_not_standards_unit(final)
+  init <- CWP.dataset::function_geographic_identifier_renaming_and_not_standards_unit(init)
+  final <- CWP.dataset::function_geographic_identifier_renaming_and_not_standards_unit(final)
 
   #cat("Applying filtering function...\n")
-  formals(filtering_function, envir = environment())$parameter_filtering = parameter_filtering
-  init <- filtering_function(init)
+  formals(CWP.dataset::filtering_function, envir = environment())$parameter_filtering = parameter_filtering
+  init <- CWP.dataset::filtering_function(init)
 
   if(nrow(init) == 0){
     stop("Filtering has removed all rows")
@@ -158,7 +158,7 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     fig.path <- getwd()
   }
   #cat("Grouping differences...\n")
-  groupping_differences_list <- groupping_differences(init, final, parameter_time_dimension, parameter_geographical_dimension, parameter_geographical_dimension_groupping)
+  groupping_differences_list <- CWP.dataset::groupping_differences(init, final, parameter_time_dimension, parameter_geographical_dimension, parameter_geographical_dimension_groupping)
 
   Groupped_all <- groupping_differences_list$Groupped_all
   Other_dimensions <- groupping_differences_list$Other_dimensions
@@ -169,20 +169,20 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
   GrouppedGRIDTYPE <- groupping_differences_list$GrouppedGRIDTYPE
 
   if (!unique_analyse) {
-    summary_of_differences <- compute_summary_of_differences(init, final, parameter_titre_dataset_1, parameter_titre_dataset_2)
-    compare_strata_differences_list <- compare_strata_differences(init, final, Groupped_all, parameter_titre_dataset_1, parameter_titre_dataset_2, parameter_columns_to_keep, unique_analyse)
+    summary_of_differences <- CWP.dataset::compute_summary_of_differences(init, final, parameter_titre_dataset_1, parameter_titre_dataset_2)
+    compare_strata_differences_list <- CWP.dataset::compare_strata_differences(init, final, Groupped_all, parameter_titre_dataset_1, parameter_titre_dataset_2, parameter_columns_to_keep, unique_analyse)
     compare_strata_differences_list$title <- paste0("Disappearing or appearing strata between ", parameter_titre_dataset_1, " and ", parameter_titre_dataset_2)
 
 
-    compare_dimension_differences_list <- compare_dimension_differences(Groupped_all, Other_dimensions, parameter_diff_value_or_percent, parameter_columns_to_keep, topn = topnumber)
+    compare_dimension_differences_list <- CWP.dataset::compare_dimension_differences(Groupped_all, Other_dimensions, parameter_diff_value_or_percent, parameter_columns_to_keep, topn = topnumber)
     compare_dimension_differences_list$title <-paste0("Difference between the non appearing/disappearing stratas between ", parameter_titre_dataset_1, " and ", parameter_titre_dataset_2)
 
     if (length(parameter_time_dimension) != 0) {
-      plot_titles_list <- compare_temporal_differences(parameter_time_dimension, init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse = FALSE)
+      plot_titles_list <- CWP.dataset::compare_temporal_differences(parameter_time_dimension, init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse = FALSE)
     }
 
     if (length(parameter_geographical_dimension) != 0 && print_map) {
-      Geographicdiff <- geographic_diff(init, final, shapefile_fix, parameter_geographical_dimension, parameter_geographical_dimension_groupping, continent, plotting_type = plotting_type, parameter_titre_dataset_1,
+      Geographicdiff <- CWP.dataset::geographic_diff(init, final, shapefile_fix, parameter_geographical_dimension, parameter_geographical_dimension_groupping, continent, plotting_type = plotting_type, parameter_titre_dataset_1,
                                         parameter_titre_dataset_2, outputonly)
       if(removemap| !print_map){
         Geographicdiff$plott <- NULL
@@ -201,23 +201,23 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
   }
 
   if (length(parameter_time_dimension) != 0 && coverage) {
-    time_coverage_analysis_list <- time_coverage_analysis(time_dimension_list_groupped, parameter_time_dimension, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse)
+    time_coverage_analysis_list <- CWP.dataset::time_coverage_analysis(time_dimension_list_groupped, parameter_time_dimension, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse)
   } else {
     time_coverage_analysis_list <- NULL
   }
 
   if(coverage){
-    other_dimension_analysis_list <- other_dimension_analysis(Other_dimensions, init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse)
+    other_dimension_analysis_list <- CWP.dataset::other_dimension_analysis(Other_dimensions, init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse)
   } else {
     other_dimension_analysis_list <- NULL
   }
   if (print_map && coverage) {
-    spatial_coverage_analysis_list <- spatial_coverage_analysis(init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, shapefile_fix, plotting_type = plotting_type, continent, TRUE, GrouppedGRIDTYPE)
+    spatial_coverage_analysis_list <- CWP.dataset::spatial_coverage_analysis(init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, shapefile_fix, plotting_type = plotting_type, continent, TRUE, GrouppedGRIDTYPE)
   } else {
     spatial_coverage_analysis_list <- NULL
   }
 
-  combined_summary_histogram <- combined_summary_histogram_function(init, parameter_titre_dataset_1, final, parameter_titre_dataset_2)
+  combined_summary_histogram <- CWP.dataset::combined_summary_histogram_function(init, parameter_titre_dataset_1, final, parameter_titre_dataset_2)
 
   rm(init)
   rm(final)

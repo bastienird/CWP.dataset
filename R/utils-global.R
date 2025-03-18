@@ -1,4 +1,4 @@
-utils::globalVariables(c(
+utils::globalVariables(c(".", "Difference in value",
   "Dataset", "measurement_unit", "write.csv",
   "as_grouped_data", "autofit", "autonum", "brewer.pal",
   "code", "continet", "curl_download", "cwp_code",

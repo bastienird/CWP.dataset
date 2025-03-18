@@ -52,9 +52,10 @@ qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, col
     y <- x %>%
       dplyr::ungroup() %>%
       dplyr::mutate_if(is.factor, as.character) %>%
-      dplyr::mutate_if(is.character, ~ str_replace_all(., ",", ", \n" )) %>%
-      dplyr::mutate_if(is.character, ~ str_replace_all(., "_", "-" )) %>%
-      dplyr::mutate_if(is.numeric, function(.) { round(., 2) })
+      dplyr::mutate_if(is.character, ~ stringr::str_replace_all(.x, ",", ", \n" )) %>%
+      dplyr::mutate_if(is.character, ~ stringr::str_replace_all(.x, "_", "-" )) %>%
+      dplyr::mutate_if(is.numeric, ~ round(.x, 2))
+
 
     if(!is.null(grouped_data)){
       y <- as_grouped_data(y, groups = grouped_data)

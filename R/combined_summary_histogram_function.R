@@ -29,11 +29,11 @@ combined_summary_histogram_function <- function(init, parameter_titre_dataset_1 
                                                 final, parameter_titre_dataset_2 = "Final") {
   # Convertir en data.table
   setDT(init)
-  summary_number_row_init <- init[, .(Number_different_stratas = .N), by = measurement_unit]
+  summary_number_row_init <- init[, .(Number_different_stratas = .N), by = "measurement_unit"]
   summary_number_row_init[, data_source := parameter_titre_dataset_1]
 
   setDT(final)
-  summary_number_row_final <- final[, .(Number_different_stratas = .N), by = measurement_unit]
+  summary_number_row_final <- final[, .(Number_different_stratas = .N), by = "measurement_unit"]
   summary_number_row_final[, data_source := parameter_titre_dataset_2]
 
   # Combiner les résumés

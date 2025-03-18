@@ -20,8 +20,8 @@
 
 function_recap_each_step <- function(step_name, rds_data, explanation = "No explanation provided to this step", functions = "No function used in this step", option_list = NULL, entity = NULL) {
   # Check if global variables exist
-  if (!exists("options_written_total")) {assign("options_written_total", "", envir = .GlobalEnv)}
-  if (!exists("explanation_total")) {assign("explanation_total", "", envir = .GlobalEnv)}
+  if (!exists("options_written_total")) {assign("options_written_total", "")}
+  if (!exists("explanation_total")) {assign("explanation_total", "")}
 
   # Create directories if they do not exist
   dir.create("Markdown", showWarnings = FALSE)
@@ -62,8 +62,8 @@ function_recap_each_step <- function(step_name, rds_data, explanation = "No expl
   }
 
   # Update global variables
-  assign("options_written_total", paste0(options_written_total, options_written), envir = .GlobalEnv)
-  assign("explanation_total", paste0(explanation_total, explanation), envir = .GlobalEnv)
+  assign("options_written_total", paste0(options_written_total, options_written))
+  assign("explanation_total", paste0(explanation_total, explanation))
 
   # Save RDS and text files
   qs::qsave(rds_data, file.path(step_dir, "data.qs"))
