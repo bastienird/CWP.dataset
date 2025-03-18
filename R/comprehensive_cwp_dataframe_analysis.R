@@ -131,17 +131,23 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
   final <- final %>% dplyr::select(colnames_intersect)
 
   #cat("Renaming geographic identifiers and handling non-standard units...\n")
-  formals(function_geographic_identifier_renaming_and_not_standards_unit)$geo_dim = parameter_geographical_dimension
-  formals(function_geographic_identifier_renaming_and_not_standards_unit)$parameter_fact = parameter_fact
-  formals(function_geographic_identifier_renaming_and_not_standards_unit)$parameter_UNK_for_not_standards_unit = parameter_UNK_for_not_standards_unit
-  formals(function_geographic_identifier_renaming_and_not_standards_unit)$geo_dim_group = "GRIDTYPE"
+  init <- CWP.dataset::function_geographic_identifier_renaming_and_not_standards_unit(
+    init,
+    geo_dim = parameter_geographical_dimension,
+    parameter_fact = parameter_fact,
+    parameter_UNK_for_not_standards_unit = parameter_UNK_for_not_standards_unit,
+    geo_dim_group = "GRIDTYPE"
+  )
 
-  init <- CWP.dataset::function_geographic_identifier_renaming_and_not_standards_unit(init)
-  final <- CWP.dataset::function_geographic_identifier_renaming_and_not_standards_unit(final)
-
+  final <- CWP.dataset::function_geographic_identifier_renaming_and_not_standards_unit(
+    final,
+    geo_dim = parameter_geographical_dimension,
+    parameter_fact = parameter_fact,
+    parameter_UNK_for_not_standards_unit = parameter_UNK_for_not_standards_unit,
+    geo_dim_group = "GRIDTYPE"
+  )
   #cat("Applying filtering function...\n")
-  formals(filtering_function, envir = environment())$parameter_filtering = parameter_filtering
-  init <- CWP.dataset::filtering_function(init)
+  init <- CWP.dataset::filtering_function(init, parameter_filtering = parameter_filtering)
 
   if(nrow(init) == 0){
     stop("Filtering has removed all rows")
