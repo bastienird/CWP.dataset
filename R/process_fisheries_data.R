@@ -15,6 +15,9 @@
 #' print(result$no_fish_plot)
 #' print(result$tons_plot)
 #' }
+#' @export
+#' @importFrom qs qread
+#' @import ggplot2
 process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_filtering) {
 
   if (parameter_fact == "catch") {
@@ -22,11 +25,11 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
     if (dir.exists("Markdown")) {
       if(file.exists("data/global_nominal_catch_firms_level0_harmonized.csv")){
         nominal_dataset <- readr::read_csv("data/global_nominal_catch_firms_level0_harmonized.csv")
-        nominal_dataset <- filtering_function(nominal_dataset, parameter_filtering = parameter_filtering)
+        nominal_dataset <- CWP.dataset::filtering_function(nominal_dataset, parameter_filtering = parameter_filtering)
 
       } else if (file.exists("data/global_nominal_catch_firms_level0.csv")){
       nominal_dataset <- readr::read_csv("data/global_nominal_catch_firms_level0.csv")
-      nominal_dataset <- filtering_function(nominal_dataset, parameter_filtering = parameter_filtering)
+      nominal_dataset <- CWP.dataset::filtering_function(nominal_dataset, parameter_filtering = parameter_filtering)
       }
     }
 
@@ -45,7 +48,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
       "Percentage of nominal", "Conversion factors (kg)"  # Nouvelle colonne
     )
 
-    main <- filtering_function(qs::qread(paste0(sub_list_dir_2[1], "/data.qs")), parameter_filtering = parameter_filtering)
+    main <- CWP.dataset::filtering_function(qs::qread(paste0(sub_list_dir_2[1], "/data.qs")), parameter_filtering = parameter_filtering)
     tons_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("MTNO", "MT", "t", "Tons")))$measurement_value)
     nofish_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("NOMT", "NO", "no", "Number of fish")))$measurement_value)
     lines_init <- nrow(main)
@@ -64,7 +67,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
         sum_no <- sums$sum_no
         nrow <- sums$lines
       } else {
-        main <- filtering_function(qs::qread(paste0(i, "/data.qs")), parameter_filtering = parameter_filtering)
+        main <- CWP.dataset::filtering_function(qs::qread(paste0(i, "/data.qs")), parameter_filtering = parameter_filtering)
         sum_t <- sum((main %>% dplyr::filter(measurement_unit %in% c("MTNO", "MT", "t", "Tons")))$measurement_value)
         sum_no <- sum((main %>% dplyr::filter(measurement_unit %in% c("NOMT", "NO", "no", "Number of fish")))$measurement_value)
         nrow <- nrow(main)

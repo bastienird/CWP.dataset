@@ -15,8 +15,9 @@
 #' time_coverage_analysis_dygraphs(time_dimension_list_groupped, "Year", "Dataset1", "Dataset2", FALSE)
 #' }
 #' @import dplyr
-#' @import dygraphs
-#' @import xts
+#' @import tidyr
+#' @importFrom xts xts
+#' @importFrom dygraphs dygraph dyAxis dyRangeSelector dyLegend
 #' @export
 #' @author
 #' Bastien Grasset, \email{bastien.grasset@@ird.fr}
@@ -34,7 +35,7 @@ time_coverage_analysis_dygraphs <- function(time_dimension_list_groupped, parame
     x %>%
       dplyr::mutate(Time = as.Date(Precision)) %>%  # Convert time to Date for dygraphs
       dplyr::rename(`Values dataset 1` = "value_sum_1", `Values dataset 2` = "value_sum_2") %>%
-      pivot_longer(cols = c(`Values dataset 1`, `Values dataset 2`), names_to = "Dataset", values_to = "Values") %>%
+      tidyr::pivot_longer(cols = c(`Values dataset 1`, `Values dataset 2`), names_to = "Dataset", values_to = "Values") %>%
       dplyr::mutate(Dataset = dplyr::case_when(Dataset == "Values dataset 1" ~ titre_1, TRUE ~ titre_2)) %>%
       dplyr::distinct()
   })
@@ -54,28 +55,28 @@ time_coverage_analysis_dygraphs <- function(time_dimension_list_groupped, parame
     dataset2_values <- x %>% dplyr::filter(Dataset == titre_2) %>% select(Values)
 
     # Create xts object for the first dataset
-    first_xts <- xts(dataset1_values, order.by = time_values)
+    first_xts <- xts::xts(dataset1_values, order.by = time_values)
     colnames(first_xts) <- titre_1
 
     if (!unique_analyse) {
       # Create xts object for the second dataset
-      second_xts <- xts(dataset2_values, order.by = time_values)
+      second_xts <- xts::xts(dataset2_values, order.by = time_values)
       colnames(second_xts) <- titre_2
 
       # Merge the two xts objects
       combined_xts <- merge(first_xts, second_xts, join = "inner")
 
       # Create the dygraph for both datasets
-      dygraph <- dygraph(combined_xts, main = paste("Time Coverage for", parameter_time_dimension)) %>%
-        dyAxis("y", label = "Values") %>%
-        dyLegend(show = "always") %>%
-        dyRangeSelector()  # Add interactive range selector
+      dygraph <- dygraphs::dygraph(combined_xts, main = paste("Time Coverage for", parameter_time_dimension)) %>%
+        dygraphs::dyAxis("y", label = "Values") %>%
+        dygraphs::dyLegend(show = "always") %>%
+        dygraphs::dyRangeSelector()  # Add interactive range selector
     } else {
       # Create the dygraph for the single dataset
-      dygraph <- dygraph(first_xts, main = paste("Time Coverage for", parameter_time_dimension)) %>%
-        dyAxis("y", label = "Values") %>%
-        dyLegend(show = "always") %>%
-        dyRangeSelector()  # Add interactive range selector
+      dygraph <-dygraphs::dygraph(first_xts, main = paste("Time Coverage for", parameter_time_dimension)) %>%
+        dygraphs::dyAxis("y", label = "Values") %>%
+        dygraphs::dyLegend(show = "always") %>%
+        dygraphs::dyRangeSelector()  # Add interactive range selector
     }
 
     return(dygraph)

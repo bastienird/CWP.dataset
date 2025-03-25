@@ -18,8 +18,8 @@
 #' data_dimension_analysis_dygraphs(c("Dimension1", "Dimension2"), init, final, "Dataset1", "Dataset2", FALSE)
 #' }
 #' @import dplyr
-#' @import dygraphs
-#' @import xts
+#' @importFrom xts xts
+#' @importFrom dygraphs dygraph dyAxis dyRangeSelector dyLegend
 #' @export
 other_dimension_analysis_dygraphs <- function(Other_dimensions, init, final = NULL, titre_1 = "Dataset1", titre_2 = "Dataset2", unique_analyse = FALSE, fig.path = NULL, topn = 7) {
   # Check if final dataset is empty, meaning a unique analysis is needed
@@ -51,24 +51,24 @@ other_dimension_analysis_dygraphs <- function(Other_dimensions, init, final = NU
         dplyr::select(Time, measurement_value)
 
       # Create xts object for the second dataset
-      second_xts <- xts(provisoire_t$measurement_value, order.by = provisoire_t$Time)
+      second_xts <- xts::xts(provisoire_t$measurement_value, order.by = provisoire_t$Time)
       colnames(second_xts) <- titre_2
 
       # Merge the two xts objects
       combined_xts <- merge(first_xts, second_xts, join = "inner")
 
       # Create the dygraph for both datasets
-      dygraph <- dygraph(combined_xts, main = paste("Comparison of", dimension)) %>%
-        dyAxis("y", label = "Measurement Value") %>%
-        dyLegend(show = "always") %>%
-        dyRangeSelector()  # Add interactive range selector
+      dygraph <- dygraphs::dygraph(combined_xts, main = paste("Comparison of", dimension)) %>%
+        dygraphs::dyAxis("y", label = "Measurement Value") %>%
+        dygraphs::dyLegend(show = "always") %>%
+        dygraphs::dyRangeSelector()  # Add interactive range selector
 
     } else {
       # Create the dygraph for the single dataset
-      dygraph <- dygraph(first_xts, main = paste("Distribution of", dimension)) %>%
-        dyAxis("y", label = "Measurement Value") %>%
-        dyLegend(show = "always") %>%
-        dyRangeSelector()  # Add interactive range selector
+      dygraph <- dygraphs::dygraph(first_xts, main = paste("Distribution of", dimension)) %>%
+        dygraphs::dyAxis("y", label = "Measurement Value") %>%
+        dygraphs::dyLegend(show = "always") %>%
+        dygraphs::dyRangeSelector()  # Add interactive range selector
     }
 
     return(dygraph)

@@ -2,7 +2,7 @@
 
 #' Perform Multiple Comparisons Between Datasets
 #'
-#' This function performs various summarizing steps on datasets related to species and gear types. 
+#' This function performs various summarizing steps on datasets related to species and gear types.
 #' It retrieves data from a database, processes it, and generates comparison reports.
 #'
 #' @param counting Integer. The step number in the comparison process.
@@ -16,7 +16,7 @@
 #'
 #' @return A list containing comparison results, metadata, and visualization elements. If the datasets are identical, it returns `NA`.
 #'
-#' @details The function compares datasets between two consecutive steps, applying data filtering and analysis. 
+#' @details The function compares datasets between two consecutive steps, applying data filtering and analysis.
 #' It generates structured output reports stored in `fig.path`.
 #'
 #' @examples
@@ -35,24 +35,24 @@
 #'
 #' @import dplyr
 #' @import sf
-#' @import futile.logger
-#' @import qs
+#' @importFrom futile.logger flog.info
+#' @importFrom qs qread
 #' @export
-function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, 
-                                         parameters_child_global, fig.path, coverage = FALSE, 
+function_multiple_comparison <- function(counting, parameter_short, sub_list_dir,
+                                         parameters_child_global, fig.path, coverage = FALSE,
                                          shapefile.fix, continent) {
   gc()
-  
+
   parameter_init <- file.path(sub_list_dir[counting], "data.qs")
   parameter_final <- file.path(sub_list_dir[counting + 1], "data.qs")
   parameter_titre_dataset_1 <- basename(sub_list_dir[counting])
   parameter_titre_dataset_2 <- basename(sub_list_dir[counting + 1])
 
-  new_path <- file.path(fig.path, "Comparison", 
+  new_path <- file.path(fig.path, "Comparison",
                         paste0(parameter_titre_dataset_1, "_", parameter_titre_dataset_2))
   dir.create(new_path, recursive = TRUE, showWarnings = FALSE)
 
-  flog.info("Starting comparison between: %s and %s | Coverage: %s", 
+  futile.logger::flog.info("Starting comparison between: %s and %s | Coverage: %s",
             parameter_titre_dataset_1, parameter_titre_dataset_2, coverage)
 
   initfiltered <- filtering_function(qs::qread(parameter_init))
@@ -60,7 +60,7 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
 
   if (!identical(initfiltered, finalfiltered)) {
     rm(initfiltered, finalfiltered)
-    flog.info("Datasets are different: %s vs %s", parameter_titre_dataset_1, parameter_titre_dataset_2)
+    futile.logger::flog.info("Datasets are different: %s vs %s", parameter_titre_dataset_1, parameter_titre_dataset_2)
 
     child_env_result <- comprehensive_cwp_dataframe_analysis(
       parameter_init = parameter_init,
@@ -82,7 +82,7 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
       unique_analyse = FALSE
     )
 
-    flog.info("Analysis completed for: %s vs %s", parameter_titre_dataset_1, parameter_titre_dataset_2)
+    futile.logger::flog.info("Analysis completed for: %s vs %s", parameter_titre_dataset_1, parameter_titre_dataset_2)
 
     child_env_result$step_title_t_f <- TRUE
     child_env_result$step_title <- paste0(" Treatment : ", basename(sub_list_dir[counting + 1]))
@@ -92,11 +92,11 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
     child_env_result$child_header <- "##"
 
     gc()
-    flog.info("New result saved to: %s", new_path)
+    futile.logger::flog.info("New result saved to: %s", new_path)
     return(child_env_result)
   } else {
     rm(initfiltered, finalfiltered)
-    flog.info("Datasets are identical, skipping comparison for: %s vs %s", 
+    futile.logger::flog.info("Datasets are identical, skipping comparison for: %s vs %s",
               parameter_titre_dataset_1, parameter_titre_dataset_2)
     return(NA)
   }

@@ -62,22 +62,6 @@ combined_summary_histogram_function <- function(init, parameter_titre_dataset_1 
          fill = "Measurement unit") +
     theme_minimal()
 
-  # # Créer un tableau comme ggplot avec ggtexttable
-  # combined_table <- rbind(summary_number_row_init, summary_number_row_final)[, .(
-  #   `Measurement Unit` = measurement_unit,
-  #   `Dataset` = data_source,
-  #   `Number of Strata` = Number_different_stratas
-  # )]
-  #
-  # table_plot <- ggtexttable(
-  #   combined_table,
-  #   rows = NULL,
-  #   theme = ttheme("minimal", base_size = 10)
-  # )
-  #
-  # # Utiliser patchwork pour combiner le graphique et le tableau
-  # final_plot <- combined_summary_histogram / table_plot + plot_layout(heights = c(3, 1))
-
   return(combined_summary_histogram)
 }
 

@@ -1,16 +1,16 @@
 Package: CWP.dataset
 Title: Package to Analyse and Tidy Fisheries Dataset on CWP Standards
-Version: 0.1.2.1
+Version: 0.1.2.2
 Authors@R: 
     person("Bastien", "Grasset", , "bastien.grasset@ird.fr", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-9946-1338"))
 Description: This package is to easily analyse standardized CWP data and
     to compare different datasets.
-License: MIT + file LICENSE
+License: MIT   file LICENSE
 URL: https://github.com/bastienird/CWP.dataset,
     https://bastienird.github.io/CWP.dataset
 BugReports: https://github.com/bastienird/CWP.dataset/issues
-Imports: 
+Imports:
     bookdown,
     dplyr,
     ggplot2,
@@ -18,32 +18,31 @@ Imports:
     janitor,
     knitr,
     lubridate,
-    qs,
     readr,
     rlang,
     rmarkdown,
-    tmap
+    tmap,
+    data.table,
+    sf,
+    tidyr,
+    xts,
+    scales, 
+    futile.logger, 
+    dygraphs, 
+    googledrive, 
+    gridExtra, 
+    qs
 Suggests: 
     cowplot,
-    data.table,
     DT,
-    dygraphs,
     flextable,
-    futile.logger,
-    ggpubr,
-    googledrive,
     grid,
-    gridExtra,
     plotrix,
     purrr,
-    scales,
-    sf,
     stringr,
     tibble,
-    tidyr,
     tools,
     utils,
-    xts,
     fusen,
     testthat
 VignetteBuilder: 

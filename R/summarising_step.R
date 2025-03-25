@@ -26,7 +26,8 @@
 #' }
 #' @import dplyr
 #' @import sf
-#' @import futile.logger
+#' @importFrom futile.logger flog.info flog.warn flog.error
+#' @importFrom qs qread qsave
 #' @export
 summarising_step <- function(main_dir, connectionDB, config, source_authoritylist = c("all","IOTC","WCPFC", "IATTC", "ICCAT", "CCSBT" ), sizepdf = "long",
                              savestep = FALSE, nameoutput = NULL, usesave = FALSE) {
@@ -39,16 +40,16 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
     stop('Please provide a correct sizepdf')
   }
 
-  flog.info(paste0("Size pdf is:", sizepdf))
+  futile.logger::flog.info(paste0("Size pdf is:", sizepdf))
 
 
   ancient_wd <- getwd()
-  flog.info("Starting Summarising_step function")
+  futile.logger::flog.info("Starting Summarising_step function")
 
   species_group <- st_read(connectionDB, query = "SELECT taxa_order, code FROM species.species_asfis") %>%
     janitor::clean_names() %>%
     dplyr::select(species_group = taxa_order, species = code)
-  flog.info("Loaded species_group data")
+  futile.logger::flog.info("Loaded species_group data")
 
   if(!file.exists("data/cl_fishing_mode.csv")){
     url <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/31756d4c0baf44c6d7d851e93c14c1e6917f7276/global/firms/gta/cl_fishing_mode.csv"
@@ -67,46 +68,46 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
   cl_cwp_gear_level2 <- st_read(connectionDB, query = "SELECT * FROM gear_type.isscfg_revision_1") %>%
     dplyr::select(Code = code, Gear = label)
 
-  flog.info("Loaded cl_cwp_gear_level2 data")
+  futile.logger::flog.info("Loaded cl_cwp_gear_level2 data")
 
   shapefile.fix <- st_read(connectionDB, query = "SELECT * FROM area.cwp_grid") %>%
     dplyr::rename(GRIDTYPE = gridtype)
-  flog.info("Loaded shapefile.fix data")
+  futile.logger::flog.info("Loaded shapefile.fix data")
 
   continent <- tryCatch({
     st_read(connectionDB, query = "SELECT * FROM public.continent")
   }, error = function(e) {
-    flog.error("An error occurred while reading continent data: %s", e$message)
+    futile.logger::flog.error("An error occurred while reading continent data: %s", e$message)
     NULL
   })
 
   if (is.null(continent)) {
-    flog.warn("Continent data not found in the database. Fetching from WFS service.")
+    futile.logger::flog.warn("Continent data not found in the database. Fetching from WFS service.")
     url <- "https://www.fao.org/fishery/geoserver/wfs"
     serviceVersion <- "1.0.0"
     logger <- "INFO"
     WFS <- WFSClient$new(url = "https://www.fao.org/fishery/geoserver/fifao/wfs", serviceVersion = "1.0.0", logger = "INFO")
     continent <- WFS$getFeatures("fifao:UN_CONTINENT2")
-    flog.info("Fetched continent data from WFS service")
+    futile.logger::flog.info("Fetched continent data from WFS service")
   }
 
   shape_without_geom <- shapefile.fix %>%
     as_tibble() %>%
     dplyr::select(-geom)
-  flog.info("Processed shapefile.fix data")
+  futile.logger::flog.info("Processed shapefile.fix data")
 
   entity_dirs <- list.dirs(file.path(main_dir, "entities"), full.names = TRUE, recursive = FALSE)
   # entity_dirs <- entity_dirs[2]
   child_env <- new.env(parent = new.env())
   gc()
-  flog.info("Initialized child environment")
+  futile.logger::flog.info("Initialized child environment")
 
   i <- 1
-  flog.info("Sourced all required functions")
+  futile.logger::flog.info("Sourced all required functions")
 
   for (entity_dir in entity_dirs) {
 
-    flog.info("Processing entity directory: %s", entity_dir)
+    futile.logger::flog.info("Processing entity directory: %s", entity_dir)
 
     entity <- config$metadata$content$entities[[i]]
     i <- i + 1
@@ -114,7 +115,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
     opts <- action$options
 
     if (opts$fact == "effort") {
-      flog.warn("Effort dataset not displayed for now")
+      futile.logger::flog.warn("Effort dataset not displayed for now")
       parameter_colnames_to_keep_fact = c("source_authority", "fishing_mode", "geographic_identifier","fishing_fleet", "gear_type",
                                           "measurement_unit", "measurement_value", "GRIDTYPE","species_group")
       topnumberfact = 3
@@ -134,7 +135,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       details <- file.info(sub_list_dir_2)
       details <- details[with(details, order(as.POSIXct(mtime))), ]
       sub_list_dir_2 <- rownames(details)
-      flog.info("Processed sub_list_dir_2")
+      futile.logger::flog.info("Processed sub_list_dir_2")
 
       for (file in sub_list_dir_2) {
         `%notin%` <- Negate(`%in%`)
@@ -170,11 +171,11 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
               data <- data %>% dplyr::left_join(fishing_fleet_label %>% dplyr::select(code,fishing_fleet_label = label), by = c("fishing_fleet" = "code"))
               data <- data %>% dplyr::left_join(species_label %>% dplyr::select(code,species_label = label, species_definition = definition), by = c("species" = "code"))
               qs::qsave(data, file = file)
-            flog.info("Processed and saved data for file: %s", file)
+            futile.logger::flog.info("Processed and saved data for file: %s", file)
           }
         }
         } else {
-          flog.info("Retrieving processed data: %s", file)
+          futile.logger::flog.info("Retrieving processed data: %s", file)
 
       }
       }
@@ -267,11 +268,11 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         } else {
       process_fisheries_data_list <- process_fisheries_data(sub_list_dir_3, parameter_fact = "catch", parameter_filtering)
         }
-      flog.info("Processed process_fisheries_data_list")
+      futile.logger::flog.info("Processed process_fisheries_data_list")
 
       render_env$process_fisheries_data_list <- process_fisheries_data_list
 
-      flog.info("Adding to render_env")
+      futile.logger::flog.info("Adding to render_env")
 
 
 
@@ -283,7 +284,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
                          continent = continent,
                          parameters_child_global = parameters_child_global, fig.path = render_env$fig.path, coverage = coverage)
 
-      flog.info("all_list processed")
+      futile.logger::flog.info("all_list processed")
 
       all_list <- all_list[!is.na(all_list)]
 
@@ -317,7 +318,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       CWP.dataset::generate_bookdown_yml()
 
       if(sizepdf != "short"){
-      flog.info("gitbook")
+      futile.logger::flog.info("gitbook")
         if (nzchar(rmd_path)) {  # Vérifie que le chemin existe
           bookdown::render_book(
             input = ".",
@@ -332,7 +333,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       gc()
       }
-      flog.info("pdfdocument")
+      futile.logger::flog.info("pdfdocument")
       bookdown::render_book(".", envir = render_env,
                             output_format = "bookdown::pdf_document2",
                             output_dir = nameoutput)
@@ -344,13 +345,13 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       gc()
 
       # drive_upload("tableau_recap_global_action_effort.html", as_id(folder_datasets_id), overwrite = TRUE)
-      flog.info("Rendered and uploaded report for entity: %s", entity_dir)
+      futile.logger::flog.info("Rendered and uploaded report for entity: %s", entity_dir)
       }
 
     sprintf("entity: %s is done", entity_dir)
 
     }
   try(setwd(ancient_wd))
-  flog.info("Finished Summarising_step function")
+  futile.logger::flog.info("Finished Summarising_step function")
   # return(render_env)
 }

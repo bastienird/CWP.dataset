@@ -11,6 +11,9 @@
 #'
 #' @return Writes multiple summary CSV files and optional database tables, returning no explicit value.
 #' @export
+#' @importFrom qs qsave qread
+#' @importFrom googledrive drive_upload as_id
+#' @importFrom futile.logger flog.info
 Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE, upload_DB = TRUE){
   ancient_wd <- getwd()
   setwd(main_dir)
@@ -342,7 +345,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
 
         gc()
 
-        flog.info(paste("Analysis completed for:", file_name))
+        futile.logger::flog.info(paste("Analysis completed for:", file_name))
         return(child_env_result)
       }
 
@@ -401,12 +404,12 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       destination_file <- file.path(getwd(),"Recap_on_pre_harmo", basename(file))
       file.copy(file, destination_file)
       path_to_dataset_new <- file.path(file)
-      drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)
+      googledrive::drive_upload(path_to_dataset_new, googledrive::as_id(folder_datasets_id), overwrite = TRUE)
 
     })
     #
     path_Recap <- file.path(getwd(),"Recap_on_pre_harmo.html")
-    drive_upload(path_Recap, as_id(folder_datasets_id), overwrite = TRUE)
+    googledrive::drive_upload(path_Recap, googledrive::as_id(folder_datasets_id), overwrite = TRUE)
     read_last_csv <- function(path) {
       csv_files <- list.files(path, pattern = "\\.csv$", full.names = TRUE)
       if (length(csv_files) == 0) return(NULL)
@@ -436,7 +439,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
 
     drive_upload_safe <- function(data_path) {
       tryCatch({
-        drive_upload(data_path, as_id("1fXgxn-spBydGrFLtsrayVMLrQ2LOCkeg"), overwrite = TRUE)
+        googledrive::drive_upload(data_path, googledrive::as_id("1fXgxn-spBydGrFLtsrayVMLrQ2LOCkeg"), overwrite = TRUE)
       }, error = function(e) {
         message(sprintf("Failed to upload %s: %s", data_path, e$message))
         return(NULL)  # Returning NULL or any other indication of failure

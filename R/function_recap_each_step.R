@@ -15,6 +15,7 @@
 #' function_recap_each_step("step1", data, "This step does X", "function1, function2", list(option1 = "value1"))
 #' }
 #' @export
+#' @importFrom qs qsave
 #' @author
 #' Bastien Grasset
 
