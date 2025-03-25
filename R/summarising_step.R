@@ -319,16 +319,12 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       if(sizepdf != "short"){
       futile.logger::flog.info("gitbook")
-        if (nzchar(rmd_path)) {  # Vérifie que le chemin existe
           bookdown::render_book(
             input = ".",
             envir = render_env,
             output_format = "bookdown::gitbook",
             output_dir = nameoutput
           )
-        } else {
-          stop("Le fichier index.Rmd est introuvable dans le package.")
-        }
 
 
       gc()
