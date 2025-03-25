@@ -1,6 +1,6 @@
 Package: CWP.dataset
 Title: Package to Analyse and Tidy Fisheries Dataset on CWP Standards
-Version: 0.1.2.2
+Version: 0.1.2.3
 Authors@R: 
     person("Bastien", "Grasset", , "bastien.grasset@ird.fr", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-9946-1338"))

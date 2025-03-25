@@ -154,7 +154,7 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
   if (unique_analyse) {
     final <- init[0,]
   } else {
-    final <- filtering_function(final)
+    final <- filtering_function(final, parameter_filtering = parameter_filtering)
   }
 
   # Ensure all necessary variables exist and set default values
