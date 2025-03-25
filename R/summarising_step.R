@@ -169,9 +169,6 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
               data <- data %>% dplyr::left_join(fishing_fleet_label %>% dplyr::select(code,fishing_fleet_label = label), by = c("fishing_fleet" = "code"))
               data <- data %>% dplyr::left_join(species_label %>% dplyr::select(code,species_label = label, species_definition = definition), by = c("species" = "code"))
-              if(opts$fact == "effort"){
-                data <- data %>% dplyr::filter(measurement_unit%in%c("HOOKS", "FDAYS", "SETS", "NO.HOOKS", "NO.LINES", "NETS")) #only two first measuremnt_unit for each dataset
-              }
               qs::qsave(data, file = file)
             flog.info("Processed and saved data for file: %s", file)
           }
@@ -241,7 +238,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         parameter_init = sub_list_dir_2[1],
         parameter_final = sub_list_dir_2[length(sub_list_dir_2)],
         fig.path = parameters_child_global$fig.path,
-        parameter_fact = "catch",
+        parameter_fact = opts$fact,
         parameter_colnames_to_keep = parameter_colnames_to_keep_fact,
         shapefile_fix = shapefile.fix,
         continent = continent,
