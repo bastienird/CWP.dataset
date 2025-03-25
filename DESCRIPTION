@@ -26,12 +26,13 @@ Imports:
     sf,
     tidyr,
     xts,
-    scales, 
-    futile.logger, 
-    dygraphs, 
-    googledrive, 
-    gridExtra, 
-    qs
+    scales,
+    futile.logger,
+    dygraphs,
+    googledrive,
+    gridExtra,
+    qs,
+    CWP.dataset
 Suggests: 
     cowplot,
     DT,
