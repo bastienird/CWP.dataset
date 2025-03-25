@@ -55,8 +55,10 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
   flog.info("Starting comparison between: %s and %s | Coverage: %s", 
             parameter_titre_dataset_1, parameter_titre_dataset_2, coverage)
 
-  initfiltered <- filtering_function(qs::qread(parameter_init))
-  finalfiltered <- filtering_function(qs::qread(parameter_final))
+  initfiltered <- filtering_function(qs::qread(parameter_init),
+                                     parameter_filtering = parameters_child_global$parameter_filtering)
+  finalfiltered <- filtering_function(qs::qread(parameter_final),
+                                     parameter_filtering = parameters_child_global$parameter_filtering)
 
   if (!identical(initfiltered, finalfiltered)) {
     rm(initfiltered, finalfiltered)
