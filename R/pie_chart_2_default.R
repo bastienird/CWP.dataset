@@ -84,16 +84,16 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
                                    all_class_i %>% dplyr::select(class)) %>% distinct()
     number_disappearing_stratas <- nrow(disappearing_stratas)
     number_appearing_stratas <- nrow(appearing_stratas)
-    summary_apparition <- ggdraw() + draw_label(paste0("Number of appearing stratas : ",
+    summary_apparition <- cowplot::ggdraw() + cowplot::draw_label(paste0("Number of appearing stratas : ",
                                                        number_appearing_stratas), size = 10)
     if (number_appearing_stratas != 0)
-      summary_apparition <- summary_apparition + draw_label(paste0(" \nThey are ",
+      summary_apparition <- summary_apparition + cowplot::draw_label(paste0(" \nThey are ",
                                                                    paste((appearing_stratas %>% dplyr::select(class) %>%
                                                                             distinct())$class, sep = ";")), size = 10)
-    summary_apparition <- summary_apparition + draw_label(paste0(" \nNumber of disappearing stratas : ",
+    summary_apparition <- summary_apparition + cowplot::draw_label(paste0(" \nNumber of disappearing stratas : ",
                                                                  number_disappearing_stratas), size = 10)
     if (number_disappearing_stratas != 0)
-      summary_apparition <- summary_apparition + draw_label(paste0(" \nThey are ",
+      summary_apparition <- summary_apparition + cowplot::draw_label(paste0(" \nThey are ",
                                                                    paste((disappearing_stratas %>% dplyr::select(class) %>%
                                                                             distinct())$class, sep = ";")), size = 10)
   }
@@ -150,25 +150,25 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
                                     scale_fill_manual(values = pal))
   }
   if (title_yes_no) {
-    title <- ggdraw() + draw_label(paste0("Distribution in measurement_value for the dimension : ",
+    title <- cowplot::ggdraw() + cowplot::draw_label(paste0("Distribution in measurement_value for the dimension : ",
                                           r), fontface = "bold", x = 0, hjust = 0) + theme(plot.margin = margin(0,
                                                                                                                 0, 0, 7))
   }
   else {
-    title <- ggdraw() + draw_label(" \n ")
+    title <- cowplot::ggdraw() + cowplot::draw_label(" \n ")
   }
   if (!is.null(second)) {
-    graph <- plot_grid(ggplot_i + theme(legend.position = "none"),
+    graph <- cowplot::plot_grid(ggplot_i + theme(legend.position = "none"),
                        ggplot_t, nrow = 2, labels = c(gsub("\"", "", gsub("~\"",
                                                                           "", deparse(substitute(name1)))), gsub("\"",
                                                                                                                  "", gsub("~\"", "", deparse(substitute(name2))))),
                        label_size = 10, vjust = 1.3, label_x = c(0, 0),
                        label_y = 1.025, axis = "l", align = "v")
-    ploting_map <- plot_grid(title, nrow = 2, plot_grid(graph,
+    ploting_map <- cowplot::plot_grid(title, nrow = 2, cowplot::plot_grid(graph,
                                                         legend, ncol = 2), rel_heights = c(0.1, 1)) + theme(plot.background = element_rect(color = "black"))
     if (sum(!(round(provisoire_i$pourcentage) == round(provisoire_t$pourcentage))) ==
         0) {
-      title <- ggdraw() + draw_label(paste0("Distribution in measurement_value for the dimension : ",
+      title <- cowplot::ggdraw() + cowplot::draw_label(paste0("Distribution in measurement_value for the dimension : ",
                                             r, "\n(same distribution to the nearest rounding for both datasets : \n",
                                             gsub("\"", "", gsub("~\"", "", deparse(substitute(name1)))),
                                             " and \n", gsub("\"", "", gsub("~\"", "", deparse(substitute(name2)))),
@@ -179,7 +179,7 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
     }
   }
   else {
-    graph <- plot_grid(ggplot_i + theme(legend.position = "none"),
+    graph <- cowplot::plot_grid(ggplot_i + theme(legend.position = "none"),
                        nrow = 1, labels = c(gsub("\"", "", gsub("~\"",
                                                                 "", deparse(substitute(name1))))), label_size = 10,
                        vjust = 1.3, label_x = c(0, 0), label_y = 0.8, axis = "l",
@@ -189,7 +189,7 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
     if (exists("provisoire_t"))
       if (sum(!(round(provisoire_i$pourcentage) == round(provisoire_t$pourcentage))) ==
           0) {
-        title <- ggdraw() + draw_label(paste0("(same distribution to the nearest rounding for both datasets :\n",
+        title <- cowplot::ggdraw() + cowplot::draw_label(paste0("(same distribution to the nearest rounding for both datasets :\n",
                                               gsub("\"", "", gsub("~\"", "", deparse(substitute(name1)))),
                                               " and ", gsub("\"", "", gsub("~\"", "", deparse(substitute(name2)))),
                                               ")"), fontface = "bold", x = 0, hjust = 0,
@@ -197,10 +197,10 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
                                                                                             0, 0, 7))
       }
     else {
-      title <- ggdraw() + draw_label(" \n ")
+      title <- cowplot::ggdraw() + cowplot::draw_label(" \n ")
     }
   }
-  ploting_map <- plot_grid(title, nrow = 2, plot_grid(graph,
+  ploting_map <- cowplot::plot_grid(title, nrow = 2, cowplot::plot_grid(graph,
                                                       legend, ncol = 2), rel_heights = c(0.1, 1)) + theme(plot.background = element_rect(color = "black"))
   if (exists("summary_apparition") & dataframe) {
     df <- data.frame(` ` = c("Stratas appearing", "Stratas disappearing"),

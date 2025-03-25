@@ -130,7 +130,7 @@ strata_with_catches_without_effort = function(main.dir, connectionDB,uploadgoogl
         # config$logger.info("Upload netcdf to Google Drive")
         folder_datasets_id <- "1vvmdaT80ZFHnDZcJyhyIOsf_mOJjB5tA"
         path_to_dataset_new <- file.path(file)
-        drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)
+        googledrive::drive_upload(path_to_dataset_new, googledrive::as_id(folder_datasets_id), overwrite = TRUE)
       }
     }
 

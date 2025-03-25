@@ -52,7 +52,7 @@ bar_plot_default <- function(first,
     # If final data is provided, generate plot for final data and return combined plot
     second[is.na(second)] <- "NA"
     bar_plot <- generate_plot(dataset,title =NULL, dimensioninside = dimension, topninside = topn)
-    # bar_plot <- plot_grid(bar_plot, bar_plot_final, ncol = 2)
+    # bar_plot <- cowplot::plot_grid(bar_plot, bar_plot_final, ncol = 2)
   }
   return(bar_plot)
 }
