@@ -315,12 +315,12 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       set_flextable_defaults(fonts_ignore=TRUE)
       base::options(knitr.duplicate.label = "allow")
-      CWP.dataset::generate_bookdown_yml()
+      bookdown_path <- CWP.dataset::generate_bookdown_yml()
 
       if(sizepdf != "short"){
       futile.logger::flog.info("gitbook")
           bookdown::render_book(
-            input = ".",
+            input = bookdown_path,
             envir = render_env,
             output_format = "bookdown::gitbook",
             output_dir = nameoutput

@@ -97,55 +97,98 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
                                                                    paste((disappearing_stratas %>% dplyr::select(class) %>%
                                                                             distinct())$class, sep = ";")), size = 10)
   }
-  set.seed(2)
-  if (!(is.null(second))) {
-    number <- length(unique(unlist(as.character(c(provisoire_i$class,
-                                                  provisoire_t$class)))))
-  }
-  else {
-    number <- length(unique(unlist(as.character(c(provisoire_i$class)))))
-  }
-  pal <- brewer.pal(number, "Paired")
-  if (!(is.null(second))) {
-    pal = setNames(pal, unique(unlist(as.character(c(provisoire_i$class,
-                                                     provisoire_t$class)))))
-  }
-  else {
-    pal = setNames(pal, unique(unlist(as.character(c(provisoire_i$class)))))
-  }
+classes <- if (!is.null(second)) {
+  unique(unlist(as.character(c(provisoire_i$class, provisoire_t$class))))
+} else {
+  unique(as.character(provisoire_i$class))
+}
+
+# Nombre de classes à colorer
+n_classes <- length(classes)
+
+# Palette sécurisée selon le nombre de classes
+if (n_classes <= 12) {
+  pal <- RColorBrewer::brewer.pal(n_classes, "Paired")
+} else {
+  # Plus de 12 classes → palette alternative
+  pal <- grDevices::rainbow(n_classes)
+}
+
+# Affectation des couleurs par nom de classe (ordre stable)
+pal <- setNames(pal, sort(classes))
   ggplot_i <- ggplot(provisoire_i %>% dplyr::filter(!is.na(class))) +
-    aes(x = "", fill = class, group = class, weight = pourcentage) +
-    geom_bar(position = "fill") + scale_fill_hue(direction = 1) +
-    scale_color_hue(direction = 1) + theme_minimal() + coord_polar("y",
-                                                                   start = 0) + geom_text(first = (provisoire_i %>% dplyr::filter(!is.na(class)) %>%
-                                                                                                     dplyr::mutate_if(is.numeric, round)), size = 3, aes(x = 1,
-                                                                                                                                                         y = ypos_ligne/100, label = paste0(round(pourcentage),
-                                                                                                                                                                                            "%")), color = "black") + theme(axis.ticks.x = element_blank(),
-                                                                                                                                                                                                                            axis.text.x = element_blank()) + labs(x = "", y = "") +
-    scale_fill_manual(values = pal) + guides(fill = guide_legend(title = toupper(r))) +
-    facet_wrap("measurement_unit")
+  aes(x = "", fill = class, group = class, weight = pourcentage) +
+  geom_bar(position = "fill") +
+  scale_fill_hue(direction = 1) +
+  scale_color_hue(direction = 1) +
+  theme_minimal() +
+  coord_polar("y", start = 0) +
+  geom_text(
+    data = provisoire_i %>%
+      dplyr::filter(!is.na(class)) %>%
+      dplyr::mutate_if(is.numeric, round),
+    mapping = aes(
+      x = 1,
+      y = ypos_ligne / 100,
+      label = paste0(round(pourcentage), "%")
+    ),
+    size = 3,
+    color = "black"
+  ) +
+  theme(
+    axis.ticks.x = element_blank(),
+    axis.text.x = element_blank()
+  ) +
+  labs(x = "", y = "") +
+  scale_fill_manual(values = pal) +
+  guides(fill = guide_legend(title = toupper(r))) +
+  facet_wrap("measurement_unit")
+
   if (!is.null(second)) {
-    to_get_legend <- ggplot(rbind(provisoire_i %>% dplyr::filter(!is.na(class)),
-                                  provisoire_t %>% dplyr::filter(!is.na(class)))) +
+     to_get_legend <- ggplot(
+      rbind(
+        provisoire_i %>% dplyr::filter(!is.na(class)),
+        provisoire_t %>% dplyr::filter(!is.na(class))
+      )
+    ) +
       aes(x = "", fill = class, group = class, weight = pourcentage) +
-      geom_bar(position = "fill") + guides(fill = guide_legend(title = toupper(r)))+
+      geom_bar(position = "fill") +
+      guides(fill = guide_legend(title = toupper(r))) +
       scale_fill_manual(values = pal)
+
+    # Extraire la légende avec cowplot
     legend <- cowplot::get_legend(to_get_legend)
+
+    # Graphe pour le final (provisoire_t)
     ggplot_t <- ggplot(provisoire_t %>% dplyr::filter(!is.na(class))) +
       aes(x = "", fill = class, group = class, weight = pourcentage) +
-      geom_bar(position = "fill") + scale_fill_hue(direction = 1) +
-      scale_color_hue(direction = 1) + theme_minimal() +
-      coord_polar("y", start = 0) + geom_text(first = (provisoire_t %>%
-                                                         dplyr::filter(!is.na(class)) %>% dplyr::mutate_if(is.numeric,
-                                                                                                           round)), size = 3, aes(x = 1, y = ypos_ligne/100,
-                                                                                                                                  label = paste0(round(pourcentage), "%")), color = "black") +
-      theme(axis.ticks.x = element_blank(), axis.text.x = element_blank())  +
-      labs(x = "", y = "") +  scale_fill_manual(values = pal) +
+      geom_bar(position = "fill") +
+      scale_fill_hue(direction = 1) +
+      scale_color_hue(direction = 1) +
+      theme_minimal() +
+      coord_polar("y", start = 0) +
+      geom_text(
+        data = provisoire_t %>%
+          dplyr::filter(!is.na(class)) %>%
+          dplyr::mutate_if(is.numeric, round),
+        mapping = aes(
+          x = 1,
+          y = ypos_ligne / 100,
+          label = paste0(round(pourcentage), "%")
+        ),
+        size = 3,
+        color = "black"
+      ) +
+      theme(
+        axis.ticks.x = element_blank(),
+        axis.text.x = element_blank(),
+        legend.position = "none"
+      ) +
+      labs(x = "", y = "") +
+      scale_fill_manual(values = pal) +
       guides(fill = guide_legend(title = toupper(r))) +
-      facet_wrap("measurement_unit") +
-      theme(legend.position = "none")
-  }
-  else {
+      facet_wrap("measurement_unit")
+  }  else {
     legend <- cowplot::get_legend(ggplot_i +
                                     scale_fill_manual(values = pal))
   }

@@ -49,12 +49,12 @@ qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, col
       fwrite(x, file = save_path_data)
     }
 
-    y <- x %>%
-      dplyr::ungroup() %>%
-      dplyr::mutate_if(is.factor, as.character) %>%
-      dplyr::mutate_if(is.character, ~ stringr::str_replace_all(.x, ",", ", \n" )) %>%
-      dplyr::mutate_if(is.character, ~ stringr::str_replace_all(.x, "_", "-" )) %>%
-      dplyr::mutate_if(is.numeric, ~ round(.x, 2))
+y <- x %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate_if(is.factor, as.character) %>%
+  dplyr::mutate_if(is.character, ~ stringr::str_replace_all(.x, ",", ", \n" )) %>%
+  dplyr::mutate_if(is.character, ~ stringr::str_replace_all(.x, "_", "-" )) %>%
+  dplyr::mutate_if(is.numeric, ~ round(.x, 2))
 
 
     if(!is.null(grouped_data)){

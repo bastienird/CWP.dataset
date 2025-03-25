@@ -7,3 +7,7 @@ inst/doc
 docs
 README.html
 _bookdown.yml
+catch_final_small.qs
+catch_init_small.qs
+effort_final_small.qs
+effort_init_small.qs

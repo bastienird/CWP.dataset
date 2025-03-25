@@ -53,7 +53,7 @@ pie_chart_2_default_plotrix <- function (dimension, first, second = NULL, topn =
   # Prepare for second dataset if available
   if (!is.null(second)) {
     provisoire_t <- second %>%
-      dplyr::group_by(across(c(dimension, "measurement_unit"))) %>%
+      dplyr::group_by(dplyr::across(c(dimension, "measurement_unit"))) %>%
       dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE)) %>%
       dplyr::group_by(measurement_unit) %>%
       dplyr::arrange(desc(measurement_value)) %>%

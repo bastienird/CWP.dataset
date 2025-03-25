@@ -1,57 +1,58 @@
 Package: CWP.dataset
 Title: Package to Analyse and Tidy Fisheries Dataset on CWP Standards
-Version: 0.1.3
+Version: 0.1.4
 Authors@R: 
     person("Bastien", "Grasset", , "bastien.grasset@ird.fr", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-9946-1338"))
 Description: This package is to easily analyse standardized CWP data and
     to compare different datasets.
-License: MIT   file LICENSE
+License: MIT + file LICENSE
 URL: https://github.com/bastienird/CWP.dataset,
     https://bastienird.github.io/CWP.dataset
 BugReports: https://github.com/bastienird/CWP.dataset/issues
+Depends: 
+    R (>= 3.5)
 Imports:
     bookdown,
+    cowplot,
+    data.table,
     dplyr,
+    DT,
+    dygraphs,
+    flextable,
+    futile.logger,
     ggplot2,
+    googledrive,
+    grDevices,
+    grid,
+    gridExtra,
     here,
     janitor,
     knitr,
     lubridate,
+    plotrix,
+    purrr,
+    qs,
+    RColorBrewer,
     readr,
     rlang,
     rmarkdown,
-    tmap,
-    data.table,
-    sf,
-    tidyr,
-    xts,
     scales,
-    futile.logger,
-    dygraphs,
-    googledrive,
-    gridExtra,
-    qs,
-    CWP.dataset
-Suggests: 
-    cowplot,
-    DT,
-    flextable,
-    grid,
-    plotrix,
-    purrr,
+    sf,
     stringr,
     tibble,
+    tidyr,
+    tmap,
     tools,
     utils,
+    xts
+Suggests: 
     fusen,
     testthat
 VignetteBuilder: 
     knitr
 Config/fusen/version: 0.7.0
 Encoding: UTF-8
+LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-Depends: 
-    R (>= 3.5)
-LazyData: true

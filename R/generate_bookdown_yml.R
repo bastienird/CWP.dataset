@@ -35,4 +35,5 @@ generate_bookdown_yml <- function(destination = system.file("rmd", package = "CW
 
 
   writeLines(yml_content, file.path(getwd(), "_bookdown.yml"))
+  return(file.path(getwd(), "_bookdown.yml"))
 }
