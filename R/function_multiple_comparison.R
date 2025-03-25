@@ -62,7 +62,7 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
     rm(initfiltered, finalfiltered)
     futile.logger::flog.info("Datasets are different: %s vs %s", parameter_titre_dataset_1, parameter_titre_dataset_2)
 
-    child_env_result <- comprehensive_cwp_dataframe_analysis(
+    child_env_result <- CWP.dataset::comprehensive_cwp_dataframe_analysis(
       parameter_init = parameter_init,
       parameter_final = parameter_final,
       fig.path = new_path,

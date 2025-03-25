@@ -187,7 +187,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
 
 
       } else if ("GRIDTYPE" %notin% colnames(data_list)){
-        data_list <- tidying_GTA_data_for_comparison(dataframe = data_list,
+        data_list <- CWP.dataset::tidying_GTA_data_for_comparison(dataframe = data_list,
                                                      shape = shape_without_geom,
                                                      species_group_dataframe = species_group,
                                                      cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2)
@@ -316,7 +316,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
         )
 
         # Générer l'environnement pour ce fichier
-        child_env_result <- comprehensive_cwp_dataframe_analysis(
+        child_env_result <- CWP.dataset::comprehensive_cwp_dataframe_analysis(
           parameter_init = file_path,
           parameter_final = NULL,
           parameter_fact = "catch",

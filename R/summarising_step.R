@@ -209,7 +209,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       render_env <- list2env(as.list(child_env), parent = child_env)
       list2env(parameters_child_global, envir = render_env)
-      child_env_last_result <- comprehensive_cwp_dataframe_analysis(
+      child_env_last_result <- CWP.dataset::comprehensive_cwp_dataframe_analysis(
         parameter_init = sub_list_dir_2[length(sub_list_dir_2)],
         parameter_final = NULL,
         fig.path = parameters_child_global$fig.path,
@@ -235,7 +235,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       # child_env_last_result$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
       # child_env_last_result$parameter_titre_dataset_2 <- NULL
 
-      child_env_first_to_last_result <- comprehensive_cwp_dataframe_analysis(
+      child_env_first_to_last_result <- CWP.dataset::comprehensive_cwp_dataframe_analysis(
         parameter_init = sub_list_dir_2[1],
         parameter_final = sub_list_dir_2[length(sub_list_dir_2)],
         fig.path = parameters_child_global$fig.path,
