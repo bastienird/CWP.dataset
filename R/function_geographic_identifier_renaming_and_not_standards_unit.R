@@ -9,9 +9,6 @@
 #' @return A modified data frame with renamed columns.
 #' @export
 function_geographic_identifier_renaming_and_not_standards_unit <- function(dataframe_to_filter, geo_dim , parameter_fact, parameter_UNK_for_not_standards_unit = TRUE, geo_dim_group){
-  if(  parameter_UNK_for_not_standards_unit & parameter_fact == "effort"){
-    dataframe_to_filter <- dataframe_to_filter %>% dplyr::mutate(measurement_unit = ifelse(measurement_unit%in%c("HOOKS","FDAYS"), measurement_unit, "UNK" ))}
-
   if(geo_dim != "geographic_identifier" && "geographic_identifier"%notin%colnames(dataframe_to_filter)){
     dataframe_to_filter <- dataframe_to_filter %>% dplyr::rename("geographic_identifier" := {{geo_dim}})
   }

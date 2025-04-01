@@ -23,9 +23,6 @@ if(is_null_or_not_exist(parameter_columns_to_keep)){
 if(is_null_or_not_exist("parameter_diff_value_or_percent")){
   parameter_diff_value_or_percent <- "Difference (in %)"
 }
-if(is_null_or_not_exist(parameter_UNK_for_not_standards_unit)){
-  parameter_UNK_for_not_standards_unit <- TRUE
-}
 
 if(is_null_or_not_exist(parameter_mapped)){parameter_mapped <- TRUE}
 

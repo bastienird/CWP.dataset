@@ -14,7 +14,6 @@
 #' @param parameter_short Logical. Whether to use short parameter names. Default is `FALSE`.
 #' @param parameter_columns_to_keep Character vector. Columns to retain for comparison.
 #' @param parameter_diff_value_or_percent Character. Difference calculation method: `"Difference (in %)"` (default) or `"Difference in value"`.
-#' @param parameter_UNK_for_not_standards_unit Logical. Whether to use `"UNK"` for non-standard measurement units. Default is `TRUE`.
 #' @param parameter_filtering List. Filtering parameters for species and fishing fleet. Default is `list(species = NULL, fishing_fleet = NULL)`.
 #' @param parameter_time_dimension Character vector. Time-related columns to include. Default is `c("time_start")`.
 #' @param parameter_geographical_dimension Character. Column name for geographic identifiers. Default is `"geographic_identifier"`.
@@ -53,7 +52,6 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
                                                                                "Difference (in %)", "Dimension",
                                                                                "Difference in value"),
                                                  parameter_diff_value_or_percent = "Difference (in %)",
-                                                 parameter_UNK_for_not_standards_unit = TRUE,
                                                  parameter_filtering = list(species = NULL, fishing_fleet = NULL),
                                                  parameter_time_dimension = c("time_start"),
                                                  parameter_geographical_dimension = "geographic_identifier",
@@ -133,7 +131,6 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     init,
     geo_dim = parameter_geographical_dimension,
     parameter_fact = parameter_fact,
-    parameter_UNK_for_not_standards_unit = parameter_UNK_for_not_standards_unit,
     geo_dim_group = "GRIDTYPE"
   )
 
@@ -141,7 +138,6 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     final,
     geo_dim = parameter_geographical_dimension,
     parameter_fact = parameter_fact,
-    parameter_UNK_for_not_standards_unit = parameter_UNK_for_not_standards_unit,
     geo_dim_group = "GRIDTYPE"
   )
   #cat("Applying filtering function...\n")
