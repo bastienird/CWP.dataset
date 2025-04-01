@@ -14,7 +14,6 @@ comprehensive_cwp_dataframe_analysis(
     "Values dataset 2", "Loss / Gain", "Difference (in \%)", "Dimension",
     "Difference in value"),
   parameter_diff_value_or_percent = "Difference (in \%)",
-  parameter_UNK_for_not_standards_unit = TRUE,
   parameter_filtering = list(species = NULL, fishing_fleet = NULL),
   parameter_time_dimension = c("time_start"),
   parameter_geographical_dimension = "geographic_identifier",
@@ -48,8 +47,6 @@ comprehensive_cwp_dataframe_analysis(
 \item{parameter_columns_to_keep}{Character vector. Columns to retain for comparison.}
 
 \item{parameter_diff_value_or_percent}{Character. Difference calculation method: \code{"Difference (in \%)"} (default) or \code{"Difference in value"}.}
-
-\item{parameter_UNK_for_not_standards_unit}{Logical. Whether to use \code{"UNK"} for non-standard measurement units. Default is \code{TRUE}.}
 
 \item{parameter_filtering}{List. Filtering parameters for species and fishing fleet. Default is \code{list(species = NULL, fishing_fleet = NULL)}.}
 

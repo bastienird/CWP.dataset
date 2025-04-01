@@ -9,7 +9,6 @@ function_geographic_identifier_renaming_and_not_standards_unit(
   dataframe_to_filter,
   geo_dim,
   parameter_fact,
-  parameter_UNK_for_not_standards_unit = TRUE,
   geo_dim_group
 )
 }
@@ -19,8 +18,6 @@ function_geographic_identifier_renaming_and_not_standards_unit(
 \item{geo_dim}{The geographic dimension to rename.}
 
 \item{parameter_fact}{A parameter indicating the measurement context.}
-
-\item{parameter_UNK_for_not_standards_unit}{Logical indicating if non-standard units should be labeled as 'UNK'.}
 
 \item{geo_dim_group}{The grouping geographic dimension to rename.}
 }
