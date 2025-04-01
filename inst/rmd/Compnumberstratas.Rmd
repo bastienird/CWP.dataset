@@ -1,6 +1,6 @@
 ---
 title: "Compnumberstratas"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
+date: !r format(Sys.time(), '%d %B, %Y')
 date: "2023-09-12"
 output: html_document
 ---

@@ -1,6 +1,6 @@
 ---
 title: "Summary of the treatment for a specific dataset of the Global Tuna Atlas"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
+date: !r format(Sys.time(), '%d %B, %Y')
 author:
   - name: Bastien Grasset
     email: bastien.grasset@ird.fr

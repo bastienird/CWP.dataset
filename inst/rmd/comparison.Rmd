@@ -1,6 +1,6 @@
 ---
 title: "`r ifelse(exists('title_markdown'), title_markdown, 'Comparison of two datasets')`"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
+date: !r format(Sys.time(), '%d %B, %Y')
 author: "BastienG"
 output: html_document
 ---
