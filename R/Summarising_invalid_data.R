@@ -44,7 +44,7 @@ Summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
         continent = WFS$getFeatures("fifao:UN_CONTINENT2")
 
       }
-      qs::qsave(continet, here::here(file.path("data", "continent.qs")))
+      qs::qsave(continent, here::here(file.path("data", "continent.qs")))
     }
   shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
 

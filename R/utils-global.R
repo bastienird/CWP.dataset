@@ -1,7 +1,7 @@
 utils::globalVariables(c(".", "Difference in value",
   "Dataset", "measurement_unit", "write.csv",
   "as_grouped_data", "autofit", "autonum", "brewer.pal",
-  "code", "continet", "curl_download", "cwp_code",
+  "code", "continent", "curl_download", "cwp_code",
   "data_source", "dataset", "dbExecute", "definition",
   "Detail", "Difference", "Difference (in %)",
   "dimension", "Dimension", "draw_label", "explanation_total",
