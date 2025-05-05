@@ -38,7 +38,7 @@ geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_d
   breaks$`Impact on the data` <- factor(breaks$`Impact on the data`,
                                         levels = c("Appearing data", "Gain (more than double)", "Gain",
                                                    "No differences", "Loss", "All data lost"))
-
+browser()
   if (plotting_type == "view") {
     image <- tmap::tm_shape(breaks) +
       tmap::tm_fill(
