@@ -21,8 +21,8 @@ geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_d
                             parameter_geographical_dimension_groupping, continent, plotting_type,
                             titre_1, titre_2, outputonly) {
 
-  geographic_dimension <- fonction_groupement(c(parameter_geographical_dimension, parameter_geographical_dimension_groupping),
-                                              init = init , final = final) %>%
+  geographic_dimension <- CWP.dataset::fonction_groupement(c(parameter_geographical_dimension, parameter_geographical_dimension_groupping),
+                                                           init = init , final = final) %>%
     dplyr::filter(value_sum_1 != 0 | value_sum_2 != 0)
 
   breaks <- dplyr::inner_join(shapefile_fix %>% dplyr::select(cwp_code, geom), geographic_dimension, by = c("cwp_code"="Precision")) %>%
@@ -38,37 +38,15 @@ geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_d
   breaks$`Impact on the data` <- factor(breaks$`Impact on the data`,
                                         levels = c("Appearing data", "Gain (more than double)", "Gain",
                                                    "No differences", "Loss", "All data lost"))
-browser()
-  if (plotting_type == "view") {
-    image <- tmap::tm_shape(breaks) +
-      tmap::tm_fill(
-        col = "Impact on the data",
-        palette = "-PiYG",
-        popup.vars = c(
-          "Unité" = "measurement_unit",
-          "Impact" = "Impact on the data"
-        )
-      ) +
-      tmap::tm_facets(
-        by = c("measurement_unit", parameter_geographical_dimension_groupping),
-        free.scales = FALSE,
-        free.coords = FALSE
-      ) +
-      tmap::tm_layout(legend.outside = TRUE)
-  } else {
-    image <- tmap::tm_shape(breaks) +
-      tmap::tm_fill(
-        col = "Impact on the data",
-        palette = "-PiYG"
-      ) +
-      tmap::tm_facets(
-        by = c("measurement_unit", parameter_geographical_dimension_groupping),
-        free.scales = FALSE,
-        free.coords = FALSE
-      ) +
-      tmap::tm_layout(legend.outside = TRUE)
-    image <- image+tmap::tm_shape(continent) + tmap::tm_borders()
-  }
+
+  image <- tm_shape(breaks) +
+    tm_polygons(
+      fill = "Impact on the data",
+      fill.scale = tm_scale(values = "-PiYG")
+    ) +
+    tm_layout(legend.outside = TRUE) +
+    tmap:::tm_facets_grid(rows = "measurement_unit", columns = parameter_geographical_dimension_groupping)
+  image <- image+tmap::tm_shape(continent) + tmap::tm_borders()
 
   title = paste0("Spatial differences between ", titre_1, " and ", titre_2, " dataset")
   breaks$geom <- NULL
