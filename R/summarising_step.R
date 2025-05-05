@@ -37,64 +37,14 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
   } else if(sizepdf %in% c("middle", "short")){
     coverage = FALSE
   } else {
-    stop('Please provide a correct sizepdf')
+    stop('Please provide a correct sizepdf, "short", "middle" or "long"')
   }
 
   futile.logger::flog.info(paste0("Size pdf is:", sizepdf))
 
-
   ancient_wd <- getwd()
   futile.logger::flog.info("Starting Summarising_step function")
-
-  species_group <- st_read(connectionDB, query = "SELECT taxa_order, code FROM species.species_asfis") %>%
-    janitor::clean_names() %>%
-    dplyr::select(species_group = taxa_order, species = code)
-  futile.logger::flog.info("Loaded species_group data")
-
-  if(!file.exists("data/cl_fishing_mode.csv")){
-    url <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/31756d4c0baf44c6d7d851e93c14c1e6917f7276/global/firms/gta/cl_fishing_mode.csv"
-    destination <- "data/cl_fishing_mode.csv"
-
-    utils::download.file(url, destination, method = "curl")
-  }
-  setwd(ancient_wd)
-  cl_fishing_mode <- readr::read_csv("data/cl_fishing_mode.csv")
-
-  species_label <- st_read(connectionDB, query = "SELECT * FROM species.species_asfis") %>%
-    janitor::clean_names()
-  fishing_fleet_label <- st_read(connectionDB, query = "SELECT * FROM fishing_fleet.fishingfleet_firms") %>%
-    janitor::clean_names()
-
-  cl_cwp_gear_level2 <- st_read(connectionDB, query = "SELECT * FROM gear_type.isscfg_revision_1") %>%
-    dplyr::select(Code = code, Gear = label)
-
-  futile.logger::flog.info("Loaded cl_cwp_gear_level2 data")
-
-  shapefile.fix <- st_read(connectionDB, query = "SELECT * FROM area.cwp_grid") %>%
-    dplyr::rename(GRIDTYPE = gridtype)
-  futile.logger::flog.info("Loaded shapefile.fix data")
-
-  continent <- tryCatch({
-    st_read(connectionDB, query = "SELECT * FROM public.continent")
-  }, error = function(e) {
-    futile.logger::flog.error("An error occurred while reading continent data: %s", e$message)
-    NULL
-  })
-
-  if (is.null(continent)) {
-    futile.logger::flog.warn("Continent data not found in the database. Fetching from WFS service.")
-    url <- "https://www.fao.org/fishery/geoserver/wfs"
-    serviceVersion <- "1.0.0"
-    logger <- "INFO"
-    WFS <- WFSClient$new(url = "https://www.fao.org/fishery/geoserver/fifao/wfs", serviceVersion = "1.0.0", logger = "INFO")
-    continent <- WFS$getFeatures("fifao:UN_CONTINENT2")
-    futile.logger::flog.info("Fetched continent data from WFS service")
-  }
-
-  shape_without_geom <- shapefile.fix %>%
-    as_tibble() %>%
-    dplyr::select(-geom)
-  futile.logger::flog.info("Processed shapefile.fix data")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/tunaatlas_scripts/generation/enrich_dataset_if_needed.R")
 
   entity_dirs <- list.dirs(file.path(main_dir, "entities"), full.names = TRUE, recursive = FALSE)
   # entity_dirs <- entity_dirs[2]
@@ -116,14 +66,14 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
     if (opts$fact == "effort") {
       futile.logger::flog.warn("Effort dataset not displayed for now")
-      parameter_colnames_to_keep_fact = c("source_authority", "fishing_mode", "geographic_identifier","fishing_fleet", "gear_type",
-                                          "measurement_unit", "measurement_value", "GRIDTYPE","species_group")
+      parameter_colnames_to_keep_fact = c("source_authority", "fishing_mode_label", "geographic_identifier","fishing_fleet_label","gear_type_label",
+                                          "measurement_unit", "measurement_value", "gridtype","species_group", "species_label", "measurement_type")
       topnumberfact = 3
     } else {
-      parameter_colnames_to_keep_fact = c("source_authority", "species", "gear_type", "fishing_fleet",
-                                          "fishing_mode", "geographic_identifier",
-                                          "measurement_unit", "measurement_value", "GRIDTYPE",
-                                          "species_group", "Gear")
+      parameter_colnames_to_keep_fact = c("source_authority", "fishing_fleet_label",
+                                          "fishing_mode_label", "geographic_identifier",
+                                          "measurement_unit", "measurement_value", "gridtype",
+                                          "species_group", "species_label", "gear_type_label")
       topnumberfact = 6
 
     }
@@ -142,38 +92,11 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         if (!file.exists(gsub(pattern = basename(file), replacement = "ancient.qs", file))) {
           data <- qs::qread(file)
           file.copy(from = file, to = gsub(pattern = basename(file), replacement = "ancient.qs", file))
+          data <- enrich_dataset_if_needed(data)
+          data <- data%>%dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT","t","MTNO", "Tons")~ "Tons",
+              measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ measurement_unit))
 
-          if ("GRIDTYPE" %notin% colnames(data)) {
-            data <- data %>%
-              dplyr::mutate(geographic_identifier = as.character(geographic_identifier),
-                            gear_type = as.character(gear_type))
-
-            if("GRIDTYPE"%in%colnames(data)){
-              data <- data%>%dplyr::mutate(GRIDTYPE = as.character(GRIDTYPE))
-            }
-            if("geographic_identifier"%in%colnames(data) & !is.null(shape_without_geom)){
-              data <- data%>%  dplyr::left_join(shape_without_geom %>%
-                                                  dplyr::select(GRIDTYPE, cwp_code), by = c("geographic_identifier"="cwp_code"))
-              if(!is.null(species_group) && ("species" %in% colnames(data))){
-                data <- data %>% dplyr::left_join(species_group%>% dplyr::distinct(), by = c("species"))
-              }
-
-              if("gear_type" %in%colnames(data) & !is.null(cl_cwp_gear_level2) ){
-                data <- data %>% dplyr::left_join(cl_cwp_gear_level2, by = c("gear_type" = "Code"))
-              }
-
-              data <- data%>%dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT","t","MTNO", "Tons")~ "Tons",
-                                                                                         measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ measurement_unit))
-
-              data <- data %>% dplyr::left_join(cl_fishing_mode %>% dplyr::select(code, fishing_mode_label = label), by = c("fishing_mode" = "code"))
-
-
-              data <- data %>% dplyr::left_join(fishing_fleet_label %>% dplyr::select(code,fishing_fleet_label = label), by = c("fishing_fleet" = "code"))
-              if (!is.null(species_group) && ("species" %in%
-                                              colnames(data))) {
-              data <- data %>% dplyr::left_join(species_label %>% dplyr::select(code,species_label = label, species_definition = definition), by = c("species" = "code"))
-              }
-              qs::qsave(data, file = file)
+          qs::qsave(data, file = file)
             futile.logger::flog.info("Processed and saved data for file: %s", file)
           }
         }
@@ -249,7 +172,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         coverage = TRUE,
         parameter_resolution_filter = parameters_child_global$parameter_resolution_filter,
         parameter_filtering = parameters_child_global$parameter_filtering,
-        parameter_titre_dataset_1 = "FirmsLevel0",
+        parameter_titre_dataset_1 = basename(sub_list_dir_2[1]),
         parameter_titre_dataset_2 = entity$identifiers[["id"]],
         unique_analyse = FALSE
       )

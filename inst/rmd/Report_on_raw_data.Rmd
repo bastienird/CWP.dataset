@@ -1,6 +1,6 @@
 ---
 title: "`r paste0('Report on raw data for dataset: ', ifelse(exists('dataset', envir = environment()), dataset, 'NULL'))`"
-date: !r format(Sys.time(), '%d %B, %Y')
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 author:
   - name: Bastien Grasset
     email: bastien.grasset@ird.fr
