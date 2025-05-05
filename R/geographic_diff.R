@@ -39,6 +39,7 @@ geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_d
                                         levels = c("Appearing data", "Gain (more than double)", "Gain",
                                                    "No differences", "Loss", "All data lost"))
   browser()
+
   if (plotting_type == "view") {
     image <- tmap::tm_shape(breaks) +
       tmap::tm_fill(
@@ -54,8 +55,7 @@ geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_d
         free.scales = FALSE,
         free.coords = FALSE
       ) +
-      tmap::tm_layout(legend.outside = TRUE)
-  } else {
+      tmap::tm_layout(legend.outside = TRUE) } else {
     image <- tmap::tm_shape(breaks) +
       tmap::tm_fill(
         col = "Impact on the data",
