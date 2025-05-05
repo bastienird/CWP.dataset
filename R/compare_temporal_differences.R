@@ -38,7 +38,8 @@ compare_temporal_differences <- function(parameter_time_dimension, init, final, 
       theme(legend.position = "top") +
       facet_wrap(vars(measurement_unit), nrow = 2L) + theme_bw() +
       labs(x = filtering_unit) +
-      facet_grid("measurement_unit", scales = "free_y")
+      facet_grid(rows = vars(measurement_unit), scales = "free_y")
+
   }, dataframe = Groupped_all_time)
 
   titles <- paste0("Difference in percent of value for the dimension ", parameter_time_dimension, " for ", titre_1, " and ", titre_2, " dataset ")

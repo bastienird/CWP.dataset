@@ -51,7 +51,8 @@ time_coverage_analysis <- function(time_dimension_list_groupped, parameter_time_
       theme(legend.position = "top") +
       facet_wrap(vars(measurement_unit), nrow = 2L) +
       labs(x = unique(x$Dimension), y = "Values") +
-      facet_grid("measurement_unit", scales = "free_y")
+      facet_grid(rows = vars(measurement_unit), scales = "free_y")
+
   })
 
   return(list(titles = titles_time, plots = time_dimension_list_groupped_diff_image))

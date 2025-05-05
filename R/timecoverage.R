@@ -55,7 +55,8 @@ timecoverage <- function(parameter_time_dimension, unique_analyse, titre_1 = "ti
       theme(legend.position = "top") +
       facet_wrap(vars(measurement_unit), nrow = 2L) +
       labs(x = unique(x$Dimension), y = "Values") +
-      facet_grid("measurement_unit", scales = "free_y")
+      facet_grid(rows = vars(measurement_unit), scales = "free_y")
+
   })
 
   # temporalcoveragelistplot chunk
