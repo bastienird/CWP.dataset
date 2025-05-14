@@ -42,7 +42,9 @@ geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_d
   image <- tm_shape(breaks) +
     tm_polygons(
       fill = "Impact on the data",
-      fill.scale = tm_scale(values = "-PiYG")
+      palette = rev(brewer.pal(6, "PiYG")),
+      border.col = NA,
+      lwd        = 0
     ) +
     tm_layout(legend.outside = TRUE) +
     tmap:::tm_facets_grid(rows = "measurement_unit", columns = parameter_geographical_dimension_groupping)
