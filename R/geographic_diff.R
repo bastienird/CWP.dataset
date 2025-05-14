@@ -40,14 +40,14 @@ geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_d
                                                    "No differences", "Loss", "All data lost"))
 
   image <- tm_shape(breaks) +
-    tm_polygons(
+    tmap::tm_polygons(
       fill = "Impact on the data",
       palette = rev(brewer.pal(6, "PiYG")),
       border.col = NA,
       lwd        = 0
     ) +
-    tm_layout(legend.outside = TRUE) +
-    tmap:::tm_facets_grid(rows = "measurement_unit", columns = parameter_geographical_dimension_groupping)
+    tmap::tm_layout(legend.outside = TRUE) +
+    tmap::tm_facets_grid(rows = "measurement_unit", columns = parameter_geographical_dimension_groupping)
   image <- image+tmap::tm_shape(continent) + tmap::tm_borders()
 
   title = paste0("Spatial differences between ", titre_1, " and ", titre_2, " dataset")
