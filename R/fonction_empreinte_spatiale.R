@@ -23,6 +23,11 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
   if(is.null(shapefile.fix)){
     stop("Please provide a shape for the polygons")
   }
+  tmap_options(
+    show.messages = FALSE,
+    show.warnings = FALSE
+  )
+
 
   selection <- function(x) {
     x[, .(geographic_identifier = as.character(geographic_identifier),
@@ -57,23 +62,25 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
       image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
         tm_fill(
           col = "measurement_value",
-          palette = "RdYlGn",
+          palette = "brewer.rd_yl_gn",
           style = "cont",
           n = 8,
           midpoint = 0
         ) +
-        tm_layout(legend.outside = FALSE) +
+        tm_layout(legend.outside = FALSE,
+                  component.autoscale = FALSE) +
         tmap:::tm_facets_grid(rows = "GRIDTYPE", columns = "source")
     } else {
       image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
         tm_fill(
           col = "measurement_value",
-          palette = "RdYlGn",
+          palette = "brewer.rd_yl_gn",
           style = "cont",
           n = 8,
           midpoint = 0
-        ) +
-        tm_layout(legend.outside = FALSE) +
+        )+tm_borders(lwd = 0.05) +
+        tm_layout(legend.outside = FALSE,
+                  component.autoscale = FALSE) +
         tmap:::tm_facets_grid(rows = "GRIDTYPE", columns = "source") +
         tm_shape(continent) + tm_borders()
     }
