@@ -13,6 +13,9 @@ if (!is.null(all_list)) {
 
 # Function to process each list item and knit the child document
 process_list_item <- function(list_item, template) {
+  if(is.characeter(list_item)){
+    list_item <- qs::qread(list_item)
+  }
   child_env_result <- list2env(list_item, new.env())
   
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Functions_markdown.R", local = child_env_result)

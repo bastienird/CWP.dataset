@@ -99,11 +99,9 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           qs::qsave(data, file = file)
             futile.logger::flog.info("Processed and saved data for file: %s", file)
           }
-        }
         } else {
           futile.logger::flog.info("Retrieving processed data: %s", file)
 
-      }
       }
       parameter_resolution_filter <- opts$resolution_filter
       parameter_filtering <- opts$parameter_filtering
@@ -160,7 +158,9 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       # child_env_last_result$unique_analyse <- TRUE
       # child_env_last_result$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
       # child_env_last_result$parameter_titre_dataset_2 <- NULL
-
+      if(!fast_and_heavy){
+      qs::qsave(child_env_last_result, "path_to_qs_final.qs")
+      }
       child_env_first_to_last_result <- CWP.dataset::comprehensive_cwp_dataframe_analysis(
         parameter_init = sub_list_dir_2[1],
         parameter_final = sub_list_dir_2[length(sub_list_dir_2)],
@@ -187,6 +187,9 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       child_env_first_to_last_result$parameter_titre_dataset_2 <- entity$identifiers[["id"]]
       child_env_first_to_last_result$child_header <- "#"
 
+      if(!fast_and_heavy){
+      qs::qsave(child_env_first_to_last_result, "path_to_qs_summary.qs")
+      }
       sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
       render_env$sub_list_dir_3 <- sub_list_dir_3
       if(opts$fact == "effort"){
@@ -205,10 +208,84 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       if(sizepdf %in% c("long", "middle")){
 
       final_step <- length(sub_list_dir_3) - 1
-      all_list <- lapply(1:final_step, CWP.dataset::function_multiple_comparison, parameter_short = FALSE, sub_list_dir = sub_list_dir_3,
-                         shapefile.fix = shapefile.fix,
-                         continent = continent,
-                         parameters_child_global = parameters_child_global, fig.path = render_env$fig.path, coverage = coverage)
+      fast_and_heavy_t_f <- fast_and_heavy
+      run_comparisons <- function(final_step,
+                                  fast_and_heavy = TRUE,
+                                  sub_list_dir_3,
+                                  shapefile.fix,
+                                  continent,
+                                  parameters_child_global,
+                                  fig.path,
+                                  coverage) {
+        # s’assure que fig.path existe
+        if (!dir.exists(fig.path)) {
+          dir.create(fig.path, recursive = TRUE)
+        }
+
+        seq_i <- seq_len(final_step)
+
+        if (fast_and_heavy) {
+          # version “lourde” : on retourne la liste d’objets en mémoire
+          all_list <- lapply(seq_i, function(i) {
+            CWP.dataset::function_multiple_comparison(
+              i,
+              parameter_short        = FALSE,
+              sub_list_dir           = sub_list_dir_3,
+              shapefile.fix          = shapefile.fix,
+              continent              = continent,
+              parameters_child_global = parameters_child_global,
+              fig.path               = fig.path,
+              coverage               = coverage
+            )
+          })
+          return(all_list)
+        } else {
+          # version “rapide” : on sauve chaque résultat en .qs et on retourne les chemins
+          all_paths <- lapply(seq_i, function(i) {
+            # calcul du résultat
+            res_i <- CWP.dataset::function_multiple_comparison(
+              i,
+              parameter_short        = FALSE,
+              sub_list_dir           = sub_list_dir_3,
+              shapefile.fix          = shapefile.fix,
+              continent              = continent,
+              parameters_child_global = parameters_child_global,
+              fig.path               = fig.path,
+              coverage               = coverage
+            )
+
+            # nom unique du fichier
+            out_file <- file.path(
+              fig.path,
+              sprintf("comparison_step_%02d.qs", i)
+            )
+
+            # sérieusement rapide
+            qs::qsave(res_i, file = out_file, preset = "high")
+
+            # nettoyage mémoire
+            rm(res_i)
+            gc()
+
+            # retourne le chemin
+            out_file
+          })
+          # lapply renvoie une liste, on la retourne directement
+          return(all_paths)
+        }
+      }
+
+      all_list <- run_comparisons(
+        final_step = final_step,
+        fast_and_heavy = fast_and_heavy_t_f,
+        sub_list_dir_3           = sub_list_dir_3,
+        shapefile.fix            = shapefile.fix,
+        continent                = continent,
+        parameters_child_global  = parameters_child_global,
+        fig.path                 = "cache",
+        coverage                 = coverage
+      )
+
 
       futile.logger::flog.info("all_list processed")
 
@@ -230,8 +307,17 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       render_env$plotting_type <- "view"
       render_env$fig.path <- new_path
 
+
+      if(fast_and_heavy){
       if(savestep){
         qs::qsave(render_env, file = paste0(sizepdf, paste0(source_authoritylist[s],"renderenv.qs")))
+      }
+      } else {
+        render_env$child_env_first_to_last_result <- NULL
+        render_env$child_env_last_result <- NULL
+        render_env$path_to_qs_summary <- "path_to_qs_summary.qs"
+        render_env$path_to_qs_final <- "path_to_qs_final.qs"
+        gc()
       }
         }
 
