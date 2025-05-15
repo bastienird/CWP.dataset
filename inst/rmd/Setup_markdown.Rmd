@@ -1,7 +1,7 @@
 ---
 title: "Setup_markdown"
-date: !r format(Sys.time(), '%d %B, %Y')
-author: "BastienG"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+author: "BastienGrasset"
 output: html_document
 ---
 

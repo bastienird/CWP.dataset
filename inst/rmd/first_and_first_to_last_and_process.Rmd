@@ -5,12 +5,27 @@ res <- knitr::knit_child(system.file("rmd/Setup_markdown.Rmd", package = "CWP.da
 
 ```
 
-# Summary of the final provided data : `r gsub("_", "", entity$identifiers[["id"]])`
+# Summary of the final provided data : `r ifelse(exists("datasetname"), datasetname, gsub("_", "", entity$identifiers[["id"]]))`
+
+```{r pathtoqsfinal}
+
+if(exists("path_to_qs_final")){
+  
+  child_env_last_result <- qs::qread(path_to_qs_final)
+  child_env_last <- list2env(as.list(child_env_last_result), parent = new.env())
+  
+} else {
+  
+  child_env_last <- list2env(as.list(child_env_last_result), parent = new.env())
+  
+}
+```
+
 
 ```{r analysislast, message=TRUE, warning=TRUE, include=FALSE}
 
-child_env_last <- list2env(as.list(child_env_last_result), parent = new.env())
-
+rm(child_env_last_result)
+gc()
 res_last <- knitr::knit_child(system.file("rmd/comparison.Rmd", package = "CWP.dataset"), quiet = TRUE, envir = child_env_last)
 
 # rm(child_env_last_result, envir = environment())
@@ -37,13 +52,26 @@ gc()
 
 # Summary of the treatment done on the data (comparison between the Initial data and the data resulting from treatments)
 
+```{r pathtoqssummary}
+
+if(exists("path_to_qs_summary")){
+  
+  child_env_first_to_last_result <- qs::qread(path_to_qs_summary)
+  child_env_first_to_last <- list2env(as.list(child_env_first_to_last_result), parent = new.env())
+  
+} else {
+  
+  child_env_first_to_last <- list2env(as.list(child_env_first_to_last_result), parent = new.env())
+  
+}
+
+```
 
 ```{r complastfirst, include=FALSE, results='asis'}
 
 
-child_env_first_to_last <- list2env(as.list(child_env_first_to_last_result), parent = new.env())
-
 res_comparison_first_to_last <- knitr::knit_child(system.file("rmd/comparison.Rmd", package = "CWP.dataset"), quiet = TRUE, envir = child_env_first_to_last)
+
 rm(child_env_first_to_last)
 # rm(child_env_first_to_last_result)
 gc()
@@ -70,7 +98,7 @@ gc()
 
 # Analyse of the processing of the data
 
-The following table recap all the treatment done on the data provided by tRFMOs.
+The following table recap all the treatment done on the mapped and standardized rawdata provided by tRFMOs.
 
 ```{r results='asis'}
 
@@ -81,6 +109,7 @@ qflextable2(process_fisheries_data_list$reduced, captionn =process_fisheries_dat
 ```{r message=FALSE, warning=FALSE}
 
 save_image(title= process_fisheries_data_list$fig.capp, plott = process_fisheries_data_list$cowplot, folder = "Summary", fig.pathinside = fig.path)
+
 ```
 
 

@@ -37,68 +37,14 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
   } else if(sizepdf %in% c("middle", "short")){
     coverage = FALSE
   } else {
-    stop('Please provide a correct sizepdf')
+    stop('Please provide a correct sizepdf, "short", "middle" or "long"')
   }
 
   futile.logger::flog.info(paste0("Size pdf is:", sizepdf))
 
-
   ancient_wd <- getwd()
   futile.logger::flog.info("Starting Summarising_step function")
-
-  species_group <- st_read(connectionDB, query = "SELECT taxa_order, code FROM species.species_asfis") %>%
-    janitor::clean_names() %>%
-    dplyr::select(species_group = taxa_order, species = code)
-  futile.logger::flog.info("Loaded species_group data")
-
-  if(!file.exists("data/cl_fishing_mode.csv")){
-    url <- "https://raw.githubusercontent.com/fdiwg/fdi-codelists/31756d4c0baf44c6d7d851e93c14c1e6917f7276/global/firms/gta/cl_fishing_mode.csv"
-    destination <- "data/cl_fishing_mode.csv"
-
-    utils::download.file(url, destination, method = "curl")
-  }
-  setwd(ancient_wd)
-  cl_fishing_mode <- readr::read_csv("data/cl_fishing_mode.csv")
-
-  species_label <- st_read(connectionDB, query = "SELECT * FROM species.species_asfis") %>%
-    janitor::clean_names()
-  fishing_fleet_label <- st_read(connectionDB, query = "SELECT * FROM fishing_fleet.fishingfleet_firms") %>%
-    janitor::clean_names()
-
-  cl_cwp_gear_level2 <- st_read(connectionDB, query = "SELECT * FROM gear_type.isscfg_revision_1") %>%
-    dplyr::select(Code = code, Gear = label)
-
-  futile.logger::flog.info("Loaded cl_cwp_gear_level2 data")
-
-  cwp_grid_file <- system.file("extdata", "cl_areal_grid.csv", package = "CWP.dataset")
-  if (!file.exists(cwp_grid_file)) {
-    stop("cl_areal_grid.csv not found in inst/extdata — run data-raw/download_codelists.R")
-  }
-  shapefile.fix <- st_read(cwp_grid_file) %>%
-    st_as_sf(wkt = "geom_wkt", crs = 4326) %>%
-    rename(cwp_code = CWP_CODE, geom = geom_wkt)
-
-  continent <- tryCatch({
-    st_read(connectionDB, query = "SELECT * FROM public.continent")
-  }, error = function(e) {
-    futile.logger::flog.error("An error occurred while reading continent data: %s", e$message)
-    NULL
-  })
-
-  if (is.null(continent)) {
-    futile.logger::flog.warn("Continent data not found in the database. Fetching from WFS service.")
-    url <- "https://www.fao.org/fishery/geoserver/wfs"
-    serviceVersion <- "1.0.0"
-    logger <- "INFO"
-    WFS <- WFSClient$new(url = "https://www.fao.org/fishery/geoserver/fifao/wfs", serviceVersion = "1.0.0", logger = "INFO")
-    continent <- WFS$getFeatures("fifao:UN_CONTINENT2")
-    futile.logger::flog.info("Fetched continent data from WFS service")
-  }
-
-  shape_without_geom <- shapefile.fix %>%
-    as_tibble() %>%
-    dplyr::select(-geom)
-  futile.logger::flog.info("Processed shapefile.fix data")
+  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/tunaatlas_scripts/generation/enrich_dataset_if_needed.R")
 
   entity_dirs <- list.dirs(file.path(main_dir, "entities"), full.names = TRUE, recursive = FALSE)
   # entity_dirs <- entity_dirs[2]
@@ -120,13 +66,14 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
     if (opts$fact == "effort") {
       futile.logger::flog.warn("Effort dataset not displayed for now")
-      parameter_colnames_to_keep_fact = c("source_authority", "fishing_mode", "geographic_identifier","fishing_fleet", "gear_type",
-                                          "measurement_unit", "measurement_value", "gridtype","species_group")
+      parameter_colnames_to_keep_fact = c("source_authority", "fishing_mode_label", "geographic_identifier","fishing_fleet_label","gear_type_label",
+                                          "measurement_unit", "measurement_value", "gridtype","species_group", "species_label", "measurement_type")
       topnumberfact = 3
     } else {
-      parameter_colnames_to_keep_fact = c("source_authority", "species_label", "gear_type_label", "fishing_fleet_label",
+      parameter_colnames_to_keep_fact = c("source_authority", "fishing_fleet_label",
                                           "fishing_mode_label", "geographic_identifier",
-                                          "measurement_unit_label", "measurement_value", "gridtype", "measurement_processing_level_label")
+                                          "measurement_unit", "measurement_value", "gridtype",
+                                          "species_group", "species_label", "gear_type_label")
       topnumberfact = 6
 
     }
@@ -145,16 +92,16 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         if (!file.exists(gsub(pattern = basename(file), replacement = "ancient.qs", file))) {
           data <- qs::qread(file)
           file.copy(from = file, to = gsub(pattern = basename(file), replacement = "ancient.qs", file))
+          data <- enrich_dataset_if_needed(data)
+          data <- data%>%dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT","t","MTNO", "Tons")~ "Tons",
+              measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ measurement_unit))
 
-          if ("gridtype" %notin% colnames(data)) {
-            data <- CWP.dataset::enrich_dataset_if_needed(data)
-            qs::qsave(data, file = file)
+          qs::qsave(data, file = file)
             futile.logger::flog.info("Processed and saved data for file: %s", file)
           }
         } else {
           futile.logger::flog.info("Retrieving processed data: %s", file)
 
-      }
       }
       parameter_resolution_filter <- opts$resolution_filter
       parameter_filtering <- opts$parameter_filtering
@@ -211,7 +158,9 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       # child_env_last_result$unique_analyse <- TRUE
       # child_env_last_result$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
       # child_env_last_result$parameter_titre_dataset_2 <- NULL
-
+      if(!fast_and_heavy){
+      qs::qsave(child_env_last_result, "path_to_qs_final.qs")
+      }
       child_env_first_to_last_result <- CWP.dataset::comprehensive_cwp_dataframe_analysis(
         parameter_init = sub_list_dir_2[1],
         parameter_final = sub_list_dir_2[length(sub_list_dir_2)],
@@ -223,7 +172,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         coverage = TRUE,
         parameter_resolution_filter = parameters_child_global$parameter_resolution_filter,
         parameter_filtering = parameters_child_global$parameter_filtering,
-        parameter_titre_dataset_1 = "FirmsLevel0",
+        parameter_titre_dataset_1 = basename(sub_list_dir_2[1]),
         parameter_titre_dataset_2 = entity$identifiers[["id"]],
         unique_analyse = FALSE
       )
@@ -238,6 +187,9 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       child_env_first_to_last_result$parameter_titre_dataset_2 <- entity$identifiers[["id"]]
       child_env_first_to_last_result$child_header <- "#"
 
+      if(!fast_and_heavy){
+      qs::qsave(child_env_first_to_last_result, "path_to_qs_summary.qs")
+      }
       sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
       render_env$sub_list_dir_3 <- sub_list_dir_3
       if(opts$fact == "effort"){
@@ -256,10 +208,84 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       if(sizepdf %in% c("long", "middle")){
 
       final_step <- length(sub_list_dir_3) - 1
-      all_list <- lapply(1:final_step, CWP.dataset::function_multiple_comparison, parameter_short = FALSE, sub_list_dir = sub_list_dir_3,
-                         shapefile.fix = shapefile.fix,
-                         continent = continent,
-                         parameters_child_global = parameters_child_global, fig.path = render_env$fig.path, coverage = coverage)
+      fast_and_heavy_t_f <- fast_and_heavy
+      run_comparisons <- function(final_step,
+                                  fast_and_heavy = TRUE,
+                                  sub_list_dir_3,
+                                  shapefile.fix,
+                                  continent,
+                                  parameters_child_global,
+                                  fig.path,
+                                  coverage) {
+        # s’assure que fig.path existe
+        if (!dir.exists(fig.path)) {
+          dir.create(fig.path, recursive = TRUE)
+        }
+
+        seq_i <- seq_len(final_step)
+
+        if (fast_and_heavy) {
+          # version “lourde” : on retourne la liste d’objets en mémoire
+          all_list <- lapply(seq_i, function(i) {
+            CWP.dataset::function_multiple_comparison(
+              i,
+              parameter_short        = FALSE,
+              sub_list_dir           = sub_list_dir_3,
+              shapefile.fix          = shapefile.fix,
+              continent              = continent,
+              parameters_child_global = parameters_child_global,
+              fig.path               = fig.path,
+              coverage               = coverage
+            )
+          })
+          return(all_list)
+        } else {
+          # version “rapide” : on sauve chaque résultat en .qs et on retourne les chemins
+          all_paths <- lapply(seq_i, function(i) {
+            # calcul du résultat
+            res_i <- CWP.dataset::function_multiple_comparison(
+              i,
+              parameter_short        = FALSE,
+              sub_list_dir           = sub_list_dir_3,
+              shapefile.fix          = shapefile.fix,
+              continent              = continent,
+              parameters_child_global = parameters_child_global,
+              fig.path               = fig.path,
+              coverage               = coverage
+            )
+
+            # nom unique du fichier
+            out_file <- file.path(
+              fig.path,
+              sprintf("comparison_step_%02d.qs", i)
+            )
+
+            # sérieusement rapide
+            qs::qsave(res_i, file = out_file, preset = "high")
+
+            # nettoyage mémoire
+            rm(res_i)
+            gc()
+
+            # retourne le chemin
+            out_file
+          })
+          # lapply renvoie une liste, on la retourne directement
+          return(all_paths)
+        }
+      }
+
+      all_list <- run_comparisons(
+        final_step = final_step,
+        fast_and_heavy = fast_and_heavy_t_f,
+        sub_list_dir_3           = sub_list_dir_3,
+        shapefile.fix            = shapefile.fix,
+        continent                = continent,
+        parameters_child_global  = parameters_child_global,
+        fig.path                 = "cache",
+        coverage                 = coverage
+      )
+
 
       futile.logger::flog.info("all_list processed")
 
@@ -281,8 +307,17 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       render_env$plotting_type <- "view"
       render_env$fig.path <- new_path
 
+
+      if(fast_and_heavy){
       if(savestep){
         qs::qsave(render_env, file = paste0(sizepdf, paste0(source_authoritylist[s],"renderenv.qs")))
+      }
+      } else {
+        render_env$child_env_first_to_last_result <- NULL
+        render_env$child_env_last_result <- NULL
+        render_env$path_to_qs_summary <- "path_to_qs_summary.qs"
+        render_env$path_to_qs_final <- "path_to_qs_final.qs"
+        gc()
       }
         }
 
