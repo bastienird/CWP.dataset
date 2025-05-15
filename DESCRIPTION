@@ -45,7 +45,8 @@ Imports:
     tmap,
     tools,
     utils,
-    xts
+    xts,
+    DBI
 Suggests: 
     fusen,
     testthat

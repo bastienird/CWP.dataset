@@ -1,6 +1,6 @@
 ---
 title: "Summary of the treatment for a specific dataset of the Global Tuna Atlas"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
+date: "`r format(Sys.time(), '%B, %Y')`"
 author:
   - name: Bastien Grasset
     email: bastien.grasset@ird.fr
@@ -51,11 +51,11 @@ tables: TRUE
 fancyhdr:
   first:
     headleft: "Global Tuna Atlas outputs and process"
-    headright: "2023"
+    headright: "2025"
     headrulewidth: 0pt
   subsequent:
     headleft: "Global Tuna Atlas outputs and process"
-    headright: "2023"
+    headright: "2025"
     headrulewidth: 1pt
     footrulewidth: 0pt
 ---
