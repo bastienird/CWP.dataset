@@ -55,7 +55,8 @@ processing it, and rendering output reports.</p>
 <span>  sizepdf <span class="op">=</span> <span class="st">"long"</span>,</span>
 <span>  savestep <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  nameoutput <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  usesave <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  usesave <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  fast_and_heavy <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -80,10 +81,7 @@ processing it, and rendering output reports.</p>
 
 
 <dt id="arg-sizepdf">sizepdf<a class="anchor" aria-label="anchor" href="#arg-sizepdf"></a></dt>
-<dd><p>Character string. La taille peut prendre les valeurs suivantes :</p><ul><li><p><code>"long"</code> (par défaut) : Long with coverage.</p></li>
-<li><p><code>"middle"</code> : Long without coverage</p></li>
-<li><p><code>"short"</code> : Only first characteristics, first differences and main table of steps</p></li>
-</ul></dd>
+<dd><p>Character string. La taille peut prendre les valeurs suivantes :</p></dd>
 
 
 <dt id="arg-savestep">savestep<a class="anchor" aria-label="anchor" href="#arg-savestep"></a></dt>
@@ -96,6 +94,13 @@ processing it, and rendering output reports.</p>
 
 <dt id="arg-usesave">usesave<a class="anchor" aria-label="anchor" href="#arg-usesave"></a></dt>
 <dd><p>Logical Should we use the nameoutput .qs instead of rerunning everything ?</p></dd>
+
+
+<dt id="arg-fast-and-heavy">fast_and_heavy<a class="anchor" aria-label="anchor" href="#arg-fast-and-heavy"></a></dt>
+<dd><p>Logical TRUE/FALSE, should we save a .qs for each dataset, and use this .qs in every markdown</p><ul><li><p><code>"long"</code> (par défaut) : Long with coverage.</p></li>
+<li><p><code>"middle"</code> : Long without coverage</p></li>
+<li><p><code>"short"</code> : Only first characteristics, first differences and main table of steps</p></li>
+</ul></dd>
 
 </dl></div>
     <div class="section level2">
