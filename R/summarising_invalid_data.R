@@ -27,7 +27,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   library(DBI)
   library(here)
 
-  # Définition des chemins
+  # Definition des chemins
   dir.create(here("data"), showWarnings = FALSE)
 
   # Fonctions de fallback
@@ -35,7 +35,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     if (!is.null(con) && DBI::dbIsValid(con)) {
       res <- try(DBI::dbGetQuery(con, "SELECT 1"), silent = TRUE)
       if (!inherits(res, "try-error")) {
-        message("Connexion à la base réussie, récupération via SQL : ", query)
+        message("Connexion a la base reussie, recuperation via SQL : ", query)
         return(DBI::dbGetQuery(con, query))
       }
     }
@@ -43,7 +43,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     message("Pas de connexion valide. ")
     if (!file.exists(fallback_file)) {
       if (!is.null(download_url)) {
-        message("Téléchargement depuis ", download_url)
+        message("Telechargement depuis ", download_url)
         download.file(download_url, fallback_file, mode = "wb")
       } else {
         stop("Fichier requis manquant : ", fallback_file)
@@ -57,14 +57,14 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     if (!is.null(con) && DBI::dbIsValid(con)) {
       res <- try(DBI::dbGetQuery(con, "SELECT 1"), silent = TRUE)
       if (!inherits(res, "try-error")) {
-        message("Connexion à la base réussie, lecture via st_read : ", query)
+        message("Connexion a la base reussie, lecture via st_read : ", query)
         return(st_read(con, query = query))
       }
     }
 
     if (!file.exists(fallback_file)) {
       if (!is.null(download_url)) {
-        message("Téléchargement de ", download_url)
+        message("Telechargement de ", download_url)
         download.file(download_url, fallback_file, mode = "wb")
         if (grepl("\\.zip$", fallback_file)) {
           unzip(fallback_file, exdir = dirname(fallback_file))
@@ -77,11 +77,10 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     return(st_read(fallback_file))
   }
 
-  # Connexion (à ajuster selon ton environnement)
   # con <- config$software$output$dbi
   con <- tryCatch(connectionDB, error = function(e) NULL)
 
-  # Récupération des données
+  # Recuperation des donnees
   species_group <- try_db_query(
     con,
     "SELECT taxa_order, code FROM species.species_asfis",
@@ -101,7 +100,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   # Lecture CWP grid via CSV si pas de DB
   cwp_grid_file <- here("data/cl_areal_grid.csv")
   if (!file.exists(cwp_grid_file)) {
-    message("Fichier cl_areal_grid.csv manquant. Téléchargement en cours...")
+    message("Fichier cl_areal_grid.csv manquant. Telechargement en cours...")
     zip_url <- "https://github.com/fdiwg/fdi-codelists/raw/main/global/cwp/cl_areal_grid.zip"
     zip_path <- here("data/cwp_grid.zip")
     download.file(zip_url, zip_path, mode = "wb")
@@ -110,8 +109,8 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   cwp_grid <- st_read(cwp_grid_file)
   cwp_grid <- st_as_sf(
     cwp_grid,
-    wkt = "geom_wkt",   # la colonne contenant les géométries
-    crs = 4326          # ou un autre CRS si tu en connais un spécifique
+    wkt = "geom_wkt",   # la colonne contenant les geometries
+    crs = 4326          # ou un autre CRS si tu en connais un specifique
   ) %>%
     dplyr::rename(cwp_code = CWP_CODE) %>%
     dplyr::rename(geom = geom_wkt)
@@ -392,10 +391,10 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       output_file_name <- paste0(entity_name, "_report.html") # name of the output file
       render_env <- new.env(parent = child_env)
       process_rds_file <- function(file_path, parameter_short, parameters_child_global, fig.path, shapefile.fix, continent, coverage = TRUE) {
-        # Créer un chemin pour les figures
+        # Creer un chemin pour les figures
         file_name <- tools::file_path_sans_ext(basename(file_path))
 
-        # Ajouter des lignes spécifiques en fonction du fichier
+        # Ajouter des lignes specifiques en fonction du fichier
         Addlines <- switch(
           file_name,
           "outside_juridiction" = paste0(
@@ -423,11 +422,11 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
             "# Not mapped data\n\n",
             "Some data provided does not correspond to any mapping.\n"
           ),
-          # Valeur par défaut si le fichier n'a pas de description
+          # Valeur par defaut si le fichier n'a pas de description
           paste0("# Unknown issue\n\nNo specific description available for this dataset.\n")
         )
         file_path <- readr::read_csv(file_path) %>% dplyr::mutate(geographic_identifier = as.numeric(geographic_identifier))
-        # Générer l'environnement pour ce fichier
+        # Generer l'environnement pour ce fichier
         child_env_result <- comprehensive_cwp_dataframe_analysis(
           parameter_init = file_path,
           parameter_final = NULL,
@@ -448,7 +447,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
           unique_analyse = TRUE
         )
 
-        # Ajouter les paramètres supplémentaires à l'environnement
+        # Ajouter les parametres supplementaires a l'environnement
         child_env_result$step_title_t_f <- FALSE
         child_env_result$treatment <- FALSE
         child_env_result$parameter_titre_dataset_1 <- file_name
@@ -545,7 +544,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
         trfmo_data <- lapply(file.path(trfmo_paths, "data"), read_last_csv)
         trfmo_data <- do.call(rbind, trfmo_data)
 
-        # Enregistrement du fichier combiné
+        # Enregistrement du fichier combine
         name <- paste0(path, "/", trfmo, "_combined_data.csv")
         write_csv(trfmo_data, name)
         return(name)

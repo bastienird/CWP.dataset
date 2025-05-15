@@ -10,8 +10,9 @@
 #' @param savestep Logical TRUE/FALSE, should the .qs result of this be saved ?
 #' @param nameoutput Character, name of the .qs if saved
 #' @param usesave Logical Should we use the nameoutput .qs instead of rerunning everything ?
-#' @return NULL. The function has side effects, such as writing files and rendering reports.
 #' @param sizepdf Character string. La taille peut prendre les valeurs suivantes :
+#' @return NULL. The function has side effects, such as writing files and rendering reports.
+#' @param fast_and_heavy Logical TRUE/FALSE, should we save a .qs for each dataset, and use this .qs in every markdown
 #'   \itemize{
 #'     \item `"long"` (par défaut) : Long with coverage.
 #'     \item `"middle"` : Long without coverage
@@ -30,7 +31,7 @@
 #' @importFrom qs qread qsave
 #' @export
 summarising_step <- function(main_dir, connectionDB, config, source_authoritylist = c("all","IOTC","WCPFC", "IATTC", "ICCAT", "CCSBT" ), sizepdf = "long",
-                             savestep = FALSE, nameoutput = NULL, usesave = FALSE) {
+                             savestep = FALSE, nameoutput = NULL, usesave = FALSE, fast_and_heavy = TRUE) {
 
   if(sizepdf == "long"){
     coverage = TRUE

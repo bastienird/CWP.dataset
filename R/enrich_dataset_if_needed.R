@@ -19,7 +19,7 @@
 #' Steps performed:
 #' \itemize{
 #'   \item Load required codelists (species, measurements, gear, fleet, etc.) via SQL or fallback.
-#'   \item Normalize units (e.g. “Tons” → “t”, “Number of fish” → “no”).
+#'   \item Normalize units (e.g. 'Tons' -> 't', 'Number of fish' -> 'no').
 #'   \item Left-join to add each \code{*_label} column alongside its code.
 #'   \item Reorder columns: base columns with their labels immediately after.
 #'   \item Convert to \code{sf} (CRS EPSG:4326).
@@ -65,7 +65,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   library(dplyr); library(sf); library(readr); library(stringr)
   library(janitor); library(here); library(qs); library(data.table); library(DBI)
 
-  # Fallback‐query helpers
+  # Fallback query helpers
   try_db_query <- function(con, query, fallback_file, fallback_read_fun, download_url = NULL) {
     if (!is.null(con) && dbIsValid(con)) {
       ok <- try(dbGetQuery(con, "SELECT 1"), silent = TRUE)
@@ -74,7 +74,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
         return(dbGetQuery(con, query))
       }
     }
-    message("No valid DB—falling back to: ", fallback_file)
+    message("No valid DB falling back to: ", fallback_file)
     if (!file.exists(fallback_file)) {
       if (!is.null(download_url)) {
         message("Downloading from ", download_url)
@@ -179,12 +179,12 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     read_csv(effort_file) %>% clean_names() %>% select(code, label)
   )
 
-  # measurement-unit labels (global & specific) — no change
+  # measurement-unit labels (global & specific) no change
 
   # CWP grid (WKT) from extdata
   cwp_grid_file <- system.file("extdata", "cl_areal_grid.csv", package = "CWP.dataset")
   if (!file.exists(cwp_grid_file)) {
-    stop("cl_areal_grid.csv not found in inst/extdata — run data-raw/download_codelists.R")
+    stop("cl_areal_grid.csv not found in inst/extdata - run data-raw/download_codelists.R")
   }
   shapefile.fix <- st_read(cwp_grid_file) %>%
     st_as_sf(wkt = "geom_wkt", crs = 4326) %>%
