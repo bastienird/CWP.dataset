@@ -70,9 +70,13 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
   futile.logger::flog.info("Loaded cl_cwp_gear_level2 data")
 
-  shapefile.fix <- st_read(connectionDB, query = "SELECT * FROM area.cwp_grid") %>%
-    dplyr::rename(GRIDTYPE = gridtype)
-  futile.logger::flog.info("Loaded shapefile.fix data")
+  cwp_grid_file <- system.file("extdata", "cl_areal_grid.csv", package = "CWP.dataset")
+  if (!file.exists(cwp_grid_file)) {
+    stop("cl_areal_grid.csv not found in inst/extdata — run data-raw/download_codelists.R")
+  }
+  shapefile.fix <- st_read(cwp_grid_file) %>%
+    st_as_sf(wkt = "geom_wkt", crs = 4326) %>%
+    rename(cwp_code = CWP_CODE, geom = geom_wkt)
 
   continent <- tryCatch({
     st_read(connectionDB, query = "SELECT * FROM public.continent")
@@ -117,13 +121,12 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
     if (opts$fact == "effort") {
       futile.logger::flog.warn("Effort dataset not displayed for now")
       parameter_colnames_to_keep_fact = c("source_authority", "fishing_mode", "geographic_identifier","fishing_fleet", "gear_type",
-                                          "measurement_unit", "measurement_value", "GRIDTYPE","species_group")
+                                          "measurement_unit", "measurement_value", "gridtype","species_group")
       topnumberfact = 3
     } else {
-      parameter_colnames_to_keep_fact = c("source_authority", "species", "gear_type", "fishing_fleet",
-                                          "fishing_mode", "geographic_identifier",
-                                          "measurement_unit", "measurement_value", "GRIDTYPE",
-                                          "species_group", "Gear")
+      parameter_colnames_to_keep_fact = c("source_authority", "species_label", "gear_type_label", "fishing_fleet_label",
+                                          "fishing_mode_label", "geographic_identifier",
+                                          "measurement_unit_label", "measurement_value", "gridtype", "measurement_processing_level_label")
       topnumberfact = 6
 
     }
@@ -143,40 +146,11 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           data <- qs::qread(file)
           file.copy(from = file, to = gsub(pattern = basename(file), replacement = "ancient.qs", file))
 
-          if ("GRIDTYPE" %notin% colnames(data)) {
-            data <- data %>%
-              dplyr::mutate(geographic_identifier = as.character(geographic_identifier),
-                            gear_type = as.character(gear_type))
-
-            if("GRIDTYPE"%in%colnames(data)){
-              data <- data%>%dplyr::mutate(GRIDTYPE = as.character(GRIDTYPE))
-            }
-            if("geographic_identifier"%in%colnames(data) & !is.null(shape_without_geom)){
-              data <- data%>%  dplyr::left_join(shape_without_geom %>%
-                                                  dplyr::select(GRIDTYPE, cwp_code), by = c("geographic_identifier"="cwp_code"))
-              if(!is.null(species_group) && ("species" %in% colnames(data))){
-                data <- data %>% dplyr::left_join(species_group%>% dplyr::distinct(), by = c("species"))
-              }
-
-              if("gear_type" %in%colnames(data) & !is.null(cl_cwp_gear_level2) ){
-                data <- data %>% dplyr::left_join(cl_cwp_gear_level2, by = c("gear_type" = "Code"))
-              }
-
-              data <- data%>%dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT","t","MTNO", "Tons")~ "Tons",
-                                                                                         measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ measurement_unit))
-
-              data <- data %>% dplyr::left_join(cl_fishing_mode %>% dplyr::select(code, fishing_mode_label = label), by = c("fishing_mode" = "code"))
-
-
-              data <- data %>% dplyr::left_join(fishing_fleet_label %>% dplyr::select(code,fishing_fleet_label = label), by = c("fishing_fleet" = "code"))
-              if (!is.null(species_group) && ("species" %in%
-                                              colnames(data))) {
-              data <- data %>% dplyr::left_join(species_label %>% dplyr::select(code,species_label = label, species_definition = definition), by = c("species" = "code"))
-              }
-              qs::qsave(data, file = file)
+          if ("gridtype" %notin% colnames(data)) {
+            data <- CWP.dataset::enrich_dataset_if_needed(data)
+            qs::qsave(data, file = file)
             futile.logger::flog.info("Processed and saved data for file: %s", file)
           }
-        }
         } else {
           futile.logger::flog.info("Retrieving processed data: %s", file)
 
