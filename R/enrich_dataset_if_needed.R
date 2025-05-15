@@ -126,7 +126,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   species_group <- try_db_query(
     con,
     "SELECT taxa_order, code FROM species.species_asfis",
-    system.file("extdata", "cl_asfis_species.csv", package = pkg),
+    system.file("extdata", "cl_asfis_species.csv", package = "CWP.dataset"),
     function(f) read_csv(f) %>% clean_names() %>% select(species_group = taxa_order, species = code),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/cl_asfis_species.csv"
   )
@@ -134,7 +134,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   cl_measurement_processing_level <- try_db_query(
     con,
     "SELECT * FROM measurement_processing_level.measurement_processing_level",
-    system.file("extdata", "cl_measurement_processing_level.csv", package = pkg),
+    system.file("extdata", "cl_measurement_processing_level.csv", package = "CWP.dataset"),
     function(f) read_csv(f) %>% clean_names() %>% select(code, label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/fdi/cl_measurement_processing_level.csv"
   )
@@ -142,7 +142,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   cl_measurement <- try_db_query(
     con,
     "SELECT * FROM measurement.measurement",
-    system.file("extdata", "cl_measurement.csv", package = pkg),
+    system.file("extdata", "cl_measurement.csv", package = "CWP.dataset"),
     function(f) read_csv(f) %>% clean_names() %>% select(code, label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/fdi/cl_measurement.csv"
   )
@@ -150,7 +150,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   cl_fishing_mode <- try_db_query(
     con,
     "SELECT * FROM fishing_mode.fishing_mode",
-    system.file("extdata", "cl_fishing_mode.csv", package = pkg),
+    system.file("extdata", "cl_fishing_mode.csv", package = "CWP.dataset"),
     function(f) read_csv(f) %>% clean_names() %>% select(code, label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_fishing_mode.csv"
   )
@@ -158,7 +158,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   cl_cwp_gear_level2 <- try_db_query(
     con,
     "SELECT * FROM gear_type.isscfg_revision_1",
-    system.file("extdata", "cl_isscfg_pilot_gear.csv", package = pkg),
+    system.file("extdata", "cl_isscfg_pilot_gear.csv", package = "CWP.dataset"),
     function(f) read_csv(f) %>% select(Code = code, Gear = label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_isscfg_pilot_gear.csv"
   )
@@ -166,14 +166,14 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   fishing_fleet_label <- try_db_query(
     con,
     "SELECT * FROM fishing_fleet.fishingfleet_firms",
-    system.file("extdata", "cl_fishingfleet_firms.csv", package = pkg),
+    system.file("extdata", "cl_fishingfleet_firms.csv", package = "CWP.dataset"),
     function(f) read_csv(f) %>% clean_names() %>% select(code, label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_fishing_fleet.csv"
   )
 
   # measurement_type: still bind two CSVs shipped in inst/extdata
-  catch_file  <- system.file("extdata", "cl_catch_concepts.csv", package = pkg)
-  effort_file <- system.file("extdata", "cl_measurement_types_effort.csv", package = pkg)
+  catch_file  <- system.file("extdata", "cl_catch_concepts.csv", package = "CWP.dataset")
+  effort_file <- system.file("extdata", "cl_measurement_types_effort.csv", package = "CWP.dataset")
   measurement_type_df <- bind_rows(
     read_csv(catch_file)  %>% clean_names() %>% select(code, label),
     read_csv(effort_file) %>% clean_names() %>% select(code, label)
@@ -182,7 +182,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   # measurement-unit labels (global & specific) — no change
 
   # CWP grid (WKT) from extdata
-  cwp_grid_file <- system.file("extdata", "cl_areal_grid.csv", package = pkg)
+  cwp_grid_file <- system.file("extdata", "cl_areal_grid.csv", package = "CWP.dataset")
   if (!file.exists(cwp_grid_file)) {
     stop("cl_areal_grid.csv not found in inst/extdata — run data-raw/download_codelists.R")
   }
