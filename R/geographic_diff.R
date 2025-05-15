@@ -51,6 +51,5 @@ geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_d
   image <- image+tmap::tm_shape(continent) + tmap::tm_borders()
 
   title = paste0("Spatial differences between ", titre_1, " and ", titre_2, " dataset")
-  breaks$geom <- NULL
-  return(list(title = title, plott = image, tableforimage = breaks))
+  return(list(title = title, plott = image))
 }
