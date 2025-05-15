@@ -98,10 +98,9 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
           qs::qsave(data, file = file)
             futile.logger::flog.info("Processed and saved data for file: %s", file)
-          }
         } else {
           futile.logger::flog.info("Retrieving processed data: %s", file)
-
+        }
       }
       parameter_resolution_filter <- opts$resolution_filter
       parameter_filtering <- opts$parameter_filtering
