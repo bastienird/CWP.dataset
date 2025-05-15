@@ -55,6 +55,42 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
   i <- 1
   futile.logger::flog.info("Sourced all required functions")
+  cwp_grid_file <- system.file("extdata", "cl_areal_grid.csv", package = "CWP.dataset")
+  if (!file.exists(cwp_grid_file)) {
+    stop("cl_areal_grid.csv not found in inst/extdata - run data-raw/download_codelists.R")
+  }
+  shapefile.fix <- st_read(cwp_grid_file) %>%
+    st_as_sf(wkt = "geom_wkt", crs = 4326) %>%
+    rename(cwp_code = CWP_CODE, geom = geom_wkt)
+
+  continent <- tryCatch({
+
+    st_read(connectionDB, query = "SELECT * FROM public.continent")
+  }, error = function(e) {
+
+    futile.logger::flog.error("An error occurred while reading continent data: %s", e$message)
+
+    NULL
+
+  })
+
+  if (is.null(continent)) {
+
+    futile.logger::flog.warn("Continent data not found in the database. Fetching from WFS service.")
+
+    url <- "https://www.fao.org/fishery/geoserver/wfs"
+
+    serviceVersion <- "1.0.0"
+
+    logger <- "INFO"
+
+    WFS <- WFSClient$new(url = "https://www.fao.org/fishery/geoserver/fifao/wfs", serviceVersion = "1.0.0", logger = "INFO")
+
+    continent <- WFS$getFeatures("fifao:UN_CONTINENT2")
+
+    futile.logger::flog.info("Fetched continent data from WFS service")
+
+  }
 
   for (entity_dir in entity_dirs) {
 
@@ -209,6 +245,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       final_step <- length(sub_list_dir_3) - 1
       fast_and_heavy_t_f <- fast_and_heavy
+
       run_comparisons <- function(final_step,
                                   fast_and_heavy = TRUE,
                                   sub_list_dir_3,
@@ -217,63 +254,62 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
                                   parameters_child_global,
                                   fig.path,
                                   coverage) {
-        # s’assure que fig.path existe
-        if (!dir.exists(fig.path)) {
-          dir.create(fig.path, recursive = TRUE)
-        }
 
         seq_i <- seq_len(final_step)
 
         if (fast_and_heavy) {
-          # version “lourde” : on retourne la liste d’objets en mémoire
           all_list <- lapply(seq_i, function(i) {
-            CWP.dataset::function_multiple_comparison(
+            # 1) calcul du résultat
+            res_i <- CWP.dataset::function_multiple_comparison(
               i,
-              parameter_short        = FALSE,
-              sub_list_dir           = sub_list_dir_3,
-              shapefile.fix          = shapefile.fix,
-              continent              = continent,
+              parameter_short         = FALSE,
+              sub_list_dir            = sub_list_dir_3,
+              shapefile.fix           = shapefile.fix,
+              continent               = continent,
               parameters_child_global = parameters_child_global,
-              fig.path               = fig.path,
-              coverage               = coverage
+              fig.path                = fig.path,
+              coverage                = coverage
             )
+
+            # 2) si ce n’est pas déjà une liste, on l’emballe
+            if (!is.list(res_i)) {
+              res_i <- list(value = res_i)
+            }
+
+            # 3) si des noms manquent, on les génère
+            nms <- names(res_i)
+            if (is.null(nms) || any(nms == "")) {
+              nms <- nms %||% rep("", length(res_i))  # %||% = si NULL, remplace par ""
+              empty <- which(nms == "")
+              nms[empty] <- paste0("item", empty)
+              names(res_i) <- nms
+            }
+
+            res_i
           })
           return(all_list)
         } else {
-          # version “rapide” : on sauve chaque résultat en .qs et on retourne les chemins
           all_paths <- lapply(seq_i, function(i) {
-            # calcul du résultat
             res_i <- CWP.dataset::function_multiple_comparison(
               i,
-              parameter_short        = FALSE,
-              sub_list_dir           = sub_list_dir_3,
-              shapefile.fix          = shapefile.fix,
-              continent              = continent,
+              parameter_short         = FALSE,
+              sub_list_dir            = sub_list_dir_3,
+              shapefile.fix           = shapefile.fix,
+              continent               = continent,
               parameters_child_global = parameters_child_global,
-              fig.path               = fig.path,
-              coverage               = coverage
+              fig.path                = fig.path,
+              coverage                = coverage
             )
-
-            # nom unique du fichier
-            out_file <- file.path(
-              fig.path,
-              sprintf("comparison_step_%02d.qs", i)
-            )
-
-            # sérieusement rapide
+            out_file <- file.path(fig.path,
+                                  sprintf("comparison_step_%02d.qs", i))
             qs::qsave(res_i, file = out_file, preset = "high")
-
-            # nettoyage mémoire
-            rm(res_i)
-            gc()
-
-            # retourne le chemin
+            rm(res_i); gc()
             out_file
           })
-          # lapply renvoie une liste, on la retourne directement
           return(all_paths)
         }
       }
+
 
       all_list <- run_comparisons(
         final_step = final_step,
