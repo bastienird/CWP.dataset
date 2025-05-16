@@ -13,7 +13,7 @@ spatial_coverage_analysis(
   plotting_type,
   continent,
   print_map = TRUE,
-  GrouppedGRIDTYPE
+  Grouppedgridtype
 )
 }
 \arguments{
@@ -33,7 +33,7 @@ spatial_coverage_analysis(
 
 \item{print_map}{Logical indicating whether to print the map.}
 
-\item{GrouppedGRIDTYPE}{Data frame containing grouped GRIDTYPE data.}
+\item{Grouppedgridtype}{Data frame containing grouped gridtype data.}
 }
 \value{
 A list containing the spatial coverage maps and related information.
@@ -44,7 +44,7 @@ of the values over spatial regions for each dataset.
 }
 \examples{
 \dontrun{
-spatial_coverage_analysis(units, init, final, "Dataset1", "Dataset2", shapefile.fix, "plot", continent, TRUE, GrouppedGRIDTYPE, "path/to/save")
+spatial_coverage_analysis(units, init, final, "Dataset1", "Dataset2", shapefile.fix, "plot", continent, TRUE, Grouppedgridtype, "path/to/save")
 }
 }
 \author{

@@ -4,7 +4,7 @@
 #' standardizing measurement units, and preparing it for analysis.
 #'
 #' @param dataframe A data frame or a file path (character) to an RDS file containing the dataset.
-#' @param shape An optional spatial data frame with a `GRIDTYPE` and `cwp_code` column for geographic matching.
+#' @param shape An optional spatial data frame with a `gridtype` and `cwp_code` column for geographic matching.
 #' @param species_group_dataframe An optional data frame mapping species to groups.
 #' @param cl_cwp_gear_level2_dataframe An optional data frame mapping gear types to level 2 categories.
 #'
@@ -29,7 +29,7 @@
 #'   measurement_value = c(100, 200)
 #' )
 #'
-#' shape_data <- data.frame(GRIDTYPE = c("1deg_x_1deg", "5deg_x_5deg"), cwp_code = c("5100000", "5100001"))
+#' shape_data <- data.frame(gridtype = c("1deg_x_1deg", "5deg_x_5deg"), cwp_code = c("5100000", "5100001"))
 #' species_mapping <- data.frame(species = c("YFT", "BET"), species_group = c("Yellowfin Tuna", "Bigeye Tuna"))
 #' gear_mapping <- data.frame(Code = c("03.1.0", "01.1.0"), GearLevel2 = c("Purse Seine", "Longline"))
 #'
@@ -48,12 +48,12 @@ tidying_GTA_data_for_comparison <- function(dataframe, shape = NULL,
 
   if("geographic_identifier"%in%colnames(dataframe) & !is.null(shape)){
     dataframe <- dataframe%>%  dplyr::left_join(shape%>%
-                                                  dplyr::select(GRIDTYPE, cwp_code), by = c("geographic_identifier"="cwp_code"))
+                                                  dplyr::select(gridtype, cwp_code), by = c("geographic_identifier"="cwp_code"))
     print_map <- TRUE
   } else {print_map <- FALSE}
 
-  if("GRIDTYPE"%in%colnames(dataframe)){
-    dataframe <- dataframe%>%dplyr::mutate(GRIDTYPE = as.character(GRIDTYPE))
+  if("gridtype"%in%colnames(dataframe)){
+    dataframe <- dataframe%>%dplyr::mutate(gridtype = as.character(gridtype))
   }
   if(!is.null(species_group_dataframe) && ("species" %in% colnames(dataframe))){
     dataframe <- dataframe %>% dplyr::left_join(species_group_dataframe%>% dplyr::distinct(), by = c("species"))

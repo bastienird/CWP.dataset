@@ -2,7 +2,7 @@
 
 #' Perform Multiple Comparisons Between Datasets
 #'
-#' This function performs various summarizing steps on datasets related to species and gear types. 
+#' This function performs various summarizing steps on datasets related to species and gear types.
 #' It retrieves data from a database, processes it, and generates comparison reports.
 #'
 #' @param counting Integer. The step number in the comparison process.
@@ -16,7 +16,7 @@
 #'
 #' @return A list containing comparison results, metadata, and visualization elements. If the datasets are identical, it returns `NA`.
 #'
-#' @details The function compares datasets between two consecutive steps, applying data filtering and analysis. 
+#' @details The function compares datasets between two consecutive steps, applying data filtering and analysis.
 #' It generates structured output reports stored in `fig.path`.
 #'
 #' @examples
@@ -38,21 +38,21 @@
 #' @import futile.logger
 #' @import qs
 #' @export
-function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, 
-                                         parameters_child_global, fig.path, coverage = FALSE, 
+function_multiple_comparison <- function(counting, parameter_short, sub_list_dir,
+                                         parameters_child_global, fig.path, coverage = FALSE,
                                          shapefile.fix, continent) {
   gc()
-  
+
   parameter_init <- file.path(sub_list_dir[counting], "data.qs")
   parameter_final <- file.path(sub_list_dir[counting + 1], "data.qs")
   parameter_titre_dataset_1 <- basename(sub_list_dir[counting])
   parameter_titre_dataset_2 <- basename(sub_list_dir[counting + 1])
 
-  new_path <- file.path(fig.path, "Comparison", 
+  new_path <- file.path(fig.path, "Comparison",
                         paste0(parameter_titre_dataset_1, "_", parameter_titre_dataset_2))
   dir.create(new_path, recursive = TRUE, showWarnings = FALSE)
 
-  flog.info("Starting comparison between: %s and %s | Coverage: %s", 
+  flog.info("Starting comparison between: %s and %s | Coverage: %s",
             parameter_titre_dataset_1, parameter_titre_dataset_2, coverage)
 
   initfiltered <- filtering_function(qs::qread(parameter_init),
@@ -72,7 +72,7 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
       plotting_type = "view",
       parameter_colnames_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet",
                                      "fishing_mode", "geographic_identifier",
-                                     "measurement_unit", "measurement_value", "GRIDTYPE",
+                                     "measurement_unit", "measurement_value", "gridtype",
                                      "species_group", "Gear"),
       shapefile_fix = shapefile.fix,
       continent = continent,
@@ -98,7 +98,7 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
     return(child_env_result)
   } else {
     rm(initfiltered, finalfiltered)
-    flog.info("Datasets are identical, skipping comparison for: %s vs %s", 
+    flog.info("Datasets are identical, skipping comparison for: %s vs %s",
               parameter_titre_dataset_1, parameter_titre_dataset_2)
     return(NA)
   }

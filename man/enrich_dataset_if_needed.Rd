@@ -2,55 +2,65 @@
 % Please edit documentation in R/enrich_dataset_if_needed.R
 \name{enrich_dataset_if_needed}
 \alias{enrich_dataset_if_needed}
-\title{Enrich a CWP dataset with missing labels and geometries}
+\title{Enrich CWP Dataset}
 \usage{
-enrich_dataset_if_needed(data, connectionDB = NULL, save_prefix = NULL)
+enrich_dataset_if_needed(
+  data,
+  connectionDB = NULL,
+  save_prefix = NULL,
+  shp_raw = NULL
+)
 }
 \arguments{
-\item{data}{A \code{data.frame} or \code{sf} object following CWP standards.}
+\item{data}{A \code{data.frame} or \code{sf} object following CWP conventions.}
 
-\item{connectionDB}{Optional. A DBI-compatible database connection.}
+\item{connectionDB}{Optional. A DBI-compatible database connection for querying codelists.}
 
-\item{save_prefix}{Optional. A prefix for saving output files (\code{.qs} and \code{.csv}).}
+\item{save_prefix}{Optional. Filename prefix for saving outputs (\code{.qs} and \code{.csv}).}
+
+\item{shp_raw}{Optional. To prevent reading it every time that can be time consuming, we can provide it directly}
 }
 \value{
 A \code{list} with two elements:
 \describe{
-\item{\code{with_geom}}{An \code{sf} object enriched with geometry.}
-\item{\code{without_geom}}{A \code{data.frame} enriched without geometry.}
+\item{\code{with_geom}}{An \code{sf} object enriched with geometries (CRS EPSG:4326).}
+\item{\code{without_geom}}{A \code{data.frame} enriched without geometries.}
 }
 }
 \description{
-This function enriches a dataset (data.frame or sf) by:
+Completes a CWP-compliant dataset (data.frame or sf) by:
 \itemize{
-\item filling in missing descriptive labels (species, gear type, fleet, units, etc.),
-\item attaching or validating geometries,
-using SQL queries, local fallback files, or online downloads.
+\item Filling in missing descriptive labels (species, gear type, fleet, units, etc.);
+\item Attaching or validating spatial geometries.
 }
+Labels and geometries are sourced via SQL queries when \code{connectionDB} is provided,
+with fallbacks to local files or online downloads otherwise.
 }
 \details{
+Enrich a CWP Dataset with Missing Labels and Geometries
+
 Steps performed:
-\itemize{
+\enumerate{
 \item Load required codelists (species, measurements, gear, fleet, etc.) via SQL or fallback.
-\item Normalize units (e.g. “Tons” → “t”, “Number of fish” → “no”).
+\item Normalize measurement units (e.g. tons number of fish.
 \item Left-join to add each \code{*_label} column alongside its code.
-\item Reorder columns: base columns with their labels immediately after.
-\item Convert to \code{sf} (CRS EPSG:4326).
+\item Reorder columns so that each code is immediately followed by its label.
+\item Convert to \code{sf} with CRS EPSG:4326.
 \item Optionally save to disk if \code{save_prefix} is provided.
 }
 }
 \examples{
 \dontrun{
 df <- data.frame(
-  species = c("COD", "SAL"),
-  measurement_unit = c("Tons", "Number of fish"),
-  geographic_identifier = c("0001", "0002"),
-  fishing_mode = "LL",
-  fishing_fleet = "FleetA",
-  measurement_type = "KT",
-  measurement = "catch",
+  species                     = c("YFT", "SKJ"),
+  measurement_unit            = c("Tons", "Number of fish"),
+  geographic_identifier       = c("0001", "0002"),
+  fishing_mode                = "UNK",
+  fishing_fleet               = "NEI",
+  measurement_type            = "NC",
+  measurement                  = "catch",
   measurement_processing_level = "raised",
-  gear_type = "01.1"
+  gear_type                   = "99.9"
 )
 result <- enrich_dataset_if_needed(df)
 str(result)

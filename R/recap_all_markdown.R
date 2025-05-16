@@ -103,8 +103,7 @@ recap_all_markdown <- function(action, entity, config, options){
     # # CWP_GRIDS <- rbindlist(list(CWP11, CWP55, CWP1010, CWP2020, CWP3030))
     #
     # shapefile.fix <- rbindlist(list(CWP11, CWP55, CWP1010, CWP2020, CWP3030))
-    shapefile.fix <- st_read(con,query = "SELECT * from area.cwp_grid")%>%
-      dplyr::rename(GRIDTYPE = gridtype)
+    shapefile.fix <- st_read(con,query = "SELECT * from area.cwp_grid")
 
     shape_without_geom  <- shapefile.fix %>% as_tibble() %>%dplyr::select(-geom)
 

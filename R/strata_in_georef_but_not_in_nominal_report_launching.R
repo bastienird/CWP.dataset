@@ -21,8 +21,7 @@ strata_in_georef_but_not_in_nominal_report_launching <- function(main.dir, conne
   species_group <-  st_read(connectionDB,query = "SELECT taxa_order, code from species.species_asfis") %>% janitor::clean_names() %>%  dplyr::select(species_group = taxa_order, species = code)
   cl_cwp_gear_level2 <- st_read(connectionDB, query = "SELECT * FROM gear_type.isscfg_revision_1")%>% select(Code = code, Gear = label)
 
-  shapefile.fix <- st_read(connectionDB,query = "SELECT * from area.cwp_grid") %>%
-    dplyr::rename(GRIDTYPE = gridtype)
+  shapefile.fix <- st_read(connectionDB,query = "SELECT * from area.cwp_grid")
   source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/compare_georef_nominal.R")
   if (file.exists(file.path("entities/global_catch_firms_level0/data/global_nominal_catch_firms_level0.csv"))) {
     nominal <- as.data.frame(read_csv(file.path("entities/global_catch_firms_level0/data/global_nominal_catch_firms_level0.csv")) %>%
@@ -59,11 +58,11 @@ strata_in_georef_but_not_in_nominal_report_launching <- function(main.dir, conne
               fig.path = paste0("georef_not_nominal_markdown/", i, "/figures/"),
               parameter_init = georef_no_nominal_groupped,
               nominal_groupped = nominal_groupped_filtered,
-              parameter_colnames_to_keep = c("fishing_fleet", "gear_type", "geographic_identifier", "fishing_mode", "species", "measurement_unit", "measurement_value", "Gear", "species_group", "GRIDTYPE"),
+              parameter_colnames_to_keep = c("fishing_fleet", "gear_type", "geographic_identifier", "fishing_mode", "species", "measurement_unit", "measurement_value", "Gear", "species_group", "gridtype"),
               georef_sup_to_nom = georef_sup_to_nom,
               shapefile.fix = shapefile.fix,
               parameter_geographical_dimension = "geographic_identifier",
-              parameter_geographical_dimension_groupping = "GRIDTYPE"
+              parameter_geographical_dimension_groupping = "gridtype"
             )
 
             child_env_global <- new.env()

@@ -780,7 +780,7 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
   selection <- function(x) {
     x[, .(geographic_identifier = as.character(geographic_identifier), 
           measurement_value, 
-          GRIDTYPE, 
+          gridtype, 
           measurement_unit)]
   }
   
@@ -795,7 +795,7 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
                                fifelse(source == "Final_dataframe", titre_2, "Error"))]
   
   inner_join_data <- geo_data[, .(measurement_value = sum(measurement_value, na.rm = TRUE)), 
-                         by = .(geographic_identifier, measurement_unit, source, GRIDTYPE)][
+                         by = .(geographic_identifier, measurement_unit, source, gridtype)][
                            measurement_value != 0]
   
   inner_join_data <- st_as_sf(inner_join(inner_join_data, 
@@ -804,16 +804,16 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
   
   if (nrow(inner_join_data%>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
       # inner_join_data <- inner_join_data %>%
-      #   dplyr::mutate(Group = paste0(GRIDTYPE, "_", source))
+      #   dplyr::mutate(Group = paste0(gridtype, "_", source))
       
       if (plotting_type == "view") {
         image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
           tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
-          tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE)
+          tm_layout(legend.outside = FALSE) + tm_facets(by = c("gridtype", "source"), free.scales = TRUE)
       } else {
         image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
           tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
-          tm_layout(legend.outside = FALSE) + tm_facets(by = c("GRIDTYPE", "source"), free.scales = TRUE)+
+          tm_layout(legend.outside = FALSE) + tm_facets(by = c("gridtype", "source"), free.scales = TRUE)+
           tm_shape(continent) + tm_borders()
       }
     
@@ -1119,7 +1119,7 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
       plotting_type = "view",
       parameter_colnames_to_keep = c("source_authority", "species", "gear_type", "fishing_fleet",
                                      "fishing_mode", "geographic_identifier",
-                                     "measurement_unit", "measurement_value", "GRIDTYPE",
+                                     "measurement_unit", "measurement_value", "gridtype",
                                      "species_group", "Gear"),
       shapefile_fix = shapefile.fix,
       continent = continent,

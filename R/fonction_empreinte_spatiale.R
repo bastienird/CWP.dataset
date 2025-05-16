@@ -32,7 +32,7 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
   selection <- function(x) {
     x[, .(geographic_identifier = as.character(geographic_identifier),
           measurement_value,
-          GRIDTYPE,
+          gridtype,
           measurement_unit)]
   }
 
@@ -47,7 +47,7 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
                                fifelse(source == "Final_dataframe", titre_2, "Error"))]
 
   inner_join_data <- geo_data[, .(measurement_value = sum(measurement_value, na.rm = TRUE)),
-                         by = .(geographic_identifier, measurement_unit, source, GRIDTYPE)][
+                         by = .(geographic_identifier, measurement_unit, source, gridtype)][
                            measurement_value != 0]
 
   inner_join_data <- st_as_sf(inner_join(inner_join_data,
@@ -68,7 +68,7 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
         ) +
         tm_layout(legend.outside = FALSE,
                   component.autoscale = FALSE) +
-        tmap:::tm_facets_grid(rows = "GRIDTYPE", columns = "source") +
+        tmap:::tm_facets_grid(rows = "gridtype", columns = "source") +
         tm_shape(continent) + tm_borders()
 
 

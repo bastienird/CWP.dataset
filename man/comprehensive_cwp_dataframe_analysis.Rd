@@ -17,7 +17,7 @@ comprehensive_cwp_dataframe_analysis(
   parameter_filtering = list(species = NULL, fishing_fleet = NULL),
   parameter_time_dimension = c("time_start"),
   parameter_geographical_dimension = "geographic_identifier",
-  parameter_geographical_dimension_groupping = "GRIDTYPE",
+  parameter_geographical_dimension_groupping = "gridtype",
   parameter_colnames_to_keep = "all",
   outputonly = FALSE,
   plotting_type = "view",
@@ -54,7 +54,7 @@ comprehensive_cwp_dataframe_analysis(
 
 \item{parameter_geographical_dimension}{Character. Column name for geographic identifiers. Default is \code{"geographic_identifier"}.}
 
-\item{parameter_geographical_dimension_groupping}{Character. Grouping column for geographical dimensions. Default is \code{"GRIDTYPE"}.}
+\item{parameter_geographical_dimension_groupping}{Character. Grouping column for geographical dimensions. Default is \code{"gridtype"}.}
 
 \item{parameter_colnames_to_keep}{Character or \code{"all"}. Column names to retain. Default is \code{"all"}.}
 

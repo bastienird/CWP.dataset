@@ -17,7 +17,7 @@
 #' @param parameter_filtering List. Filtering parameters for species and fishing fleet. Default is `list(species = NULL, fishing_fleet = NULL)`.
 #' @param parameter_time_dimension Character vector. Time-related columns to include. Default is `c("time_start")`.
 #' @param parameter_geographical_dimension Character. Column name for geographic identifiers. Default is `"geographic_identifier"`.
-#' @param parameter_geographical_dimension_groupping Character. Grouping column for geographical dimensions. Default is `"GRIDTYPE"`.
+#' @param parameter_geographical_dimension_groupping Character. Grouping column for geographical dimensions. Default is `"gridtype"`.
 #' @param parameter_colnames_to_keep Character or `"all"`. Column names to retain. Default is `"all"`.
 #' @param outputonly Logical. Whether to return only the analysis output without visualization. Default is `FALSE`.
 #' @param plotting_type Character. Type of visualization (`"view"` by default).
@@ -55,7 +55,7 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
                                                  parameter_filtering = list(species = NULL, fishing_fleet = NULL),
                                                  parameter_time_dimension = c("time_start"),
                                                  parameter_geographical_dimension = "geographic_identifier",
-                                                 parameter_geographical_dimension_groupping = "GRIDTYPE",
+                                                 parameter_geographical_dimension_groupping = "gridtype",
                                                  parameter_colnames_to_keep = "all",
                                                  outputonly = FALSE,
                                                  plotting_type = "view",
@@ -94,8 +94,8 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     }
   }
   if(!print_map | parameter_geographical_dimension_groupping %notin% colnames(init)){
-    init <- init %>% dplyr::mutate(GRIDTYPE = "GRIDTYPE")
-    final <- final %>% dplyr::mutate(GRIDTYPE = "GRIDTYPE")
+    init <- init %>% dplyr::mutate(gridtype = "gridtype")
+    final <- final %>% dplyr::mutate(gridtype = "gridtype")
   }
   if (is_null_or_not_exist(parameter_titre_dataset_2) & !unique_analyse) {
     if(!is.data.frame(parameter_final)) {
@@ -131,14 +131,14 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     init,
     geo_dim = parameter_geographical_dimension,
     parameter_fact = parameter_fact,
-    geo_dim_group = "GRIDTYPE"
+    geo_dim_group = "gridtype"
   )
 
   final <- CWP.dataset::function_geographic_identifier_renaming_and_not_standards_unit(
     final,
     geo_dim = parameter_geographical_dimension,
     parameter_fact = parameter_fact,
-    geo_dim_group = "GRIDTYPE"
+    geo_dim_group = "gridtype"
   )
   #cat("Applying filtering function...\n")
   init <- CWP.dataset::filtering_function(init, parameter_filtering = parameter_filtering)
@@ -166,7 +166,7 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
 
   time_dimension_list_groupped <- groupping_differences_list$Groupped_time_dimension
 
-  GrouppedGRIDTYPE <- groupping_differences_list$GrouppedGRIDTYPE
+  Grouppedgridtype <- groupping_differences_list$Grouppedgridtype
 
   if (!unique_analyse) {
     summary_of_differences <- CWP.dataset::compute_summary_of_differences(init, final, parameter_titre_dataset_1, parameter_titre_dataset_2)
@@ -212,7 +212,7 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     other_dimension_analysis_list <- NULL
   }
   if (print_map && coverage) {
-    spatial_coverage_analysis_list <- CWP.dataset::spatial_coverage_analysis(init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, shapefile_fix, plotting_type = plotting_type, continent, TRUE, GrouppedGRIDTYPE)
+    spatial_coverage_analysis_list <- CWP.dataset::spatial_coverage_analysis(init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, shapefile_fix, plotting_type = plotting_type, continent, TRUE, Grouppedgridtype)
   } else {
     spatial_coverage_analysis_list <- NULL
   }

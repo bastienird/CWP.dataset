@@ -1,43 +1,49 @@
-#' Enrich a CWP dataset with missing labels and geometries
+#' Enrich a CWP Dataset with Missing Labels and Geometries
 #'
-#' This function enriches a dataset (data.frame or sf) by:
-#' - filling in missing descriptive labels (species, gear type, fleet, units, etc.),
-#' - attaching or validating geometries,
-#' using SQL queries, local fallback files, or online downloads.
+#' @title Enrich CWP Dataset
+#' @description
+#' Completes a CWP-compliant dataset (data.frame or sf) by:
+#' \itemize{
+#'   \item Filling in missing descriptive labels (species, gear type, fleet, units, etc.);
+#'   \item Attaching or validating spatial geometries.
+#' }
+#' Labels and geometries are sourced via SQL queries when \code{connectionDB} is provided,
+#' with fallbacks to local files or online downloads otherwise.
 #'
-#' @param data         A \code{data.frame} or \code{sf} object following CWP standards.
-#' @param connectionDB Optional. A DBI-compatible database connection.
-#' @param save_prefix  Optional. A prefix for saving output files (\code{.qs} and \code{.csv}).
+#' @param data         A \code{data.frame} or \code{sf} object following CWP conventions.
+#' @param connectionDB Optional. A DBI-compatible database connection for querying codelists.
+#' @param save_prefix  Optional. Filename prefix for saving outputs (\code{.qs} and \code{.csv}).
+#' @param shp_raw  Optional. To prevent reading it every time that can be time consuming, we can provide it directly
 #'
 #' @return A \code{list} with two elements:
-#'   \describe{
-#'     \item{\code{with_geom}}{An \code{sf} object enriched with geometry.}
-#'     \item{\code{without_geom}}{A \code{data.frame} enriched without geometry.}
-#'   }
+#' \describe{
+#'   \item{\code{with_geom}}{An \code{sf} object enriched with geometries (CRS EPSG:4326).}
+#'   \item{\code{without_geom}}{A \code{data.frame} enriched without geometries.}
+#' }
 #'
 #' @details
 #' Steps performed:
-#' \itemize{
+#' \enumerate{
 #'   \item Load required codelists (species, measurements, gear, fleet, etc.) via SQL or fallback.
-#'   \item Normalize units (e.g. 'Tons' -> 't', 'Number of fish' -> 'no').
+#'   \item Normalize measurement units (e.g. tons number of fish.
 #'   \item Left-join to add each \code{*_label} column alongside its code.
-#'   \item Reorder columns: base columns with their labels immediately after.
-#'   \item Convert to \code{sf} (CRS EPSG:4326).
+#'   \item Reorder columns so that each code is immediately followed by its label.
+#'   \item Convert to \code{sf} with CRS EPSG:4326.
 #'   \item Optionally save to disk if \code{save_prefix} is provided.
 #' }
 #'
 #' @examples
 #' \dontrun{
 #' df <- data.frame(
-#'   species = c("COD", "SAL"),
-#'   measurement_unit = c("Tons", "Number of fish"),
-#'   geographic_identifier = c("0001", "0002"),
-#'   fishing_mode = "LL",
-#'   fishing_fleet = "FleetA",
-#'   measurement_type = "KT",
-#'   measurement = "catch",
+#'   species                     = c("YFT", "SKJ"),
+#'   measurement_unit            = c("Tons", "Number of fish"),
+#'   geographic_identifier       = c("0001", "0002"),
+#'   fishing_mode                = "UNK",
+#'   fishing_fleet               = "NEI",
+#'   measurement_type            = "NC",
+#'   measurement                  = "catch",
 #'   measurement_processing_level = "raised",
-#'   gear_type = "01.1"
+#'   gear_type                   = "99.9"
 #' )
 #' result <- enrich_dataset_if_needed(df)
 #' str(result)
@@ -49,19 +55,18 @@
 #' @import sf
 #' @import qs
 #' @import data.table
-#'
-#' @importFrom DBI dbGetQuery dbIsValid
-#' @importFrom utils download.file unzip
-#' @importFrom readr read_csv
-#' @importFrom stringr str_detect
-#' @importFrom janitor clean_names
-#' @importFrom here here
-#' @importFrom dplyr mutate case_when rename left_join select everything
-#' @importFrom sf st_read st_as_sf st_crs
+#' @importFrom DBI        dbGetQuery dbIsValid
+#' @importFrom utils      download.file unzip
+#' @importFrom readr      read_csv
+#' @importFrom stringr    str_detect
+#' @importFrom janitor     clean_names
+#' @importFrom here        here
+#' @importFrom dplyr       mutate case_when rename left_join select everything
+#' @importFrom sf          st_read st_as_sf st_crs
 #' @importFrom data.table fwrite
 #'
 #' @export
-enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NULL) {
+enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NULL, shp_raw = NULL) {
   library(dplyr); library(sf); library(readr); library(stringr)
   library(janitor); library(here); library(qs); library(data.table); library(DBI)
 
@@ -122,7 +127,6 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   con <- tryCatch(connectionDB, error = function(e) NULL)
 
   # Load all codelists via system.file()
-  pkg <- "yourPackageName"
   species_group <- try_db_query(
     con,
     "SELECT taxa_order, code FROM species.species_asfis",
@@ -159,7 +163,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     con,
     "SELECT * FROM gear_type.isscfg_revision_1",
     system.file("extdata", "cl_isscfg_pilot_gear.csv", package = "CWP.dataset"),
-    function(f) read_csv(f) %>% select(Code = code, Gear = label),
+    function(f) read_csv(f) %>% select(code, label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_isscfg_pilot_gear.csv"
   )
 
@@ -182,61 +186,89 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   # measurement-unit labels (global & specific) no change
 
   # CWP grid (WKT) from extdata
+  if(is.null(shp_raw)){
   cwp_grid_file <- system.file("extdata", "cl_areal_grid.csv", package = "CWP.dataset")
   if (!file.exists(cwp_grid_file)) {
     stop("cl_areal_grid.csv not found in inst/extdata - run data-raw/download_codelists.R")
   }
-  shapefile.fix <- st_read(cwp_grid_file) %>%
-    st_as_sf(wkt = "geom_wkt", crs = 4326) %>%
-    rename(cwp_code = CWP_CODE, geom = geom_wkt)
+  shp_raw <- sf::st_read(cwp_grid_file, show_col_types = FALSE)
+  }
+  shapefile.fix <- sf::st_as_sf(shp_raw, wkt = "geom_wkt", crs = 4326)
+  shapefile.fix <- dplyr::rename(shapefile.fix,
+                                 cwp_code = CWP_CODE,
+                                 geom     = geom_wkt)
 
-  # Start enrichment
-  enriched_data <- data %>%
-    # species
-    left_join(species_group, by = "species") %>%
-    # gear
-    left_join(cl_cwp_gear_level2, by = c("gear_type" = "Code")) %>%
-    rename(gear_type_label = Gear) %>%
-    # fleet
-    left_join(fishing_fleet_label %>% select(code, fishing_fleet_label = label),
-              by = c("fishing_fleet" = "code")) %>%
-    # measurement unit
-    {
-      global  <- measurement_unit_label %>% filter(source_authority == "ALL")
-      specific <- measurement_unit_label %>% filter(source_authority != "ALL")
-      . %>%
-        left_join(specific %>% select(code, source_authority, meas_unit_lbl_sp = label),
-                  by = c("measurement_unit" = "code", "source_authority")) %>%
-        left_join(global  %>% select(code, meas_unit_lbl_gl = label),
-                  by = "measurement_unit") %>%
-        mutate(measurement_unit_label = coalesce(meas_unit_lbl_sp, meas_unit_lbl_gl)) %>%
-        select(-meas_unit_lbl_sp, -meas_unit_lbl_gl)
-    } %>%
-    # measurement type, measurement, processing level, fishing mode
-    left_join(measurement_type_df %>% rename(measurement_type_label = label),
-              by = c("measurement_type" = "code")) %>%
-    left_join(cl_measurement %>% rename(measurement_label = label),
-              by = c("measurement" = "code")) %>%
-    left_join(cl_measurement_processing_level %>% rename(measurement_processing_level_label = label),
-              by = c("measurement_processing_level" = "code")) %>%
-    left_join(cl_fishing_mode %>% rename(fishing_mode_label = label),
-              by = c("fishing_mode" = "code")) %>%
-    # add gridtype
-    left_join(shapefile.fix %>% select(geographic_identifier = cwp_code, gridtype = GRIDTYPE),
-              by = "geographic_identifier") %>%
-    # reorder so that each code is followed by its *_label
-    {
-      df <- .                         # <- ici on capture le tibble pipeline dans df
-      cols <- names(df)
-      base <- grep("_label$", cols, invert = TRUE, value = TRUE)
-      neword <- unlist(lapply(base, function(x) c(x, paste0(x, "_label"))))
-      neword <- neword[neword %in% cols]
+  # Step 2: Join species and gear data
+  enriched_data <- dplyr::left_join(data,
+                                    species_group,
+                                    by = "species")
+  enriched_data <- dplyr::left_join(enriched_data,
+                                    cl_cwp_gear_level2,
+                                    by = c("gear_type" = "code"))
+  enriched_data <- dplyr::rename(enriched_data,
+                                 gear_type_label = label)
 
-      df[, unique(c(neword, setdiff(cols, neword)))]
-    } %>%
+  # Step 3: Join fleet data
+  enriched_data <- dplyr::left_join(
+    enriched_data,
+    dplyr::select(fishing_fleet_label,
+                  code,
+                  fishing_fleet_label = label),
+    by = c("fishing_fleet" = "code")
+  )
 
-    # enfin on remonte en sf
-    sf::st_as_sf(crs = 4326)
+  # Step 4: Join measurement type, measurement, processing level, and mode labels
+  enriched_data <- dplyr::left_join(
+    enriched_data,
+    dplyr::rename(measurement_type_df,
+                  measurement_type_label = label),
+    by = c("measurement_type" = "code")
+  )
+  enriched_data <- dplyr::left_join(
+    enriched_data,
+    dplyr::rename(cl_measurement,
+                  measurement_label = label),
+    by = c("measurement" = "code")
+  )
+  enriched_data <- dplyr::left_join(
+    enriched_data,
+    dplyr::rename(cl_measurement_processing_level,
+                  measurement_processing_level_label = label),
+    by = c("measurement_processing_level" = "code")
+  )
+  enriched_data <- dplyr::left_join(
+    enriched_data,
+    dplyr::rename(cl_fishing_mode,
+                  fishing_mode_label = label),
+    by = c("fishing_mode" = "code")
+  )
+
+  # Step 5: Join gridtype from shapefile.fix
+  enriched_data <- dplyr::left_join(
+    enriched_data,
+    dplyr::select(shapefile.fix,
+                  geographic_identifier = cwp_code,
+                  gridtype            = GRIDTYPE),
+    by = "geographic_identifier"
+  )
+
+  # Step 6: Reorder columns so each code is followed by its label
+  cols      <- base::names(enriched_data)
+  base_cols <- base::grep("_label$", cols,
+                          invert = TRUE,
+                          value  = TRUE)
+  new_order <- base::unlist(
+    base::lapply(base_cols, function(x) c(x, paste0(x, "_label")))
+  )
+  new_order <- new_order[new_order %in% cols]
+  final_order <- base::unique(c(new_order,
+                                base::setdiff(cols, new_order)))
+  enriched_data <- enriched_data[final_order]
+
+  # Step 7: Convert to sf if not already
+  if (!inherits(enriched_data, "sf")) {
+    enriched_data <- sf::st_as_sf(enriched_data, crs = 4326)
+  }
 
   # save if requested
   if (!is.null(save_prefix)) {
@@ -251,4 +283,3 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
 
   list(with_geom = enriched_data, without_geom = without_geom)
 }
-

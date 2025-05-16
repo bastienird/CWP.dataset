@@ -30,7 +30,7 @@ if(is_null_or_not_exist(parameter_filtering)){parameter_filtering <- list(specie
 if(is_null_or_not_exist(parameter_time_dimension)){parameter_time_dimension = c("time_start")}
 
 if(is_null_or_not_exist(parameter_geographical_dimension)){parameter_geographical_dimension = "geographic_identifier"}
-if(is_null_or_not_exist(parameter_geographical_dimension_groupping)){parameter_geographical_dimension_groupping = "GRIDTYPE"}
+if(is_null_or_not_exist(parameter_geographical_dimension_groupping)){parameter_geographical_dimension_groupping = "gridtype"}
 if(is_null_or_not_exist(coverage)){coverage = TRUE}
 
 

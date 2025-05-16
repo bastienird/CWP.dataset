@@ -82,7 +82,7 @@ strata_with_catches_without_effort = function(main.dir, connectionDB,uploadgoogl
                                             shapefile.fix = shapefile.fix, continent = continent,
                                             parameter_geographical_dimension = "geographic_identifier",
                                             parameter_time_dimension = "time_start",
-                                            parameter_geographical_dimension_groupping = "GRIDTYPE", child_header = "-#",
+                                            parameter_geographical_dimension_groupping = "gridtype", child_header = "-#",
                                             Add_lines = "Catch_no_effort_add_lines.Rmd",print_map = TRUE,
                                             title = "Summary of the data being recorded in catch dataset but not in effort dataset")
 

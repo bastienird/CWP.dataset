@@ -38,8 +38,7 @@ compare_georef_nominal <- function(georef, nominal, connectionDB) {
   cl_cwp_gear_level2 <- st_read(connectionDB, query = "SELECT * FROM gear_type.isscfg_revision_1") %>%
     select(Code = code, Gear = label)
 
-  shapefile.fix <- st_read(connectionDB, query = "SELECT * from area.cwp_grid") %>%
-    dplyr::rename(GRIDTYPE = gridtype)
+  shapefile.fix <- st_read(connectionDB, query = "SELECT * from area.cwp_grid")
 
   shape_without_geom <- shapefile.fix %>%
     as_tibble() %>%

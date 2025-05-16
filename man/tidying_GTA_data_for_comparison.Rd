@@ -14,7 +14,7 @@ tidying_GTA_data_for_comparison(
 \arguments{
 \item{dataframe}{A data frame or a file path (character) to an RDS file containing the dataset.}
 
-\item{shape}{An optional spatial data frame with a \code{GRIDTYPE} and \code{cwp_code} column for geographic matching.}
+\item{shape}{An optional spatial data frame with a \code{gridtype} and \code{cwp_code} column for geographic matching.}
 
 \item{species_group_dataframe}{An optional data frame mapping species to groups.}
 
@@ -48,7 +48,7 @@ df <- data.frame(
   measurement_value = c(100, 200)
 )
 
-shape_data <- data.frame(GRIDTYPE = c("1deg_x_1deg", "5deg_x_5deg"), cwp_code = c("5100000", "5100001"))
+shape_data <- data.frame(gridtype = c("1deg_x_1deg", "5deg_x_5deg"), cwp_code = c("5100000", "5100001"))
 species_mapping <- data.frame(species = c("YFT", "BET"), species_group = c("Yellowfin Tuna", "Bigeye Tuna"))
 gear_mapping <- data.frame(Code = c("03.1.0", "01.1.0"), GearLevel2 = c("Purse Seine", "Longline"))
 

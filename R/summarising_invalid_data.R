@@ -295,15 +295,12 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
           rename_with(~ gsub("\\.x$", "", .x), matches("\\.x$"))  # This renames columns, removing '.x'
 
 
-      } else if ("GRIDTYPE" %notin% colnames(data_list)){
+      } else if ("gridtype" %notin% colnames(data_list)){
         data_list <- data_list %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
         data_list <- tidying_GTA_data_for_comparison(dataframe = data_list,
                                                      shape = shape_without_geom,
                                                      species_group_dataframe = species_group,
                                                      cl_cwp_gear_level2_dataframe = cl_cwp_gear_level2)
-      }
-      if("gridtype"%in% colnames(data_list)){
-        data_list <- data_list %>% dplyr::rename(GRIDTYPE = gridtype)
       }
       readr::write_csv(data_list, file = data_path)
 
@@ -331,7 +328,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   }
   if(length(all_data) !=0){
     combined_data <- bind_rows(all_data, .id = "entity_name")
-    combined_data <- combined_data %>% dplyr::rename(gridtype = GRIDTYPE) %>%
+    combined_data <- combined_data  %>%
       dplyr::rename(dataset  = entity_name) %>%
       dplyr::mutate(issue = gsub(".csv","", issue)) %>%
       dplyr::rename(codesource_area = geographic_identifier)
@@ -364,7 +361,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   parameters_child <- list(
     parameter_colnames_to_keep = c("fishing_fleet", "gear_type", "geographic_identifier",
                                    "fishing_mode", "species", "measurement_unit", "measurement_value",
-                                   "Gear", "species_group", "GRIDTYPE"),
+                                   "Gear", "species_group", "gridtype"),
     shapefile.fix = shapefile.fix,
     outputonly = FALSE,
     print_map = TRUE,
@@ -436,7 +433,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
             # "source_authority",
             "species", "gear_type", "fishing_fleet",
             "fishing_mode", "geographic_identifier", "measurement_unit",
-            "measurement_value", "GRIDTYPE", "species_group", "Gear"
+            "measurement_value", "gridtype", "species_group", "Gear"
           ),
           shapefile_fix = shapefile.fix,
           continent = continent,

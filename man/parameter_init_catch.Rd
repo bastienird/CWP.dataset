@@ -16,7 +16,7 @@ A tibble with 200 rows and 14 variables:
 \item{geographic_identifier}{CWP geographic identifier}
 \item{measurement_unit}{Unit of measurement (e.g., t, no, etc.)}
 \item{measurement_value}{Measurement value (e.g., catch in tons)}
-\item{GRIDTYPE}{Spatial resolution label}
+\item{gridtype}{Spatial resolution label}
 \item{Gear}{Gear label}
 \item{fishing_mode_label}{Fishing mode label}
 \item{fishing_fleet_label}{Fishing fleet label}

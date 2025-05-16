@@ -39,10 +39,10 @@ groupping_differences <- function(init, final, parameter_time_dimension, paramet
   Groupped_all$Dimension <- as.character(Groupped_all$Dimension)
   Groupped_all$Precision <- as.character(Groupped_all$Precision)
 
-  GrouppedGRIDTYPE <- fonction_groupement(parameter_geographical_dimension_groupping, init = init, final = final)
+  Grouppedgridtype <- fonction_groupement(parameter_geographical_dimension_groupping, init = init, final = final)
 
   time_dimension_list_groupped <- lapply(parameter_time_dimension, fonction_groupement, init = init, final = final)
   # Groupped_time_dimension <- do.call(rbind, time_dimension_list_groupped)
 
-  return(list(Groupped_all = Groupped_all, GrouppedGRIDTYPE = GrouppedGRIDTYPE, Groupped_time_dimension = time_dimension_list_groupped, Other_dimensions = Other_dimensions))
+  return(list(Groupped_all = Groupped_all, Grouppedgridtype = Grouppedgridtype, Groupped_time_dimension = time_dimension_list_groupped, Other_dimensions = Other_dimensions))
 }
