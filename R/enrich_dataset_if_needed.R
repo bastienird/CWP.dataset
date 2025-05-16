@@ -225,14 +225,18 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     left_join(shapefile.fix %>% select(geographic_identifier = cwp_code, gridtype = GRIDTYPE),
               by = "geographic_identifier") %>%
     # reorder so that each code is followed by its *_label
-    { df ->
-        cols <- names(df)
-        base <- grep("_label$", cols, invert = TRUE, value = TRUE)
-        neword <- unlist(lapply(base, function(x) c(x, paste0(x, "_label"))))
-        neword <- neword[neword %in% cols]
-        df[, unique(c(neword, setdiff(cols, neword)))]
-    }() %>%
-    st_as_sf(crs = 4326)
+    {
+      df <- .                         # <- ici on capture le tibble pipeline dans df
+      cols <- names(df)
+      base <- grep("_label$", cols, invert = TRUE, value = TRUE)
+      neword <- unlist(lapply(base, function(x) c(x, paste0(x, "_label"))))
+      neword <- neword[neword %in% cols]
+
+      df[, unique(c(neword, setdiff(cols, neword)))]
+    } %>%
+
+    # enfin on remonte en sf
+    sf::st_as_sf(crs = 4326)
 
   # save if requested
   if (!is.null(save_prefix)) {
