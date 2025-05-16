@@ -131,9 +131,13 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     con,
     "SELECT taxa_order, code FROM species.species_asfis",
     system.file("extdata", "cl_asfis_species.csv", package = "CWP.dataset"),
-    function(f) read_csv(f) %>% clean_names() %>% select(species_group = taxa_order, species = code),
+    function(f) read_csv(f) %>% clean_names() %>% select(species_label = label, species_group = taxa_order, species = code),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/cl_asfis_species.csv"
   )
+
+
+  species_label <- st_read(connectionDB, query = "SELECT * FROM species.species_asfis") %>%
+    janitor::clean_names()
 
   cl_measurement_processing_level <- try_db_query(
     con,
