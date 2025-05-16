@@ -45,7 +45,6 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
   ancient_wd <- getwd()
   futile.logger::flog.info("Starting Summarising_step function")
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/refs/heads/master/tunaatlas_scripts/generation/enrich_dataset_if_needed.R")
 
   entity_dirs <- list.dirs(file.path(main_dir, "entities"), full.names = TRUE, recursive = FALSE)
   # entity_dirs <- entity_dirs[2]
@@ -129,7 +128,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         if (!file.exists(gsub(pattern = basename(file), replacement = "ancient.qs", file))) {
           data <- qs::qread(file)
           file.copy(from = file, to = gsub(pattern = basename(file), replacement = "ancient.qs", file))
-          data <- enrich_dataset_if_needed(data)
+          data <- CWP.dataset::enrich_dataset_if_needed(data)
           data <- data%>%dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT","t","MTNO", "Tons")~ "Tons",
               measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ measurement_unit))
 
