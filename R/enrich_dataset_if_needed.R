@@ -135,10 +135,6 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/cl_asfis_species.csv"
   )
 
-
-  species_label <- st_read(connectionDB, query = "SELECT * FROM species.species_asfis") %>%
-    janitor::clean_names()
-
   cl_measurement_processing_level <- try_db_query(
     con,
     "SELECT * FROM measurement_processing_level.measurement_processing_level",
