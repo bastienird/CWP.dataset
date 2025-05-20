@@ -312,10 +312,11 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
                   fig.path                = fig.path,
                   coverage                = coverage
                 )
-                }
+
 
                 qs::qsave(res_i, file = out_file, preset = "high")
                 rm(res_i); gc()
+                }
                 out_file
               })
               return(all_paths)
