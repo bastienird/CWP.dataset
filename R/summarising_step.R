@@ -293,6 +293,15 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
               return(all_list)
             } else {
               all_paths <- lapply(seq_i, function(i) {
+
+                out_file <- file.path(fig.path,
+                                      sprintf("comparison_step_%02d.qs", i))
+
+                if(usesave && file.exists(out_file)){
+
+                  sprintf("comparison_step_%02d.qs", i, " already exists, using the cached data")
+
+                } else {
                 res_i <- CWP.dataset::function_multiple_comparison(
                   i,
                   parameter_short         = FALSE,
@@ -303,8 +312,8 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
                   fig.path                = fig.path,
                   coverage                = coverage
                 )
-                out_file <- file.path(fig.path,
-                                      sprintf("comparison_step_%02d.qs", i))
+                }
+
                 qs::qsave(res_i, file = out_file, preset = "high")
                 rm(res_i); gc()
                 out_file
