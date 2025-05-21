@@ -29,7 +29,11 @@ base::options(knitr.duplicate.label = "allow")
 
 base::options(scipen=9999)
 plotting_type <- "plot" 
-if (knitr::is_html_output()){plotting_type <- "view" }
+if (knitr::opts_knit$get("rmarkdown.pandoc.to") == "html") {
+  plotting_type <- "view"
+} else {
+  plotting_type <- "plot"
+}
 tmap_mode(plotting_type)
 
 ```
