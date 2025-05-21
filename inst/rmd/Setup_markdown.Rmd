@@ -19,7 +19,7 @@ lapply(required_packages, function(pkg) {
 require(CWP.dataset)
 base::options(scipen=9999)
 
-if(!exists("plotting_type") | !knitr::is_html_output()){
+if(!exists("plotting_type") | !knitr::opts_knit$get("rmarkdown.pandoc.to") == "html"){
   plotting_type  <- "plot"  
 } else{
 plotting_type <- plotting_type}
