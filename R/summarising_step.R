@@ -236,6 +236,9 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         } else {
           process_fisheries_data_list <- process_fisheries_data(sub_list_dir_3, parameter_fact = "catch", parameter_filtering)
         }
+        if(!fast_and_heavy){
+          qs::qsave(process_fisheries_data_list, "process_fisheries_data_list.qs")
+        }
         futile.logger::flog.info("Processed process_fisheries_data_list")
 
         render_env$process_fisheries_data_list <- process_fisheries_data_list
@@ -364,7 +367,9 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         } else {
           render_env$child_env_first_to_last_result <- NULL
           render_env$child_env_last_result <- NULL
+          render_env$process_fisheries_data_list <- NULL
           render_env$path_to_qs_summary <- "path_to_qs_summary.qs"
+          render_env$path_to_process_fisheries_data_list <- "process_fisheries_data_list.qs"
           render_env$path_to_qs_final <- "path_to_qs_final.qs"
           gc()
         }

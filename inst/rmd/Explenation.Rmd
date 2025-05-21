@@ -44,7 +44,7 @@ output: html_document
 
 ```{r filterprinting, echo=FALSE, results='asis'}
 
-if (!isNullList(parameter_filtering)){
+if (!CWP.dataset::isNullList(parameter_filtering)){
   cat (paste0("The filter used on this data are:  \n "))
   for (i in 1:length(parameter_filtering)){
     if (parameter_filtering[i] %in% parameter_filtering & !is.null(parameter_filtering[[i]])){

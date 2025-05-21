@@ -19,12 +19,12 @@
 #' generate_bookdown_yml("custom_bookdown_dir")
 #'
 #' @export
-generate_bookdown_yml <- function(destination = system.file("rmd", package = "CWP.dataset")) {
+generate_bookdown_yml <- function(destination = system.file("rmd", package = "CWP.dataset"), new_session = FALSE) {
   yml_content <- c(
     'book_filename: "tableau_recapbookdowntest"',
     'output_dir: "_book"',
     'delete_merged_file: true',
-    'new_session: false',
+    paste0('new_session: ', new_session),
     'rmd_files:',
     paste0('  - "', destination, '/index.Rmd"'),
     paste0('  - "', destination, '/first_and_first_to_last_and_process.Rmd"'),

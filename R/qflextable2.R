@@ -66,7 +66,7 @@ y <- x %>%
                             ifelse(y %>% dplyr::select(all_of(columns_to_color)) > 0, "green", "white"))
       flextabley <- flextable::flextable(y)
 
-      flextabley <- flextabley %>% highlight(j = all_of(columns_to_color), color = colormatrix)
+      flextabley <- flextabley %>% flextable::highlight(j = all_of(columns_to_color), color = colormatrix)
 
 
     } else {    flextabley <- flextable::flextable(y)}

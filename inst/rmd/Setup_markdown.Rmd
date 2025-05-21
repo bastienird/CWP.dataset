@@ -6,15 +6,32 @@ output: html_document
 ---
 
 
-```{r options, include=FALSE}
+```{r include=FALSE}
 
+knitr::opts_chunk$set(duplicate.label = "allow")
+# Define all required packages (excluding 'base' and 'utils' as they are always available)
+required_packages <- c("dplyr", "flextable", "dplyr", "stringr"
+  "tinytex", "googledrive", "gsheet", "readr", "plotrix", "janitor", 
+  "dotenv", "data.table", "here", "xfun", "RPostgreSQL", "RPostgres", "DBI", 
+  "rpostgis", "terra", "sf", "RSQLite", "webshot", "usethis", "ows4R", "sp", 
+  "flextable", "dplyr", "stringr", "tibble", "bookdown", "knitr", 
+  "purrr", "readxl", "odbc", "rlang", "kableExtra", "tidyr", "ggplot2", 
+  "stats", "RColorBrewer", "cowplot", "tmap", "curl", "officer", 
+  "gdata", "R3port", "reshape2", "tools", "plogr", "futile.logger", "lubridate", "data.table"
+)
+
+lapply(required_packages, function(pkg) {
+  library(pkg, character.only = TRUE)
+})
+
+require(CWP.dataset)
 base::options(scipen=9999)
 
 if(!exists("plotting_type") | !knitr::is_html_output()){
   plotting_type  <- "plot"  
 } else{
 plotting_type <- plotting_type}
-tmap_mode(plotting_type)
+tmap::tmap_mode(plotting_type)
 
 knitr::opts_chunk$set(echo = FALSE)
 

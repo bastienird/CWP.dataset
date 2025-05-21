@@ -18,7 +18,7 @@ cat(res)
 
 ```
 
-`r if(step_title_t_f){cat_title(step_title, child_headerinside = child_header)}`
+`r if(step_title_t_f){CWP.dataset::cat_title(step_title, child_headerinside = child_header)}`
 
 ```{r explenation, results='asis'}
 
@@ -38,7 +38,7 @@ if(!unique_analyse && parameter_short == FALSE && coverage){
 
 ```
 
-`r if(main_title){cat_title("# Main differences", child_headerinside = child_header)}`
+`r if(main_title){CWP.dataset::cat_title("# Main differences", child_headerinside = child_header)}`
 
 ```{r Compnumberstratas, eval=!unique_analyse, echo=FALSE, results='asis'}
 
@@ -59,7 +59,7 @@ if (parameter_short){knitr::knit_exit(exit, fully = FALSE)}
 ```
 
 
-`r if(!unique_analyse && (exists("plot_titles_list") && !is.null(plot_titles_list))){cat_title("## Differences in temporal data", child_headerinside = child_header)}`
+`r if(!unique_analyse && (exists("plot_titles_list") && !is.null(plot_titles_list))){CWP.dataset::cat_title("## Differences in temporal data", child_headerinside = child_header)}`
 
 
 ```{r timediffchild, results='asis', eval = !unique_analyse && (exists("plot_titles_list") && !is.null(plot_titles_list))}
@@ -71,7 +71,7 @@ cat(res, sep =  "\\clearpage")
 
 \clearpage
 
-`r if(!unique_analyse && (exists("Geographicdiff") && !is.null(Geographicdiff))){cat_title("## Differences in geographical data", child_headerinside = child_header)}`
+`r if(!unique_analyse && (exists("Geographicdiff") && !is.null(Geographicdiff))){CWP.dataset::cat_title("## Differences in geographical data", child_headerinside = child_header)}`
 
 
 ```{r Geodiff, results='asis', eval = !unique_analyse && (exists("Geographicdiff") && !is.null(Geographicdiff))}
@@ -83,7 +83,7 @@ cat(res, sep =  "\\clearpage")
 
 \clearpage
 
-`r if(!unique_analyse && (exists("compare_dimension_differences_list") && !is.null(compare_dimension_differences_list))){cat_title("## The differences for each other dimension", child_headerinside = child_header)}`
+`r if(!unique_analyse && (exists("compare_dimension_differences_list") && !is.null(compare_dimension_differences_list))){CWP.dataset::cat_title("## The differences for each other dimension", child_headerinside = child_header)}`
 
 
 ```{r Diff-for-other-dimensions, results='asis', eval = !unique_analyse && (exists("compare_dimension_differences_list") && !is.null(compare_dimension_differences_list))}

@@ -22,31 +22,35 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
 
   if (parameter_fact == "catch") {
 
+    have_nominal <- FALSE
     if (dir.exists("Markdown")) {
-      if(file.exists("data/global_nominal_catch_firms_level0_harmonized.csv")){
-        nominal_dataset <- readr::read_csv("data/global_nominal_catch_firms_level0_harmonized.csv")
+      nom_file1 <- "data/global_nominal_catch_firms_level0_harmonized.csv"
+      nom_file2 <- "data/global_nominal_catch_firms_level0.csv"
+      if (file.exists(nom_file1) || file.exists(nom_file2)) {
+        fname <- if (file.exists(nom_file1)) nom_file1 else nom_file2
+        nominal_dataset <- readr::read_csv(fname)
         nominal_dataset <- CWP.dataset::filtering_function(nominal_dataset, parameter_filtering = parameter_filtering)
-
-      } else if (file.exists("data/global_nominal_catch_firms_level0.csv")){
-      nominal_dataset <- readr::read_csv("data/global_nominal_catch_firms_level0.csv")
-      nominal_dataset <- CWP.dataset::filtering_function(nominal_dataset, parameter_filtering = parameter_filtering)
+        nominal <- sum(nominal_dataset$measurement_value)
+        have_nominal <- TRUE
       }
     }
 
-    if (exists("nominal_dataset")) {
-      nominal <- sum(nominal_dataset$measurement_value)
+    # Prepare empty data frame with dynamic columns
+    base_cols <- c(
+      "Step", "Explanation", "Functions", "Options",
+      "Tons", "Number of fish", "Lines",
+      "Difference (in % of tons)", "Difference in tons",
+      "Difference (in % of fish)", "Difference in number of fish", "Difference (in % of lines)",
+      "Conversion factors (kg)"
+    )
+    if (have_nominal) {
+      all_cols <- c(base_cols, "Percentage of nominal")
     } else {
-      nominal <- 1
+      all_cols <- base_cols
     }
 
-    df <- data.frame(matrix(ncol = 14, nrow = 1))  # Ajout d'une colonne pour "Conversion factors"
-    colnames(df) <- c(
-      paste0(tail(str_split(paste0(sub_list_dir_2), "/")[[1]], n = 1)),
-      "Explanation", "Functions",
-      "Options", "Tons", "Number of fish", "Lines", "Difference (in % of tons)", "Difference in tons",
-      "Difference (in % of fish)", "Difference in number of fish", "Difference (in % of lines)",
-      "Percentage of nominal", "Conversion factors (kg)"  # Nouvelle colonne
-    )
+    df <- data.frame(matrix(ncol = length(all_cols), nrow = 0))
+    colnames(df) <- all_cols
 
     main <- CWP.dataset::filtering_function(qs::qread(paste0(sub_list_dir_2[1], "/data.qs")), parameter_filtering = parameter_filtering)
     tons_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("MTNO", "MT", "t", "Tons")))$measurement_value)
@@ -61,7 +65,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
       } else {
         Options <- "None"
       }
-      if (isNullList(parameter_filtering)) {
+      if (CWP.dataset::isNullList(parameter_filtering)) {
         sums <- read_csv(paste0(i, "/sums.csv"))
         sum_t <- sums$sum_t
         sum_no <- sums$sum_no
@@ -92,6 +96,9 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
                       sums, Difference_percent, Difference_tons, Difference_percent_no,
                       Difference_no, Difference_percent_lines, percentage_of_nominal,
                       Conversion_factors_kg)  # Ajout de la colonne conversion factors
+      if (have_nominal) {
+        data_i$`Percentage of nominal` <- round((sum_t * 100) / nominal, 1)
+      }
       names(data_i) <- colnames(df)
       df <- rbind(df, data_i)
       tons_init <- sum_t

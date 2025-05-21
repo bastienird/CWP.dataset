@@ -9,7 +9,7 @@ Representing the differences in percent for each year.
 
 ```{r include = FALSE}
 
-timediffplot_knit_list <- mapply(FUN = knitting_plots_subfigures, plot = plot_titles_list$plots, title = plot_titles_list$titles, MoreArgs = list(folder = "Temporal", fig.pathinside = fig.path))
+timediffplot_knit_list <- mapply(FUN = CWP.dataset::knitting_plots_subfigures, plot = plot_titles_list$plots, title = plot_titles_list$titles, MoreArgs = list(folder = "Temporal", fig.pathinside = fig.path))
 
 ```
 

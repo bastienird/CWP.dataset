@@ -5,7 +5,7 @@ res <- knitr::knit_child(system.file("rmd/Setup_markdown.Rmd", package = "CWP.da
 
 ```
 
-# Summary of the final provided data : `r ifelse(exists("datasetname"), datasetname, gsub("_", "", entity$identifiers[["id"]]))`
+# Summary of the final provided data : `r ifelse(exists("datasetname"), datasetname, gsub("_", "", parameter_titre_dataset_1))`
 
 ```{r pathtoqsfinal}
 
@@ -17,14 +17,14 @@ if(exists("path_to_qs_final")){
 } else {
   
   child_env_last <- list2env(as.list(child_env_last_result), parent = new.env())
-  
+  rm(child_env_last_result)
 }
 ```
 
 
 ```{r analysislast, message=TRUE, warning=TRUE, include=FALSE}
 
-rm(child_env_last_result)
+
 gc()
 res_last <- knitr::knit_child(system.file("rmd/comparison.Rmd", package = "CWP.dataset"), quiet = TRUE, envir = child_env_last)
 
@@ -100,15 +100,20 @@ gc()
 
 The following table recap all the treatment done on the mapped and standardized rawdata provided by tRFMOs.
 
-```{r results='asis'}
+```{r analysislast, message=TRUE, warning=TRUE, include=FALSE, results='asis'}
 
-qflextable2(process_fisheries_data_list$reduced, captionn =process_fisheries_data_list$fig.capp, columns_to_color = process_fisheries_data_list$columns_to_color,  pgwidth = 6, save_folder = "Summary", fig.pathinside = fig.path)
+if(exists("path_to_process_fisheries_data_list")){
+    process_fisheries_data_list <- qs::qread(path_to_process_fisheries_data_list)
+}
+gc()
+
+CWP.dataset::qflextable2(process_fisheries_data_list$reduced, captionn =process_fisheries_data_list$fig.capp, columns_to_color = process_fisheries_data_list$columns_to_color,  pgwidth = 6, save_folder = "Summary", fig.pathinside = fig.path)
 
 ```
 
 ```{r message=FALSE, warning=FALSE}
 
-save_image(title= process_fisheries_data_list$fig.capp, plott = process_fisheries_data_list$cowplot, folder = "Summary", fig.pathinside = fig.path)
+CWP.dataset::save_image(title= process_fisheries_data_list$fig.capp, plott = process_fisheries_data_list$cowplot, folder = "Summary", fig.pathinside = fig.path)
 
 ```
 
