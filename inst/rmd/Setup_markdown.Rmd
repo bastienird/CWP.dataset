@@ -10,15 +10,7 @@ output: html_document
 
 knitr::opts_chunk$set(duplicate.label = "allow")
 # Define all required packages (excluding 'base' and 'utils' as they are always available)
-required_packages <- c("dplyr", "flextable", "dplyr", "stringr"
-  "tinytex", "googledrive", "gsheet", "readr", "plotrix", "janitor", 
-  "dotenv", "data.table", "here", "xfun", "RPostgreSQL", "RPostgres", "DBI", 
-  "rpostgis", "terra", "sf", "RSQLite", "webshot", "usethis", "ows4R", "sp", 
-  "flextable", "dplyr", "stringr", "tibble", "bookdown", "knitr", 
-  "purrr", "readxl", "odbc", "rlang", "kableExtra", "tidyr", "ggplot2", 
-  "stats", "RColorBrewer", "cowplot", "tmap", "curl", "officer", 
-  "gdata", "R3port", "reshape2", "tools", "plogr", "futile.logger", "lubridate", "data.table"
-)
+required_packages <- c("dplyr", "flextable", "dplyr", "stringr", "tinytex", "bookdown", "tmap", "data.table", "kableExtra", "ggplot2", "knitr", "webshot", "sf", "tidyr", "tmap", "futile.logger")
 
 lapply(required_packages, function(pkg) {
   library(pkg, character.only = TRUE)

@@ -15,7 +15,7 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
 
   # Save the ggplot object in the current environment with a unique name
   if(is_ggplot(plot)) {
-    save_image(title = title, plott = plot, folder = folder, fig.pathinside = fig.pathinside)
+    CWP.dataset::save_image(title = title, plott = plot, folder = folder, fig.pathinside = fig.pathinside)
     if(in_knitr) {
       # This will run if inside a knitr/RMarkdown environment
 

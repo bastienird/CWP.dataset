@@ -60,7 +60,7 @@ timecoverage <- function(parameter_time_dimension, unique_analyse, titre_1 = "ti
   })
 
   # temporalcoveragelistplot chunk
-  time_dimension_list_groupped_diff_image_knit <- mapply(FUN = knitting_plots_subfigures,
+  time_dimension_list_groupped_diff_image_knit <- mapply(FUN = CWP.dataset::knitting_plots_subfigures,
                                                          plot = time_dimension_list_groupped_diff_image,
                                                          title = titles_time,
                                                          MoreArgs = list(folder = "Temporal", fig.pathinside = fig.path))
