@@ -170,74 +170,110 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
         render_env <- list2env(as.list(child_env), parent = child_env)
         list2env(parameters_child_global, envir = render_env)
-        child_env_last_result <- CWP.dataset::comprehensive_cwp_dataframe_analysis(
-          parameter_init = sub_list_dir_2[length(sub_list_dir_2)],
-          parameter_final = NULL,
-          fig.path = parameters_child_global$fig.path,
-          parameter_fact = opts$fact,
-          parameter_colnames_to_keep = parameter_colnames_to_keep_fact,
-          coverage = TRUE,
-          shapefile_fix = shapefile.fix,
-          continent = continent,
-          parameter_resolution_filter = parameters_child_global$parameter_resolution_filter,
-          parameter_filtering = parameters_child_global$parameter_filtering,
-          parameter_titre_dataset_1 = entity$identifiers[["id"]],
-          parameter_geographical_dimension_groupping = "gridtype",
-          unique_analyse = TRUE
-        )
 
-        filename <- paste0("Report_on_", entity$identifiers[["id"]])
-        new_path <- file.path(render_env$fig.path, filename)
-        dir.create(new_path, recursive = TRUE)
-        child_env_last_result$fig.path <- new_path
-        child_env_last_result$step_title_t_f <- FALSE
-        # child_env_last_result$parameter_short <- FALSE
-        child_env_last_result$child_header <- "#"
-        # child_env_last_result$unique_analyse <- TRUE
-        # child_env_last_result$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
-        # child_env_last_result$parameter_titre_dataset_2 <- NULL
-        if(!fast_and_heavy){
-          qs::qsave(child_env_last_result, "path_to_qs_final.qs")
+        if(usesave && file.exists("process_fisheries_data_list.qs")){
+
+          sprintf("Using saved data for process_fisheries_data_list.qs")
+
         }
-        child_env_first_to_last_result <- CWP.dataset::comprehensive_cwp_dataframe_analysis(
-          parameter_init = sub_list_dir_2[1],
-          parameter_final = sub_list_dir_2[length(sub_list_dir_2)],
-          fig.path = parameters_child_global$fig.path,
-          parameter_fact = opts$fact,
-          parameter_colnames_to_keep = parameter_colnames_to_keep_fact,
-          shapefile_fix = shapefile.fix,
-          continent = continent,
-          coverage = TRUE,
-          parameter_resolution_filter = parameters_child_global$parameter_resolution_filter,
-          parameter_filtering = parameters_child_global$parameter_filtering,
-          parameter_titre_dataset_1 = basename(sub_list_dir_2[1]),
-          parameter_titre_dataset_2 = entity$identifiers[["id"]],
-          parameter_geographical_dimension_groupping = "gridtype",
-          unique_analyse = FALSE
-        )
 
-        new_path <- file.path(parameters_child_global$fig.path, paste0("/Comparison/initfinal_", basename(sub_list_dir_2[1]), "_", basename(sub_list_dir_2[length(sub_list_dir_2)])))
-        dir.create(new_path, recursive = TRUE)
-        child_env_first_to_last_result$fig.path <- new_path
-        child_env_first_to_last_result$step_title_t_f <- FALSE
-        # child_env_first_to_last_result$parameter_short <- FALSE
-        # child_env_first_to_last_result$unique_analyse <- FALSE
-        child_env_first_to_last_result$parameter_titre_dataset_1 <- "Initial_data"
-        child_env_first_to_last_result$parameter_titre_dataset_2 <- entity$identifiers[["id"]]
-        child_env_first_to_last_result$child_header <- "#"
+        if(!fast_and_heavy && usesave && file.exists("path_to_qs_final.qs")){
 
-        if(!fast_and_heavy){
-          qs::qsave(child_env_first_to_last_result, "path_to_qs_summary.qs")
+          sprintf("Using saved data for path_to_qs_final.qs")
+          child_env_last_result <- NULL
+
+        } else {
+
+          child_env_last_result <- CWP.dataset::comprehensive_cwp_dataframe_analysis(
+            parameter_init = sub_list_dir_2[length(sub_list_dir_2)],
+            parameter_final = NULL,
+            fig.path = parameters_child_global$fig.path,
+            parameter_fact = opts$fact,
+            parameter_colnames_to_keep = parameter_colnames_to_keep_fact,
+            coverage = TRUE,
+            shapefile_fix = shapefile.fix,
+            continent = continent,
+            parameter_resolution_filter = parameters_child_global$parameter_resolution_filter,
+            parameter_filtering = parameters_child_global$parameter_filtering,
+            parameter_titre_dataset_1 = entity$identifiers[["id"]],
+            parameter_geographical_dimension_groupping = "gridtype",
+            unique_analyse = TRUE
+          )
+
+          filename <- paste0("Report_on_", entity$identifiers[["id"]])
+          new_path <- file.path(render_env$fig.path, filename)
+          dir.create(new_path, recursive = TRUE)
+          child_env_last_result$fig.path <- new_path
+          child_env_last_result$step_title_t_f <- FALSE
+          # child_env_last_result$parameter_short <- FALSE
+          child_env_last_result$child_header <- "#"
+          # child_env_last_result$unique_analyse <- TRUE
+          child_env_last_result$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
+          # child_env_last_result$parameter_titre_dataset_2 <- NULL
+          if(!fast_and_heavy){
+            qs::qsave(child_env_last_result, "path_to_qs_final.qs")
+          }
         }
+
+        if(!fast_and_heavy && usesave && file.exists("path_to_qs_summary.qs")){
+
+          sprintf("Using saved data for path_to_qs_summary.qs")
+          child_env_first_to_last_result <- NULL
+          new_path <- file.path(parameters_child_global$fig.path, paste0("/Comparison/initfinal_", basename(sub_list_dir_2[1]), "_", basename(sub_list_dir_2[length(sub_list_dir_2)])))
+        } else {
+
+          child_env_first_to_last_result <- CWP.dataset::comprehensive_cwp_dataframe_analysis(
+            parameter_init = sub_list_dir_2[1],
+            parameter_final = sub_list_dir_2[length(sub_list_dir_2)],
+            fig.path = parameters_child_global$fig.path,
+            parameter_fact = opts$fact,
+            parameter_colnames_to_keep = parameter_colnames_to_keep_fact,
+            shapefile_fix = shapefile.fix,
+            continent = continent,
+            coverage = TRUE,
+            parameter_resolution_filter = parameters_child_global$parameter_resolution_filter,
+            parameter_filtering = parameters_child_global$parameter_filtering,
+            parameter_titre_dataset_1 = basename(sub_list_dir_2[1]),
+            parameter_titre_dataset_2 = entity$identifiers[["id"]],
+            parameter_geographical_dimension_groupping = "gridtype",
+            unique_analyse = FALSE
+          )
+
+          new_path <- file.path(parameters_child_global$fig.path, paste0("/Comparison/initfinal_", basename(sub_list_dir_2[1]), "_", basename(sub_list_dir_2[length(sub_list_dir_2)])))
+          dir.create(new_path, recursive = TRUE)
+          child_env_first_to_last_result$fig.path <- new_path
+          child_env_first_to_last_result$step_title_t_f <- FALSE
+          # child_env_first_to_last_result$parameter_short <- FALSE
+          # child_env_first_to_last_result$unique_analyse <- FALSE
+          child_env_first_to_last_result$parameter_titre_dataset_1 <- "Initial_data"
+          child_env_first_to_last_result$parameter_titre_dataset_2 <- entity$identifiers[["id"]]
+          child_env_first_to_last_result$child_header <- "#"
+
+          if(!fast_and_heavy){
+            qs::qsave(child_env_first_to_last_result, "path_to_qs_summary.qs")
+          }
+
+        }
+
         sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
         render_env$sub_list_dir_3 <- sub_list_dir_3
-        if(opts$fact == "effort"){
-          process_fisheries_data_list <- process_fisheries_effort_data(sub_list_dir_3,  parameter_filtering)
+
+        if(!fast_and_heavy && usesave && file.exists("process_fisheries_data_list.qs")){
+
+          sprintf("Using saved data for process_fisheries_data_list.qs")
+          process_fisheries_data_list <- NULL
+
         } else {
-          process_fisheries_data_list <- process_fisheries_data(sub_list_dir_3, parameter_fact = "catch", parameter_filtering)
-        }
-        if(!fast_and_heavy){
-          qs::qsave(process_fisheries_data_list, "process_fisheries_data_list.qs")
+
+          if(opts$fact == "effort"){
+            process_fisheries_data_list <- process_fisheries_effort_data(sub_list_dir_3,  parameter_filtering)
+          } else {
+            process_fisheries_data_list <- process_fisheries_data(sub_list_dir_3, parameter_fact = "catch", parameter_filtering)
+          }
+          if(!fast_and_heavy){
+
+            qs::qsave(process_fisheries_data_list, "process_fisheries_data_list.qs")
+          }
         }
         futile.logger::flog.info("Processed process_fisheries_data_list")
 
@@ -305,20 +341,20 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
                   sprintf("comparison_step_%02d.qs", i, " already exists, using the cached data")
 
                 } else {
-                res_i <- CWP.dataset::function_multiple_comparison(
-                  i,
-                  parameter_short         = FALSE,
-                  sub_list_dir            = sub_list_dir_3,
-                  shapefile.fix           = shapefile.fix,
-                  continent               = continent,
-                  parameters_child_global = parameters_child_global,
-                  fig.path                = fig.path,
-                  coverage                = coverage
-                )
+                  res_i <- CWP.dataset::function_multiple_comparison(
+                    i,
+                    parameter_short         = FALSE,
+                    sub_list_dir            = sub_list_dir_3,
+                    shapefile.fix           = shapefile.fix,
+                    continent               = continent,
+                    parameters_child_global = parameters_child_global,
+                    fig.path                = fig.path,
+                    coverage                = coverage
+                  )
 
 
-                qs::qsave(res_i, file = out_file, preset = "high")
-                rm(res_i); gc()
+                  qs::qsave(res_i, file = out_file, preset = "high")
+                  rm(res_i); gc()
                 }
                 out_file
               })
@@ -371,6 +407,45 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           render_env$path_to_qs_summary <- "path_to_qs_summary.qs"
           render_env$path_to_process_fisheries_data_list <- "process_fisheries_data_list.qs"
           render_env$path_to_qs_final <- "path_to_qs_final.qs"
+
+          # 1) créer un env « propre » sans parent
+          minimal_env <- new.env(parent = emptyenv())
+
+          process_paths <- function(x, start) {
+            if (is.character(x)&& grepl("[./]", x)) {
+              # transforme chaque élément en chemin absolu
+              return(path_abs(x, start = start))
+            }
+            if (is.list(x)) {
+              # rappelle process_paths sur chaque sous-élément
+              return(lapply(x, process_paths, start = start))
+            }
+            # si ce n'est ni caractère ni liste, on ignore
+            return(NULL)
+          }
+
+          # 2) y copier uniquement les bindings de render_env qui vous intéressent
+          for (nm in ls(render_env, all.names = TRUE)) {
+            val <- render_env[[nm]]
+            # si c'est un chemin ou une liste de chemins
+            if (is.character(val) || is.list(val)) {
+              processed <- process_paths(val, start = orig_wd)
+              # only keep it if there's something non-NULL
+              if (!is.null(processed)) {
+                minimal_env[[nm]] <- processed
+              }
+            }
+            # sinon, on n'ajoute pas cet objet
+          }
+
+          minimal_env$tmap_mode <- "view"
+          minimal_env$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
+          # 3) sauvegarder le minimal_env à la place de render_env
+          qs::qsave(
+            minimal_env,
+            file = paste0(sizepdf, source_authoritylist[s], "renderenvpath.qs"),
+          )
+
           gc()
         }
       }
@@ -381,30 +456,44 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       set_flextable_defaults(fonts_ignore=TRUE)
       base::options(knitr.duplicate.label = "allow")
-      bookdown_path <- CWP.dataset::generate_bookdown_yml()
-
+      bookdown_path <- CWP.dataset::generate_bookdown_yml(new_session = !fast_and_heavy)
       if(sizepdf != "short"){
-        futile.logger::flog.info("gitbook")
-        bookdown::render_book(
-          input = bookdown_path,
-          envir = render_env,
-          output_format = "bookdown::gitbook",
-          output_dir = nameoutput
-        )
+        if(fast_and_heavy){
+          futile.logger::flog.info("gitbook")
+          bookdown::render_book(
+            input = bookdown_path,
+            envir = render_env,
+            output_format = "bookdown::gitbook",
+            output_dir = nameoutput
+          )
+        } else {
+
+        CWP.dataset::build_book(master_qs_rel = paste0(sizepdf, source_authoritylist[s], "renderenvpath.qs"),
+                     output_format = "bookdown::gitbook",
+                     output_dir = nameoutput)
+        }
 
 
         gc()
       }
       futile.logger::flog.info("pdfdocument")
-      bookdown::render_book(".", envir = render_env,
-                            output_format = "bookdown::pdf_document2",
-                            output_dir = nameoutput)
+      if(fast_and_heavy){
+        bookdown::render_book(".", envir = render_env,
+                              output_format = "bookdown::pdf_document2",
+                              output_dir = nameoutput)
+
+        gc()
+      } else {
+        CWP.dataset::build_book(master_qs_rel = paste0(sizepdf, source_authoritylist[s], "renderenvpath.qs"),
+                   output_format = "bookdown::pdf_document2",
+                   output_dir = nameoutput)
+      }
+
       unlink("_bookdown.yml")
       nameoutput <- NULL
       rm(child_env_last_result, envir = render_env)
       rm(child_env_first_to_last_result, envir = render_env)
       rm(render_env)
-      gc()
 
       # drive_upload("tableau_recap_global_action_effort.html", as_id(folder_datasets_id), overwrite = TRUE)
       futile.logger::flog.info("Rendered and uploaded report for entity: %s", entity_dir)

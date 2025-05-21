@@ -101,11 +101,14 @@ gc()
 The following table recap all the treatment done on the mapped and standardized rawdata provided by tRFMOs.
 
 ```{r analysislast, message=TRUE, warning=TRUE, include=FALSE, results='asis'}
-
 if(exists("path_to_process_fisheries_data_list")){
     process_fisheries_data_list <- qs::qread(path_to_process_fisheries_data_list)
 }
 gc()
+```
+
+
+```{r analysislast, message=TRUE, warning=TRUE, results='asis'}
 
 CWP.dataset::qflextable2(process_fisheries_data_list$reduced, captionn =process_fisheries_data_list$fig.capp, columns_to_color = process_fisheries_data_list$columns_to_color,  pgwidth = 6, save_folder = "Summary", fig.pathinside = fig.path)
 

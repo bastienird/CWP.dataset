@@ -6,10 +6,11 @@ if (!is.null(all_list)) {
       "This allows to see where major changes occur for specific data needs.\n\n")
   
 }
+
 ```
 
 
-```{r processallandHIDe, echo=FALSE, results='hide'}
+```{r processallandHIDe, echo=FALSE, message=FALSE, warning=FALSE, results='hide'}
 
 # Function to process each list item and knit the child document
 process_list_item <- function(list_item, template) {
