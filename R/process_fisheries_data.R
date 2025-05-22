@@ -51,8 +51,19 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
       all_cols <- base_cols
     }
 
-    df <- data.frame(matrix(ncol = length(all_cols), nrow = 0))
+    # Initialize empty data frame with correct column types
+    df <- data.frame(matrix(ncol = length(all_cols), nrow = 0), stringsAsFactors = FALSE)
     colnames(df) <- all_cols
+    # Ensure character columns
+    df$Step <- character()
+    df$Explanation <- character()
+    df$Functions <- character()
+    df$Options <- character()
+    # Ensure numeric columns
+    num_cols <- setdiff(colnames(df), c("Step","Explanation","Functions","Options"))
+    for (col in num_cols) {
+      df[[col]] <- numeric()
+    }
 
     # Initial sums
     main <- CWP.dataset::filtering_function(qs::qread(paste0(sub_list_dir_2[1], "/data.qs")), parameter_filtering = parameter_filtering)
