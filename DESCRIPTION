@@ -46,7 +46,9 @@ Imports:
     tools,
     utils,
     xts,
-    DBI
+    DBI, 
+    fs, 
+    yaml
 Suggests: 
     fusen,
     testthat
