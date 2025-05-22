@@ -7,14 +7,12 @@
 #'
 #' @param destination Character. The directory where the `_bookdown.yml` file
 #'   will be created. Default is `"bookdown_run"`.
+#' @param new_session Boolean. Is the bookdown yml with new_session parameter to true or false
 #'
 #' @return No return value. The function writes `_bookdown.yml` in the
 #'   specified destination directory.
 #'
 #' @examples
-#' # Generate a `_bookdown.yml` in the default directory
-#' generate_bookdown_yml()
-#'
 #' # Generate a `_bookdown.yml` in a custom directory
 #' generate_bookdown_yml("custom_bookdown_dir")
 #'

@@ -16,7 +16,6 @@
 #' @param root Root directory of the project where Bookdown should run (defaults to here::here()).
 #'
 #' @import bookdown yaml fs qs here knitr
-#' @export
 #'
 #' @examples
 #' \dontrun{
@@ -37,6 +36,7 @@
 #'   delete_merged_file = TRUE
 #' )
 #' }
+#' @export
 build_book <- function(master_qs_rel,
                        orig_setup_rmd = system.file("rmd/Setup_markdown.Rmd", package = "CWP.dataset"),
                        src_paths = c(
@@ -126,5 +126,5 @@ build_book <- function(master_qs_rel,
   setwd(orig_wd)
   fs::file_delete(fixed_qs)
 
-  message("✅ Build completed successfully.")
+  message("Build completed successfully.")
 }

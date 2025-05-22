@@ -415,7 +415,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           process_paths <- function(x, start) {
             if (is.character(x)&& grepl("[./]", x)) {
               # transforme chaque élément en chemin absolu
-              return(path_abs(x, start = start))
+              return(fs::path_abs(x, start = start))
             }
             if (is.list(x)) {
               # rappelle process_paths sur chaque sous-élément
@@ -430,7 +430,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
             val <- render_env[[nm]]
             # si c'est un chemin ou une liste de chemins
             if (is.character(val) || is.list(val)) {
-              processed <- process_paths(val, start = orig_wd)
+              processed <- process_paths(val, start = getwd())
               # only keep it if there's something non-NULL
               if (!is.null(processed)) {
                 minimal_env[[nm]] <- processed
