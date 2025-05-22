@@ -30,7 +30,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
       if (file.exists(nom_file1) || file.exists(nom_file2)) {
         fname <- if (file.exists(nom_file1)) nom_file1 else nom_file2
         nominal_dataset <- readr::read_csv(fname)
-        nominal_dataset <- CWP.dataset::enrich_dataset_if_needed(nominal_dataset)
+        nominal_dataset <- CWP.dataset::enrich_dataset_if_needed(nominal_dataset)$without_geom
         nominal_dataset <- CWP.dataset::filtering_function(nominal_dataset, parameter_filtering = parameter_filtering)
         nominal <- sum(nominal_dataset$measurement_value)
         have_nominal <- TRUE
