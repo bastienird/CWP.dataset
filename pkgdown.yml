@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   first: first.html
   go-further: go-further.html
-last_built: 2025-05-22T10:40Z
+last_built: 2025-05-22T10:54Z
 urls:
   reference: https://bastienird.github.io/CWP.dataset/reference
   article: https://bastienird.github.io/CWP.dataset/articles
