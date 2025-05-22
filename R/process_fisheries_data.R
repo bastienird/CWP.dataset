@@ -5,6 +5,7 @@
 #' @param sub_list_dir_2 List of directories containing the data files.
 #' @param parameter_fact Character string specifying the type of data ("catch" or "effort").
 #' @param parameter_filtering List of filtering parameters to be passed to the filtering function.
+#' @param nominal_dataset path of the nominal dataset to calculate percentage of nominal
 #'
 #' @return A list containing the processed data frame and the generated plots.
 #' @examples
@@ -15,44 +16,32 @@
 #' print(result$no_fish_plot)
 #' print(result$tons_plot)
 #' }
-#' @export
-#' @importFrom qs qread
-#' @import ggplot2
-process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_filtering) {
+process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_filtering, nominal_dataset = "data/global_nominal_catch_firms_level0.csv") {
 
   if (parameter_fact == "catch") {
 
-    have_nominal <- FALSE
     if (dir.exists("Markdown")) {
-      nom_file1 <- "data/global_nominal_catch_firms_level0_harmonized.csv"
-      nom_file2 <- "data/global_nominal_catch_firms_level0.csv"
-      if (file.exists(nom_file1) || file.exists(nom_file2)) {
-        fname <- if (file.exists(nom_file1)) nom_file1 else nom_file2
-        nominal_dataset <- readr::read_csv(fname)
-        nominal_dataset <- CWP.dataset::filtering_function(nominal_dataset, parameter_filtering = parameter_filtering)
-        nominal <- sum(nominal_dataset$measurement_value)
-        have_nominal <- TRUE
-      }
-    }
+      if(file.exists(nominal_dataset)){
+        nominal_dataset <- readr::read_csv(nominal_dataset)
+        nominal_dataset <- filtering_function(nominal_dataset, parameter_filtering = parameter_filtering)
+      }}
 
-    # Prepare empty data frame with dynamic columns
-    base_cols <- c(
-      "Step", "Explanation", "Functions", "Options",
-      "Tons", "Number of fish", "Lines",
-      "Difference (in % of tons)", "Difference in tons",
-      "Difference (in % of fish)", "Difference in number of fish", "Difference (in % of lines)",
-      "Conversion factors (kg)"
-    )
-    if (have_nominal) {
-      all_cols <- c(base_cols, "Percentage of nominal")
+    if (exists("nominal_dataset")) {
+      nominal <- sum(nominal_dataset$measurement_value)
     } else {
-      all_cols <- base_cols
+      nominal <- 1
     }
 
-    df <- data.frame(matrix(ncol = length(all_cols), nrow = 0))
-    colnames(df) <- all_cols
+    df <- data.frame(matrix(ncol = 14, nrow = 1))  # Ajout d'une colonne pour "Conversion factors"
+    colnames(df) <- c(
+      paste0(tail(str_split(paste0(sub_list_dir_2), "/")[[1]], n = 1)),
+      "Explanation", "Functions",
+      "Options", "Tons", "Number of fish", "Lines", "Difference (in % of tons)", "Difference in tons",
+      "Difference (in % of fish)", "Difference in number of fish", "Difference (in % of lines)",
+      "Percentage of nominal", "Conversion factors (kg)"  # Nouvelle colonne
+    )
 
-    main <- CWP.dataset::filtering_function(qs::qread(paste0(sub_list_dir_2[1], "/data.qs")), parameter_filtering = parameter_filtering)
+    main <- filtering_function(qs::qread(paste0(sub_list_dir_2[1], "/data.qs")), parameter_filtering = parameter_filtering)
     tons_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("MTNO", "MT", "t", "Tons")))$measurement_value)
     nofish_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("NOMT", "NO", "no", "Number of fish")))$measurement_value)
     lines_init <- nrow(main)
@@ -65,13 +54,13 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
       } else {
         Options <- "None"
       }
-      if (CWP.dataset::isNullList(parameter_filtering)) {
+      if (isNullList(parameter_filtering)) {
         sums <- read_csv(paste0(i, "/sums.csv"))
         sum_t <- sums$sum_t
         sum_no <- sums$sum_no
         nrow <- sums$lines
       } else {
-        main <- CWP.dataset::filtering_function(qs::qread(paste0(i, "/data.qs")), parameter_filtering = parameter_filtering)
+        main <- filtering_function(qs::qread(paste0(i, "/data.qs")), parameter_filtering = parameter_filtering)
         sum_t <- sum((main %>% dplyr::filter(measurement_unit %in% c("MTNO", "MT", "t", "Tons")))$measurement_value)
         sum_no <- sum((main %>% dplyr::filter(measurement_unit %in% c("NOMT", "NO", "no", "Number of fish")))$measurement_value)
         nrow <- nrow(main)
@@ -96,9 +85,6 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
                       sums, Difference_percent, Difference_tons, Difference_percent_no,
                       Difference_no, Difference_percent_lines, percentage_of_nominal,
                       Conversion_factors_kg)  # Ajout de la colonne conversion factors
-      if (have_nominal) {
-        data_i$`Percentage of nominal` <- round((sum_t * 100) / nominal, 1)
-      }
       names(data_i) <- colnames(df)
       df <- rbind(df, data_i)
       tons_init <- sum_t
@@ -140,14 +126,12 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
       theme(axis.text.x = element_text(angle = 90))
 
     no_fish_plot <- ggplot(reduced, aes(x = Step, group = 1)) +
-      geom_line(aes(y = `Millions of fish`, group = 1), size = 0.5)+
-      theme(axis.text.x = element_text(angle = 90))+
-      scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.1)))
+      geom_line(aes(y = `Millions of fish`, group = 1), size = 0.5) +
+      theme(axis.text.x = element_text(angle = 90))+scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.1)))
 
     tons_plot <- ggplot(reduced, aes(x = Step, group = 1)) +
       geom_line(aes(y = `Millions of tons`, group = 1), size = 0.5) +
-      theme(axis.text.x = element_text(angle = 90))+
-      scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.1)))
+      theme(axis.text.x = element_text(angle = 90))+scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.1)))
 
     cowplot <- cowplot::plot_grid(no_fish_plot, tons_plot)
     columns_to_color = c("Difference (in % of tons)","Difference (in % of fish)")
@@ -158,3 +142,9 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
   return(list(reduced = reduced, cowplot = cowplot, second_graf = second_graf, df2 = df2,
               columns_to_color = columns_to_color, fig.capp = fig.capp))
 }
+
+# a <- process_fisheries_data(sub_list_dir_3, "catch", opts$parameter_filtering)
+
+
+
+
