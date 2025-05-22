@@ -394,6 +394,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
         render_env$plotting_type <- "view"
         render_env$fig.path <- new_path
+        render_env$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
 
 
         if(fast_and_heavy){

@@ -13,7 +13,7 @@ if(exists("path_to_process_fisheries_data_list")){
 
 ```{r reviewimpact}
 
-df2 <- process_fisheries_data_list$df2 %>% dplyr::select(Step, Explanation, Functions)
+df2 <- process_fisheries_data_list$full_df %>% dplyr::select(Step, Explanation, Functions)
 
 df3 <- flextable(df2) %>% width("Explanation",width = 4)
 df3 <- set_caption(df3, caption ="Review of all the impact and purpose of every the treatment done")

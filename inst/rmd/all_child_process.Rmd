@@ -34,8 +34,9 @@ results <- lapply(all_list, process_list_item, template = system.file("rmd/compa
 
 # Perform garbage collection
 gc()
-}
 results <- Filter(Negate(is.null), results)
+}
+
 ```
 
 
