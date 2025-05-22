@@ -27,7 +27,6 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
     if (dir.exists("Markdown")) {
       nom_file1 <- "data/global_nominal_catch_firms_level0_harmonized.csv"
       nom_file2 <- "data/global_nominal_catch_firms_level0_2025.csv"
-
       if (file.exists(nom_file1) || file.exists(nom_file2)) {
         fname <- if (file.exists(nom_file1)) nom_file1 else nom_file2
         nominal_dataset <- readr::read_csv(fname)
@@ -37,7 +36,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
       }
     }
 
-    # Prepare empty data frame with dynamic columns
+    # Prepare column names
     base_cols <- c(
       "Step", "Explanation", "Functions", "Options",
       "Tons", "Number of fish", "Lines",
@@ -45,11 +44,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
       "Difference (in % of fish)", "Difference in number of fish", "Difference (in % of lines)",
       "Conversion factors (kg)"
     )
-    if (have_nominal) {
-      all_cols <- c(base_cols, "Percentage of nominal")
-    } else {
-      all_cols <- base_cols
-    }
+    all_cols <- if (have_nominal) c(base_cols, "Percentage of nominal") else base_cols
 
     # Initialize empty data frame with correct column types
     df <- data.frame(matrix(ncol = length(all_cols), nrow = 0), stringsAsFactors = FALSE)
@@ -127,9 +122,6 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
       lines_init  <- nrow_i
     }
 
-    # Clean up infinite or NA
-    df[is.infinite(df)] <- 0
-
     # Prepare reduced for plotting
     reduced <- df %>%
       dplyr::mutate(`Millions of tons` = Tons / 1e6,
@@ -164,8 +156,14 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
       ggplot2::ggtitle("Evolution of the repartition of captures depending on units and Steps") +
       ggplot2::theme(axis.text.x = element_text(angle = 90))
 
+    no_fish_plot <- ggplot2::ggplot(reduced, aes(x = Step, y = `Millions of fish`, group = 1)) +
+      ggplot2::geom_line(size = 0.5) +
+      ggplot2::scale_y_continuous(limits = c(0, NA), expand = ggplot2::expansion(mult = c(0, 0.1))) +
+      ggplot2::theme(axis.text.x = element_text(angle = 90))
 
-    ggplot2::scale_y_continuous(limits = c(0, NA), expand = ggplot2::expansion(mult = c(0, 0.1))) +
+    tons_plot <- ggplot2::ggplot(reduced, aes(x = Step, y = `Millions of tons`, group = 1)) +
+      ggplot2::geom_line(size = 0.5) +
+      ggplot2::scale_y_continuous(limits = c(0, NA), expand = ggplot2::expansion(mult = c(0, 0.1))) +
       ggplot2::theme(axis.text.x = element_text(angle = 90))
 
     cowplot <- cowplot::plot_grid(no_fish_plot, tons_plot)
