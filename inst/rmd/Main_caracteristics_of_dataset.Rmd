@@ -30,7 +30,7 @@ map_unit_knit_list <- mapply(FUN = CWP.dataset::knitting_plots_subfigures, plot 
 
 `r if(exists("spatial_coverage_analysis_list", envir =environment()) && !is.null(spatial_coverage_analysis_list)){CWP.dataset::cat_title("## Spatial coverage", child_headerinside = child_header)}`
 
-```{r spatialcoverage, echo=FALSE, results='asis', eval=(exists("spatial_coverage_analysis_list", envir =environment()) && !is.null(spatial_coverage_analysis_list))}
+```{r spatialcoverage, eval=(exists("spatial_coverage_analysis_list", envir =environment()) && !is.null(spatial_coverage_analysis_list)), echo=FALSE, message=FALSE, (exists("spatial_coverage_analysis_list", envir=environment()) && !is.null(spatial_coverage_analysis_list)), results='asis'}
 
 cat(spatial_coverage_analysis_list$child_text)
 
@@ -45,33 +45,33 @@ cat(unlist(map_unit_knit_list), sep = "
 
 We check the distribution of the value of each dimension and each unit.
 
-```{r pie-charts-multiple, eval =(exists("other_dimension_analysis_list", envir =environment()) && !is.null(other_dimension_analysis_list)) &&!unique_analyse, include = FALSE}
+```{r pie-charts-multiple, eval=(exists("other_dimension_analysis_list", envir =environment()) && !is.null(other_dimension_analysis_list)) &&!unique_analyse, message=FALSE, warning=FALSE, include=FALSE}
 
 pie_chart_knit <- mapply(FUN = CWP.dataset::knitting_plots_subfigures, plot = other_dimension_analysis_list$figures, title = other_dimension_analysis_list$dimension_title_subfigures, MoreArgs = list(folder = "Piechartdimensions", fig.pathinside = fig.path))
 # bar_chart_knit <- mapply(FUN = CWP.dataset::knitting_plots_subfigures, plot = other_dimension_analysis_list$barplots, title = other_dimension_analysis_list$dimension_title_subfigures, MoreArgs = list(folder = "Barplot", fig.pathinside = fig.path))
 
 ```
 
-```{r otherdimensionanalysis, echo=FALSE, results='asis', eval =(exists("other_dimension_analysis_list", envir =environment()) && !is.null(other_dimension_analysis_list)) && !unique_analyse}
+```{r otherdimensionanalysis, eval=(exists("other_dimension_analysis_list", envir =environment()) && !is.null(other_dimension_analysis_list)) && !unique_analyse, echo=FALSE, message=FALSE, warning=FALSE, (exists("other_dimension_analysis_list", envir=environment()) && !is.null(other_dimension_analysis_list)) && !unique_analyse, results='asis'}
 
 cat(unlist(pie_chart_knit), sep = "
 ")
 
 ```
 
-```{r subfigures, eval=(exists("other_dimension_analysis_list", envir =environment()) && !is.null(other_dimension_analysis_list)) && unique_analyse, results='asis'}
+```{r subfigures, eval=(exists("other_dimension_analysis_list", envir =environment()) && !is.null(other_dimension_analysis_list)) && unique_analyse, message=FALSE, warning=FALSE, results='asis'}
 
 CWP.dataset::render_subfigures(plots_list = other_dimension_analysis_list$figures , titles_list = other_dimension_analysis_list$dimension_title_subfigures, general_title = "Other dimensions")
 
 ```
 
-```{r subfigures, results='asis', eval=FALSE}
+```{r subfigures, eval=FALSE, message=FALSE, warning=FALSE, results='asis'}
 
 CWP.dataset::render_subfigures(plots_list = barplots, titles_list = dimension_title_subfigures, general_title = "Other dimensions")
 
 ```
 
-```{r otherdimensionanalysisbarplots, echo=FALSE, results='asis', eval=FALSE}
+```{r otherdimensionanalysisbarplots, eval=FALSE, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
 
 cat(unlist(bar_chart_knit), sep = "
 ")
