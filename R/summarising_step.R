@@ -236,13 +236,13 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
             coverage = TRUE,
             parameter_resolution_filter = parameters_child_global$parameter_resolution_filter,
             parameter_filtering = parameters_child_global$parameter_filtering,
-            parameter_titre_dataset_1 = basename(sub_list_dir_2[1]),
+            parameter_titre_dataset_1 =  "Initial_data",
             parameter_titre_dataset_2 = entity$identifiers[["id"]],
             parameter_geographical_dimension_groupping = "gridtype",
             unique_analyse = FALSE
           )
 
-          new_path <- file.path(parameters_child_global$fig.path, paste0("/Comparison/initfinal_", basename(sub_list_dir_2[1]), "_", basename(sub_list_dir_2[length(sub_list_dir_2)])))
+          new_path <- file.path(parameters_child_global$fig.path, paste0("/Comparison/initfinal_",  "Initial_data", "_", entity$identifiers[["id"]]))
           dir.create(new_path, recursive = TRUE)
           child_env_first_to_last_result$fig.path <- new_path
           child_env_first_to_last_result$step_title_t_f <- FALSE
