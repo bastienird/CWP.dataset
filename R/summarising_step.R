@@ -148,14 +148,17 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       } else {
         parameter_filtering$source_authority <- source_authoritylist[s]
       }
-      if(usesave & file.exists(paste0(sizepdf, paste0(source_authoritylist[s],"renderenv.qs"))) | (sizepdf=="short" && file.exists(paste0("long", paste0(source_authoritylist[s],"renderenv.qs"))))){
-        if(file.exists(paste0(sizepdf, paste0(source_authoritylist[s],"renderenv.qs")))){
+
+      prefix <- paste0(sizepdf, source_authoritylist[s])
+
+      if(usesave & file.exists(paste0(prefix, "renderenv.qs")) | (sizepdf=="short" && file.exists(paste0("long", paste0(source_authoritylist[s],"renderenv.qs"))))){ # if the size pdf is short but the .qs for long exists we can use it
+        if(file.exists(paste0(prefix, "renderenv.qs"))){
 
           render_env <- qs::qread(paste0(sizepdf,paste0(source_authoritylist[s],"renderenv.qs")))
 
         } else if(sizepdf=="short" && file.exists(paste0("long", paste0(source_authoritylist[s],"renderenv.qs")))){
 
-          render_env <- qs::qread(paste0(sizepdf,paste0(source_authoritylist[s],"renderenv.qs")))
+          render_env <- qs::qread(paste0(prefix,"renderenv.qs"))
           assign("all_list", NULL, envir = render_env)
         }
       }else {
@@ -177,7 +180,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
         }
 
-        if(!fast_and_heavy && usesave && file.exists("path_to_qs_final.qs")){
+        if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"path_to_qs_final.qs"))){
 
           sprintf("Using saved data for path_to_qs_final.qs")
           child_env_last_result <- NULL
@@ -211,11 +214,11 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           child_env_last_result$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
           # child_env_last_result$parameter_titre_dataset_2 <- NULL
           if(!fast_and_heavy){
-            qs::qsave(child_env_last_result, "path_to_qs_final.qs")
+            qs::qsave(child_env_last_result, paste0(prefix, "path_to_qs_final.qs"))
           }
         }
 
-        if(!fast_and_heavy && usesave && file.exists("path_to_qs_summary.qs")){
+        if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"path_to_qs_summary.qs"))){
 
           sprintf("Using saved data for path_to_qs_summary.qs")
           child_env_first_to_last_result <- NULL
@@ -250,7 +253,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           child_env_first_to_last_result$child_header <- "#"
 
           if(!fast_and_heavy){
-            qs::qsave(child_env_first_to_last_result, "path_to_qs_summary.qs")
+            qs::qsave(child_env_first_to_last_result, paste0(prefix,"path_to_qs_summary.qs"))
           }
 
         }
@@ -258,7 +261,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
         render_env$sub_list_dir_3 <- sub_list_dir_3
 
-        if(!fast_and_heavy && usesave && file.exists("process_fisheries_data_list.qs")){
+        if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"process_fisheries_data_list.qs"))){
 
           sprintf("Using saved data for process_fisheries_data_list.qs")
           process_fisheries_data_list <- NULL
@@ -266,13 +269,13 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         } else {
 
           if(opts$fact == "effort"){
-            process_fisheries_data_list <- process_fisheries_effort_data(sub_list_dir_3,  parameter_filtering)
+            process_fisheries_data_list <- CWP.dataset::process_fisheries_effort_data(sub_list_dir_3,  parameter_filtering)
           } else {
-            process_fisheries_data_list <- process_fisheries_data(sub_list_dir_3, parameter_fact = "catch", parameter_filtering)
+            process_fisheries_data_list <- CWP.dataset::process_fisheries_data(sub_list_dir_3, parameter_fact = "catch", parameter_filtering)
           }
           if(!fast_and_heavy){
 
-            qs::qsave(process_fisheries_data_list, "process_fisheries_data_list.qs")
+            qs::qsave(process_fisheries_data_list, paste0(prefix,"process_fisheries_data_list.qs"))
           }
         }
         futile.logger::flog.info("Processed process_fisheries_data_list")
@@ -280,8 +283,6 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         render_env$process_fisheries_data_list <- process_fisheries_data_list
 
         futile.logger::flog.info("Adding to render_env")
-
-
 
         if(sizepdf %in% c("long", "middle")){
 
@@ -370,7 +371,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
             shapefile.fix            = shapefile.fix,
             continent                = continent,
             parameters_child_global  = parameters_child_global,
-            fig.path                 = "cache",
+            fig.path                 = prefix,
             coverage                 = coverage
           )
 
@@ -399,15 +400,15 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
         if(fast_and_heavy){
           if(savestep){
-            qs::qsave(render_env, file = paste0(sizepdf, paste0(source_authoritylist[s],"renderenv.qs")))
+            qs::qsave(render_env, file = paste0(prefix, "renderenv.qs"))
           }
         } else {
           render_env$child_env_first_to_last_result <- NULL
           render_env$child_env_last_result <- NULL
           render_env$process_fisheries_data_list <- NULL
-          render_env$path_to_qs_summary <- "path_to_qs_summary.qs"
-          render_env$path_to_process_fisheries_data_list <- "process_fisheries_data_list.qs"
-          render_env$path_to_qs_final <- "path_to_qs_final.qs"
+          render_env$path_to_qs_summary <- paste0(prefix, "path_to_qs_summary.qs")
+          render_env$path_to_process_fisheries_data_list <- paste0(prefix, "process_fisheries_data_list.qs")
+          render_env$path_to_qs_final <- paste0(prefix, "path_to_qs_final.qs")
 
           # 1) créer un env « propre » sans parent
           minimal_env <- new.env(parent = emptyenv())
@@ -444,7 +445,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           # 3) sauvegarder le minimal_env à la place de render_env
           qs::qsave(
             minimal_env,
-            file = paste0(sizepdf, source_authoritylist[s], "renderenvpath.qs"),
+            file = paste0(prefix, "renderenvpath.qs"),
           )
 
           gc()
@@ -452,7 +453,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       }
 
       if(is.null(nameoutput)){
-        nameoutput <- paste0(sizepdf, paste0(source_authoritylist[s],"recappdf"))
+        nameoutput <- paste0(prefix,"recappdf")
       }
 
       set_flextable_defaults(fonts_ignore=TRUE)
@@ -469,7 +470,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           )
         } else {
 
-        CWP.dataset::build_book(master_qs_rel = paste0(sizepdf, source_authoritylist[s], "renderenvpath.qs"),
+        CWP.dataset::build_book(master_qs_rel = paste0(prefix, "renderenvpath.qs"),
                      output_format = "bookdown::gitbook",
                      output_dir = nameoutput)
         }
@@ -485,7 +486,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
         gc()
       } else {
-        CWP.dataset::build_book(master_qs_rel = paste0(sizepdf, source_authoritylist[s], "renderenvpath.qs"),
+        CWP.dataset::build_book(master_qs_rel = paste0(prefix, "renderenvpath.qs"),
                    output_format = "bookdown::pdf_document2",
                    output_dir = nameoutput)
       }
