@@ -113,7 +113,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
 
   # standardize units
   data <- data %>%
-    mutate(measurement_unit = case_when(
+    dplyr::mutate(measurement_unit = case_when(
       measurement_unit == "Tons"             ~ "t",
       measurement_unit == "Number of fish"   ~ "no",
       TRUE                                   ~ measurement_unit
@@ -121,7 +121,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
 
   # if WKT col present
   if ("geom_wkt" %in% colnames(data)) {
-    data <- rename(data, geom = geom_wkt)
+    data <- dplyr::rename(data, geom = geom_wkt)
   }
 
   con <- tryCatch(connectionDB, error = function(e) NULL)
@@ -178,9 +178,9 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   # measurement_type: still bind two CSVs shipped in inst/extdata
   catch_file  <- system.file("extdata", "cl_catch_concepts.csv", package = "CWP.dataset")
   effort_file <- system.file("extdata", "cl_measurement_types_effort.csv", package = "CWP.dataset")
-  measurement_type_df <- bind_rows(
-    read_csv(catch_file)  %>% clean_names() %>% select(code, label),
-    read_csv(effort_file) %>% clean_names() %>% select(code, label)
+  measurement_type_df <- dplyr::bind_rows(
+    readr::read_csv(catch_file)  %>% janitor::clean_names() %>% dplyr::select(code, label),
+    readr::read_csv(effort_file) %>% janitor::clean_names() %>% dplyr::select(code, label)
   )
 
   # measurement-unit labels (global & specific) no change
