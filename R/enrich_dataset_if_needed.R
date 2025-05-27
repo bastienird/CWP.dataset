@@ -123,7 +123,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   if ("geom_wkt" %in% colnames(data)) {
     data <- dplyr::rename(data, geom = geom_wkt)
   }
-
+  data$geom <- NULL
   con <- tryCatch(connectionDB, error = function(e) NULL)
 
   # Load all codelists via system.file()
@@ -139,7 +139,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     con,
     "SELECT * FROM measurement_processing_level.measurement_processing_level",
     system.file("extdata", "cl_measurement_processing_level.csv", package = "CWP.dataset"),
-    function(f) read_csv(f) %>% clean_names() %>% select(code, label),
+    function(f) read_csv(f) %>% clean_names() %>% select(code, measurement_processing_level_label = label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/fdi/cl_measurement_processing_level.csv"
   )
 
@@ -147,7 +147,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     con,
     "SELECT * FROM measurement.measurement",
     system.file("extdata", "cl_measurement.csv", package = "CWP.dataset"),
-    function(f) read_csv(f) %>% clean_names() %>% select(code, label),
+    function(f) read_csv(f) %>% janitor::clean_names() %>% dplyr::select(code, measurement_label = label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/fdi/cl_measurement.csv"
   )
 
@@ -155,7 +155,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     con,
     "SELECT * FROM fishing_mode.fishing_mode",
     system.file("extdata", "cl_fishing_mode.csv", package = "CWP.dataset"),
-    function(f) read_csv(f) %>% clean_names() %>% select(code, label),
+    function(f) read_csv(f) %>% janitor::clean_names() %>% dplyr::select(code, fishing_mode_label = label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_fishing_mode.csv"
   )
 
@@ -163,7 +163,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     con,
     "SELECT * FROM gear_type.isscfg_revision_1",
     system.file("extdata", "cl_isscfg_pilot_gear.csv", package = "CWP.dataset"),
-    function(f) read_csv(f) %>% select(code, label),
+    function(f) read_csv(f) %>% dplyr::select(code, gear_type_label = label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_isscfg_pilot_gear.csv"
   )
 
@@ -171,7 +171,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     con,
     "SELECT * FROM fishing_fleet.fishingfleet_firms",
     system.file("extdata", "cl_fishingfleet_firms.csv", package = "CWP.dataset"),
-    function(f) read_csv(f) %>% clean_names() %>% select(code, label),
+    function(f) read_csv(f) %>% janitor::clean_names() %>% dplyr::select(code, fishing_fleet_label = label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_fishing_fleet.csv"
   )
 
@@ -179,69 +179,69 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   catch_file  <- system.file("extdata", "cl_catch_concepts.csv", package = "CWP.dataset")
   effort_file <- system.file("extdata", "cl_measurement_types_effort.csv", package = "CWP.dataset")
   measurement_type_df <- dplyr::bind_rows(
-    readr::read_csv(catch_file)  %>% janitor::clean_names() %>% dplyr::select(code, label),
-    readr::read_csv(effort_file) %>% janitor::clean_names() %>% dplyr::select(code, label)
-  )
+    read_csv(catch_file)  %>% clean_names() %>% dplyr::select(code, label),
+    read_csv(effort_file) %>% clean_names() %>% dplyr::select(code, label)
+  ) %>% dplyr::rename(measurement_type_label = label)
 
   # measurement-unit labels (global & specific) no change
 
   # CWP grid (WKT) from extdata
   if(is.null(shp_raw)){
-  cwp_grid_file <- system.file("extdata", "cl_areal_grid.csv", package = "CWP.dataset")
-  if (!file.exists(cwp_grid_file)) {
-    stop("cl_areal_grid.csv not found in inst/extdata - run data-raw/download_codelists.R")
-  }
-  shp_raw <- sf::st_read(cwp_grid_file, show_col_types = FALSE)
+    cwp_grid_file <- system.file("extdata", "cl_areal_grid.csv", package = "CWP.dataset")
+    if (!file.exists(cwp_grid_file)) {
+      stop("cl_areal_grid.csv not found in inst/extdata - run data-raw/download_codelists.R")
+    }
+    shp_raw <- sf::st_read(cwp_grid_file, show_col_types = FALSE)
   }
   shapefile.fix <- sf::st_as_sf(shp_raw, wkt = "geom_wkt", crs = 4326)
   shapefile.fix <- dplyr::rename(shapefile.fix,
                                  cwp_code = CWP_CODE,
                                  geom     = geom_wkt)
-
   # Step 2: Join species and gear data
   enriched_data <- dplyr::left_join(data,
                                     species_group,
-                                    by = "species")
+                                    by = "species",
+                                    suffix = c("", ".y"))%>%dplyr::select(-ends_with(".y"))
   enriched_data <- dplyr::left_join(enriched_data,
                                     cl_cwp_gear_level2,
-                                    by = c("gear_type" = "code"))
-  enriched_data <- dplyr::rename(enriched_data,
-                                 gear_type_label = label)
-
+                                    by = c("gear_type" = "code"),
+                                    suffix = c("", ".y")) %>%dplyr::select(-ends_with(".y"))
   # Step 3: Join fleet data
   enriched_data <- dplyr::left_join(
     enriched_data,
-    dplyr::select(fishing_fleet_label,
-                  code,
-                  fishing_fleet_label = label),
-    by = c("fishing_fleet" = "code")
-  )
+    fishing_fleet_label,
+    by = c("fishing_fleet" = "code"),
+    suffix = c("", ".y")
+  )%>%dplyr::select(-ends_with(".y"))
 
   # Step 4: Join measurement type, measurement, processing level, and mode labels
   enriched_data <- dplyr::left_join(
     enriched_data,
-    dplyr::rename(measurement_type_df,
-                  measurement_type_label = label),
-    by = c("measurement_type" = "code")
-  )
+    measurement_type_df,
+    by = c("measurement_type" = "code"),
+    suffix = c("", ".y")
+  )%>%dplyr::select(-ends_with(".y"))
+
   enriched_data <- dplyr::left_join(
     enriched_data,
-    dplyr::rename(cl_measurement,
-                  measurement_label = label),
-    by = c("measurement" = "code")
-  )
+    cl_measurement,
+    by = c("measurement" = "code"),
+    suffix = c("", ".y")
+  )%>%dplyr::select(-ends_with(".y"))
+
   enriched_data <- dplyr::left_join(
     enriched_data,
-    dplyr::rename(cl_measurement_processing_level,
-                  measurement_processing_level_label = label),
-    by = c("measurement_processing_level" = "code")
-  )
+    cl_measurement_processing_level,
+    by = c("measurement_processing_level" = "code"),
+    suffix = c("", ".y")
+  )%>%dplyr::select(-ends_with(".y"))
+
   enriched_data <- dplyr::left_join(
     enriched_data,
-    dplyr::rename(cl_fishing_mode,
-                  fishing_mode_label = label),
-    by = c("fishing_mode" = "code")
-  )
+    cl_fishing_mode,
+    by = c("fishing_mode" = "code"),
+    suffix = c("", ".y")
+  )%>%dplyr::select(-ends_with(".y"))
 
   # Step 5: Join gridtype from shapefile.fix
   enriched_data <- dplyr::left_join(
@@ -249,8 +249,9 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     dplyr::select(shapefile.fix,
                   geographic_identifier = cwp_code,
                   gridtype            = GRIDTYPE),
-    by = "geographic_identifier"
-  )
+    by = "geographic_identifier",
+    suffix = c("", ".y")
+  )%>%dplyr::select(-ends_with(".y"))
 
   # Step 6: Reorder columns so each code is followed by its label
   cols      <- base::names(enriched_data)
