@@ -131,7 +131,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     con,
     "SELECT taxa_order, code FROM species.species_asfis",
     system.file("extdata", "cl_asfis_species.csv", package = "CWP.dataset"),
-    function(f) read_csv(f) %>% clean_names() %>% select(species_label = label, species_group = taxa_order, species = code),
+    function(f) read_csv(f) %>% janitor::clean_names() %>% dplyr::select(species_label = label, species_group = taxa_order, species = code),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/cl_asfis_species.csv"
   )
 
@@ -139,7 +139,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     con,
     "SELECT * FROM measurement_processing_level.measurement_processing_level",
     system.file("extdata", "cl_measurement_processing_level.csv", package = "CWP.dataset"),
-    function(f) read_csv(f) %>% clean_names() %>% select(code, measurement_processing_level_label = label),
+    function(f) read_csv(f) %>% janitor::clean_names() %>% dplyr::select(code, measurement_processing_level_label = label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/fdi/cl_measurement_processing_level.csv"
   )
 
@@ -198,23 +198,34 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
                                  cwp_code = CWP_CODE,
                                  geom     = geom_wkt)
   # Step 2: Join species and gear data
+  if("species"%in%colnames(data)){
+
   enriched_data <- dplyr::left_join(data,
                                     species_group,
                                     by = "species",
                                     suffix = c("", ".y"))%>%dplyr::select(-ends_with(".y"))
+  }
+
+  if("gear_type"%in%colnames(enriched_data)){
+
   enriched_data <- dplyr::left_join(enriched_data,
                                     cl_cwp_gear_level2,
                                     by = c("gear_type" = "code"),
                                     suffix = c("", ".y")) %>%dplyr::select(-ends_with(".y"))
+  }
   # Step 3: Join fleet data
+  if("fishing_fleet"%in%colnames(enriched_data)){
+
   enriched_data <- dplyr::left_join(
     enriched_data,
     fishing_fleet_label,
     by = c("fishing_fleet" = "code"),
     suffix = c("", ".y")
   )%>%dplyr::select(-ends_with(".y"))
-
+}
   # Step 4: Join measurement type, measurement, processing level, and mode labels
+  if("measurement_type"%in%colnames(enriched_data)){
+
   enriched_data <- dplyr::left_join(
     enriched_data,
     measurement_type_df,
@@ -222,12 +233,19 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     suffix = c("", ".y")
   )%>%dplyr::select(-ends_with(".y"))
 
+  }
+
+  if("measurement"%in%colnames(enriched_data)){
+
   enriched_data <- dplyr::left_join(
     enriched_data,
     cl_measurement,
     by = c("measurement" = "code"),
     suffix = c("", ".y")
   )%>%dplyr::select(-ends_with(".y"))
+  }
+
+  if("measurement_processing_level"%in%colnames(enriched_data)){
 
   enriched_data <- dplyr::left_join(
     enriched_data,
@@ -235,6 +253,9 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     by = c("measurement_processing_level" = "code"),
     suffix = c("", ".y")
   )%>%dplyr::select(-ends_with(".y"))
+  }
+
+  if("fishing_mode"%in%colnames(enriched_data)){
 
   enriched_data <- dplyr::left_join(
     enriched_data,
@@ -242,8 +263,10 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     by = c("fishing_mode" = "code"),
     suffix = c("", ".y")
   )%>%dplyr::select(-ends_with(".y"))
-
+}
   # Step 5: Join gridtype from shapefile.fix
+  if("geographic_identifier"%in%colnames(enriched_data)){
+
   enriched_data <- dplyr::left_join(
     enriched_data,
     dplyr::select(shapefile.fix,
@@ -252,7 +275,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     by = "geographic_identifier",
     suffix = c("", ".y")
   )%>%dplyr::select(-ends_with(".y"))
-
+}
   # Step 6: Reorder columns so each code is followed by its label
   cols      <- base::names(enriched_data)
   base_cols <- base::grep("_label$", cols,
