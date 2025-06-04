@@ -17,8 +17,7 @@ combined_summary_histogram$labels$title <- ""
 
 ```
 
-
-```{r, echo=FALSE, out.width="100%", warning=FALSE, message=FALSE, fig.cap=title}
+```{r, echo=FALSE, out.width="100%", warning=FALSE, message=FALSE, fig.cap=title, eval=exists("combined_summary_histogram")}
 
 combined_summary_histogram
 
