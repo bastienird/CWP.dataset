@@ -30,16 +30,17 @@ if (nrow(compare_strata_differences_list$strates_perdues_first_10) != 0) {
 } else {
   cat("No stratum is gained nor lost")
 }
+
 ```
 
 ```{r disapandapflextable, eval = (nrow(compare_strata_differences_list$strates_perdues_first_10) != 0), results="asis"}
 
-CWP.dataset::qflextable2(compare_strata_differences_list$disapandap, captionn = compare_strata_differences_list$title, columns_to_color = c("Difference in millions"), grouped_data = c("Dimension", "measurement_unit", "Loss / Gain"), save_folder = "Diffstratas", fig.pathinside = fig.path, interactive_plot = FALSE)
+CWP.dataset::qflextable2(compare_strata_differences_list$disapandap, captionn = compare_strata_differences_list$title, columns_to_color = c("Difference in millions"), grouped_data = c("Dimension", "measurement_unit", "Loss / Gain"), fig.pathinside = fig.path, interactive_plot = FALSE)
 
 ```
 
 ```{r compnumberstratascolumns, results='asis', out.width="100%"}
 
-CWP.dataset::qflextable2(compare_strata_differences_list$number_init_column_final_column, captionn = "Comparison of number of stratas between the two datasets", columns_to_color = c("Difference"), save_folder = "Diffstratas", fig.pathinside = fig.path, interactive_plot = FALSE)
+CWP.dataset::qflextable2(compare_strata_differences_list$number_init_column_final_column, captionn = "Comparison of number of stratas between the two datasets", columns_to_color = c("Difference"), fig.pathinside = fig.path, interactive_plot = FALSE)
 
 ```
