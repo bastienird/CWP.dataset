@@ -9,7 +9,7 @@ CWP.dataset::qflextable2(summary_of_differences, captionn = "Summary of the diff
 
 ```
 
-```{r include=FALSE}
+```{r include=FALSE, eval=exists("combined_summary_histogram")}
 
 title <- gsub("_", "\\_", combined_summary_histogram$labels$title, fixed = TRUE)
 
