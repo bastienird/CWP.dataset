@@ -43,7 +43,7 @@ cat(unlist(map_unit_knit_list), sep = "
 
 `r if(exists("other_dimension_analysis_list", envir =environment()) && !is.null(other_dimension_analysis_list)){CWP.dataset::cat_title("## Coverage for other dimensions", child_headerinside = child_header)}`
 
-We check the distribution of the value of each dimension and each unit.
+`r if(exists("other_dimension_analysis_list", envir =environment()) && !is.null(other_dimension_analysis_list)){cat("We check the distribution of the value of each dimension and each unit.)}`
 
 ```{r pie-charts-multiple, eval=(exists("other_dimension_analysis_list", envir =environment()) && !is.null(other_dimension_analysis_list) &&!unique_analyse), message=FALSE, warning=FALSE, include=FALSE}
 
