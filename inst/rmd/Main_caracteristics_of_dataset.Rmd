@@ -41,9 +41,9 @@ cat(unlist(map_unit_knit_list), sep = "
 
 \clearpage
 
-`r if(exists("other_dimension_analysis_list", envir =environment()) && !is.null(other_dimension_analysis_list)){CWP.dataset::cat_title("## Coverage for other dimensions", child_headerinside = child_header)}`
+`r if(exists("other_dimension_analysis_list", envir =environment()) && !is.null(other_dimension_analysis_list)){CWP.dataset::cat_title("## Coverage for other dimensions", child_headerinside = child_header)}}else {""}`
 
-`r if(exists("other_dimension_analysis_list", envir =environment()) && !is.null(other_dimension_analysis_list)){cat("We check the distribution of the value of each dimension and each unit.)}`
+`r if(exists("other_dimension_analysis_list", envir =environment()) && !is.null(other_dimension_analysis_list)){cat("We check the distribution of the value of each dimension and each unit.)}}else {""}`
 
 ```{r pie-charts-multiple, eval=(exists("other_dimension_analysis_list", envir =environment()) && !is.null(other_dimension_analysis_list) &&!unique_analyse), message=FALSE, warning=FALSE, include=FALSE}
 
