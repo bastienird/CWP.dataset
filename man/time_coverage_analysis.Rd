@@ -13,7 +13,7 @@ time_coverage_analysis(
 )
 }
 \arguments{
-\item{time_dimension_list_groupped}{A list of data frames, each containing time dimension data.}
+\item{time_dimension_list_groupped}{A dataframe groupped, by time dimension data.}
 
 \item{parameter_time_dimension}{The time dimension parameter.}
 

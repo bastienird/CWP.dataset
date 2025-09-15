@@ -1,6 +1,6 @@
 test_that("comprehensive_cwp_dataframe_analysis works on effort data", {
-  data("parameter_init_effort", package = "CWP.dataset")
-  data("parameter_final_effort", package = "CWP.dataset")
+  data("parameter_init_effort", envir = environment())
+  data("parameter_final_effort", envir = environment())
 
   result <- comprehensive_cwp_dataframe_analysis(
     parameter_init = parameter_init_effort,
@@ -22,8 +22,8 @@ test_that("comprehensive_cwp_dataframe_analysis works on effort data", {
 })
 
 test_that("comprehensive_cwp_dataframe_analysis works on catch data", {
-  data("parameter_init_catch", package = "CWP.dataset")
-  data("parameter_final_catch", package = "CWP.dataset")
+  utils::data("parameter_init_catch", envir = environment())
+  utils::data("parameter_final_catch", envir = environment())
 
   result <- comprehensive_cwp_dataframe_analysis(
     parameter_init = parameter_init_catch,
@@ -34,7 +34,6 @@ test_that("comprehensive_cwp_dataframe_analysis works on catch data", {
     print_map = FALSE,
     coverage = TRUE
   )
-
   expect_type(result, "list")
   expect_true("summary_of_differences" %in% names(result))
   expect_true("compare_strata_differences_list" %in% names(result))
@@ -43,3 +42,4 @@ test_that("comprehensive_cwp_dataframe_analysis works on catch data", {
       inherits(result$compare_strata_differences_list, "list")
   )
 })
+
