@@ -16,6 +16,7 @@
 #' @importFrom futile.logger flog.info
 summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE, upload_DB = TRUE){
   ancient_wd <- getwd()
+  on.exit(setwd(ancient_wd), add = TRUE)
   setwd(main_dir)
   dir.create("Recap_on_pre_harmo")
   path = file.path(getwd())#, "Recap_on_pre_harmo")
@@ -32,7 +33,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
 
   # Fonctions de fallback
   try_db_query <- function(con, query, fallback_file, fallback_read_fun, download_url = NULL) {
-    if (!is.null(con) && DBI::dbIsValid(con)) {
+    if (!is.null(con) && DBI::dbIsValid(con))  {
       res <- try(DBI::dbGetQuery(con, "SELECT 1"), silent = TRUE)
       if (!inherits(res, "try-error")) {
         message("Connexion a la base reussie, recuperation via SQL : ", query)
@@ -54,7 +55,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   }
 
   try_st_read <- function(con, query, fallback_file, download_url = NULL) {
-    if (!is.null(con) && DBI::dbIsValid(con)) {
+    if (!is.null(con) && DBI::dbIsValid(con))  {
       res <- try(DBI::dbGetQuery(con, "SELECT 1"), silent = TRUE)
       if (!inherits(res, "try-error")) {
         message("Connexion a la base reussie, lecture via st_read : ", query)
@@ -106,18 +107,21 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     download.file(zip_url, zip_path, mode = "wb")
     unzip(zip_path, exdir = here("data"))
   }
-  cwp_grid <- st_read(cwp_grid_file)
-  cwp_grid <- st_as_sf(
-    cwp_grid,
-    wkt = "geom_wkt",   # la colonne contenant les geometries
-    crs = 4326          # ou un autre CRS si tu en connais un specifique
-  ) %>%
-    dplyr::rename(cwp_code = CWP_CODE) %>%
-    dplyr::rename(geom = geom_wkt)
 
+  cwp_grid_tbl <- readr::read_csv(cwp_grid_file, show_col_types = FALSE)
+
+  # Detecte la colonne WKT au cas ou
+  wkt_col <- intersect(c("geom_wkt", "geom", "wkt", "WKT"), names(cwp_grid_tbl))[1]
+
+  cwp_grid <- sf::st_as_sf(cwp_grid_tbl, wkt = wkt_col, crs = 4326)
+  if ("CWP_CODE" %in% names(cwp_grid)) cwp_grid <- dplyr::rename(cwp_grid, cwp_code = CWP_CODE, geom=geom_wkt) %>% dplyr::mutate(code = as.character(code))
+
+  shape_without_geom <- tibble::as_tibble(sf::st_drop_geometry(cwp_grid))%>% dplyr::mutate(cwp_code = as.character(cwp_code))
+  shapefile.fix <- cwp_grid
+  rm(cwp_grid, cwp_grid_tbl)
   try_get_continent_layer <- function(con = NULL, fallback_file = "UN_CONTINENT2.qs") {
     # 1. Try to read from database
-    if (!is.null(con) && DBI::dbIsValid(con)) {
+    if (!is.null(con) && DBI::dbIsValid(con))  {
       message("Attempting to read continent layer from database...")
       res <- try(sf::st_read(con, query = "SELECT * FROM public.continent"), silent = TRUE)
       if (!inherits(res, "try-error")) {
@@ -149,11 +153,6 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     return(continent)
   }
   continent <- try_get_continent_layer(connectionDB)
-
-
-  shape_without_geom  <- cwp_grid %>% as_tibble() %>%dplyr::select(-geom)
-  shapefile.fix <- cwp_grid
-  rm(cwp_grid)
   require(CWP.dataset)
   # PART 1: Identify entities and their respective tRFMOs
   entity_dirs <- list.dirs("entities", full.names = TRUE, recursive = FALSE)
@@ -182,7 +181,6 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
 
     return(data.frame(Entity = entity_name, tRFMO = trfmo))
   })
-
   # Combine all entities into a single data frame
   entities_df <- do.call(rbind, entities_trfmo)
 
@@ -225,6 +223,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     # group_by(tRFMO) %>%
     # summarise(across(where(is.logical), sum)) %>%
     distinct()
+  dir.create(file.path(entity_dir, "data"))
   readr::write_csv(grouped_results, file.path(entity_dir, "data", "grouped_results_invalid_data.csv"))
 
   not_mapped_data_list <- list()
@@ -273,7 +272,6 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
 
   readr::write_csv(all_recap_mapping_data, file.path(path, "all_recap_mapping.csv"))
   flog.info("patrt2")
-
   # PART 3: Generate a summary CSV for all entity
   `%notin%` <- Negate(`%in%`)
   all_data <- list()
@@ -285,6 +283,10 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     problematic_files <- target_files[as.logical(entity_data[3:ncol(entity_data)])]
     # If 'problematic_files' contains NA values, this line will remove them.
     problematic_files <- na.omit(problematic_files)
+    if("GRIDTYPE" %in% colnames(shape_without_geom)){
+      shape_without_geom <- shape_without_geom %>% dplyr::rename(gridtype = GRIDTYPE)
+    }
+    shape_without_geom <- shape_without_geom %>% dplyr::mutate(cwp_code = as.character(cwp_code))
     problematic_data <- lapply(problematic_files, function(file) {
       data_path <- file.path(entity_dir, "data", file)
       data_list <- readr::read_csv(data_path)
@@ -313,13 +315,14 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       combined_problematic_data <- do.call(rbind, lapply(1:length(problematic_data), function(i) {
         data_frame <- as.data.frame(problematic_data[[i]])
         data_frame$issue <- problematic_files[i]
+        data_frame$geographic_identifier <- as.character(data_frame$geographic_identifier)
         return(data_frame)
       }))
-
+      flog.info(head(combined_problematic_data))
       all_data[[entity_name]] <- combined_problematic_data
       # Combine all dataframes into one
 
-
+      flog.info("writingcombinedproblematic")
       # Write the combined data frame to a CSV file
       write_csv(combined_problematic_data, file.path(entity_dir, paste0(entity_name, "_summary_invalid_data.csv")),
                 progress = show_progress())
@@ -372,7 +375,6 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
 
   child_env_base <- new.env(parent = environment())
   list2env(parameters_child, env = child_env_base)
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Functions_markdown.R", local = child_env_base)
 
   child_env <- list2env(as.list(child_env_base), parent = child_env_base)
   for (entity_dir in entity_dirs) {
@@ -383,14 +385,12 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     problematic_files <- target_files[as.logical(entity_data[3:ncol(entity_data)])]
     problematic_files <- na.omit(problematic_files)
     problematic_files <- setdiff(problematic_files, "not_mapped_total.csv")
-
     if (length(problematic_files) > 0) {
       output_file_name <- paste0(entity_name, "_report.html") # name of the output file
       render_env <- new.env(parent = child_env)
       process_rds_file <- function(file_path, parameter_short, parameters_child_global, fig.path, shapefile.fix, continent, coverage = TRUE) {
         # Creer un chemin pour les figures
         file_name <- tools::file_path_sans_ext(basename(file_path))
-
         # Ajouter des lignes specifiques en fonction du fichier
         Addlines <- switch(
           file_name,
@@ -422,9 +422,9 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
           # Valeur par defaut si le fichier n'a pas de description
           paste0("# Unknown issue\n\nNo specific description available for this dataset.\n")
         )
-        file_path <- readr::read_csv(file_path) %>% dplyr::mutate(geographic_identifier = as.numeric(geographic_identifier))
+        file_path <- readr::read_csv(file_path) %>% dplyr::mutate(geographic_identifier = as.character(geographic_identifier))
         # Generer l'environnement pour ce fichier
-        child_env_result <- comprehensive_cwp_dataframe_analysis(
+        child_env_result <- CWP.dataset::comprehensive_cwp_dataframe_analysis(
           parameter_init = file_path,
           parameter_final = NULL,
           parameter_fact = "catch",
@@ -456,11 +456,9 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
         flog.info(paste("Analysis completed for:", file_name))
         return(child_env_result)
       }
-
       target_files_path <- paste0(file.path("entities",entity_name,"data",target_files))
 
       target_files_path <- target_files_path[file.exists(target_files_path)]
-
       all_list <- lapply(target_files_path, process_rds_file,
                          parameter_short = FALSE,
                          fig.path = render_env$fig.path,
@@ -485,7 +483,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       rmarkdown::render(input = Report_on_raw_data, envir = render_env, output_format = "bookdown::html_document2",
                         output_dir =entity_dir, output_file = entity_name)
 
-      message(sprintf("Rendering: %s", entity_name, e$message))
+      # message(sprintf("Rendering: %s", entity_name, e$message))
 
 
       # rmarkdown::render(input = "Report_on_raw_data_iccat.Rmd", envir = render_env, output_format = "bookdown::html_document2",
@@ -496,18 +494,18 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       #                   output_dir =entity_dir, output_file = entity_name)
       rm(render_env, envir = environment())
     }
-    # Recap_on_pre_harmo <- system.file("rmd", "Recap_on_pre_harmo.Rmd", package = "CWP.dataset")
-    # rmarkdown::render(Recap_on_pre_harmo,
-    #                   output_dir = path,
-    #                   envir = environment()
-    # )
 
-    # rmarkdown::render(Recap_on_pre_harmo,
-    #                   output_dir = path,
-    #                   envir = environment(), output_format = "pdf_document2")
   }
-  folder_datasets_id <- "1s8sCv6j_3-zHR1MsOqhrqZrGKhGY3W_Y"
+  Recap_on_pre_harmo <- system.file("rmd", "Recap_on_pre_harmo.Rmd", package = "CWP.dataset")
+  rmarkdown::render(Recap_on_pre_harmo,
+                    output_dir = path,
+                    envir = environment()
+  )
 
+  rmarkdown::render(Recap_on_pre_harmo,
+                    output_dir = path,
+                    envir = environment(), output_format = "pdf_document2")
+  folder_datasets_id <- "1s8sCv6j_3-zHR1MsOqhrqZrGKhGY3W_Y"
   all_files <- list.files(getwd(), pattern = "\\.html$", full.names = TRUE, recursive = TRUE)
 
   if(upload_drive){
@@ -552,7 +550,6 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       tryCatch({
         drive_upload(data_path, as_id("1fXgxn-spBydGrFLtsrayVMLrQ2LOCkeg"), overwrite = TRUE)
       }, error = function(e) {
-        message(sprintf("Failed to upload %s: %s", data_path, e$message))
         return(NULL)  # Returning NULL or any other indication of failure
       })
     }
@@ -565,3 +562,4 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   setwd(ancient_wd)
 
 }
+

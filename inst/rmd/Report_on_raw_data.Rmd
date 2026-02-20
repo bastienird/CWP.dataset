@@ -113,8 +113,6 @@ autonum <- officer::run_autonum(seq_id = "tab", bkm = "TC1", bkm_all = TRUE) # n
 process_list_item <- function(list_item, template) {
   child_env_result <- list2env(list_item, new.env())
   
-  source("https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/functions/Functions_markdown.R", local = child_env_result)
-  
   res <- knitr::knit_child(template, envir = child_env_result, quiet = TRUE)
   rm(child_env_result)
   gc()

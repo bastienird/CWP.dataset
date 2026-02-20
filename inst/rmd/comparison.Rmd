@@ -11,11 +11,26 @@ res <- knitr::knit_child(system.file("rmd/Setup_markdown.Rmd", package = "CWP.da
 # envir = parent.frame() ne marche pas bien car il faut appeler dans le nouveau markdown (child) envir$obj
 ```
 
-```{r eval=exists("Add_lines") && file.exists(Add_lines), results='asis'}
+```{r AddLines, eval=exists("Add_lines"), results='asis', echo=FALSE}
+x <- Add_lines
 
-res <- knitr::knit_child(Add_lines, quiet = TRUE, envir = environment())
-cat(res)
+# 1) Si c'est un chemin vers un fichier existant -> knit_child
+if (is.character(x) && length(x) == 1 && file.exists(x)) {
+  res <- knitr::knit_child(x, quiet = TRUE, envir = environment())
+  cat(res)
 
+# 2) Si c'est du texte (string unique) -> cat direct
+} else if (is.character(x) && length(x) == 1 && nzchar(x)) {
+  cat(x)
+
+# 3) Si c'est un vecteur de lignes -> cat en joignant
+} else if (is.character(x) && length(x) > 1) {
+  cat(paste(x, collapse = "\n"))
+
+# Sinon -> rien
+} else {
+  # noop
+}
 ```
 
 `r if(step_title_t_f){CWP.dataset::cat_title(step_title, child_headerinside = child_header)}`
