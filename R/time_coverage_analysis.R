@@ -50,7 +50,46 @@ time_coverage_analysis <- function(time_dimension_list_groupped, parameter_time_
   })
 
   if (unique_analyse) {
-    time_dimension_list_groupped_diff <- lapply(time_dimension_list_groupped_diff, \(x) dplyr::filter(x, Values != 0))
+
+    # 1) on tente le comportement normal
+    time_dimension_list_groupped_diff <- lapply(time_dimension_list_groupped_diff, function(x) {
+      dplyr::filter(x, !is.na(Values), Values != 0)
+    })
+
+    # 2) si tous les éléments sont vides -> fallback sur number_lines
+    all_empty <- all(vapply(time_dimension_list_groupped_diff, nrow, integer(1)) == 0L)
+
+    if (all_empty) {
+      message("[time_coverage_analysis] All Values are 0; fallback to number of lines.")
+
+      time_dimension_list_groupped_diff <- lapply(time_dimension_list_groupped, function(x) {
+        x %>%
+          dplyr::rename(
+            `Lines dataset 1` = number_lines1,
+            `Lines dataset 2` = number_lines2
+          ) %>%
+          tidyr::pivot_longer(
+            c(`Lines dataset 1`, `Lines dataset 2`),
+            names_to = "Dataset",
+            values_to = "Values"
+          ) %>%
+          dplyr::mutate(
+            Dataset = dplyr::if_else(Dataset == "Lines dataset 1", titre_1, titre_2),
+            Values = as.numeric(Values)
+          ) %>%
+          dplyr::filter(!is.na(Values), Values != 0) %>%
+          dplyr::distinct()
+      })
+
+      # si encore vide (ex: que des NA / 0 en lignes), on sort proprement
+      all_empty2 <- all(vapply(time_dimension_list_groupped_diff, nrow, integer(1)) == 0L)
+      if (all_empty2) {
+        message("[time_coverage_analysis] Fallback on number of lines also empty; skipping plots.")
+        return(list(titles = titles_time, plots = list()))
+      }
+      titles_time <-paste0("Evolutions of number of lines for the dimension ", parameter_time_dimension, " for ", titre_1, " dataset ")
+
+    }
   }
 
   # un seul ggplot, axe conditionnel
