@@ -224,7 +224,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     # summarise(across(where(is.logical), sum)) %>%
     distinct()
   dir.create(file.path(entity_dir, "data"))
-  readr::write_csv(grouped_results, file.path(entity_dir, "data", "grouped_results_invalid_data.csv"))
+  readr::write_csv(grouped_results, file.path("grouped_results_invalid_data.csv"))
 
   not_mapped_data_list <- list()
 
