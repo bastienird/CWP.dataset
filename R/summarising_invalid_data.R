@@ -189,7 +189,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   # PART 2: Checking for specific .csv files
 
   target_files <- c("negative_values.csv", "not_conform_conversion_factors.csv", "removed_irregular_areas.csv",
-                    "areas_in_land.csv", "outside_juridiction.csv")
+                    "areas_in_land.csv", "outside_juridiction.csv", "not_displayed_monthly.csv")
 
 
 
