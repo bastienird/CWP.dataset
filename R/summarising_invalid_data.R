@@ -411,6 +411,10 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
             "# Not conform conversion factors\n\n",
             "Some data provided in Number of fish and tons are not plausible.\n"
           ),
+          "not_displayed_monthly" = paste0(
+            "# Not displayed monthly factors\n\n",
+            "Some data provided not in monthly time format.\n"
+          ),
           "negative_values" = paste0(
             "# Negative or null values in provided data\n\n",
             "Some data are provided with a measurement_value inferior or equal to 0.\n"
