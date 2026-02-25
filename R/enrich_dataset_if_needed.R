@@ -205,6 +205,9 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
                                     by = "species",
                                     suffix = c("", ".y"))%>%dplyr::select(-ends_with(".y"))
   }
+  if(opts$fact == "effort"){
+    enriched_data <- data
+  }
 
   if("gear_type"%in%colnames(enriched_data)){
 
