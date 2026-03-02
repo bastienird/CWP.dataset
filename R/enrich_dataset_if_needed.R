@@ -200,85 +200,85 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   # Step 2: Join species and gear data
   if("species"%in%colnames(data)){
 
-  enriched_data <- dplyr::left_join(data,
-                                    species_group,
-                                    by = "species",
-                                    suffix = c("", ".y"))%>%dplyr::select(-ends_with(".y"))
-  }
-  if(opts$fact == "effort"){
+    enriched_data <- dplyr::left_join(data,
+                                      species_group,
+                                      by = "species",
+                                      suffix = c("", ".y"))%>%dplyr::select(-ends_with(".y"))
+  } else {
     enriched_data <- data
   }
 
+
   if("gear_type"%in%colnames(enriched_data)){
 
-  enriched_data <- dplyr::left_join(enriched_data,
-                                    cl_cwp_gear_level2,
-                                    by = c("gear_type" = "code"),
-                                    suffix = c("", ".y")) %>%dplyr::select(-ends_with(".y"))
+    enriched_data <- dplyr::left_join(enriched_data,
+                                      cl_cwp_gear_level2,
+                                      by = c("gear_type" = "code"),
+                                      suffix = c("", ".y")) %>%dplyr::select(-ends_with(".y"))
   }
   # Step 3: Join fleet data
   if("fishing_fleet"%in%colnames(enriched_data)){
 
-  enriched_data <- dplyr::left_join(
-    enriched_data,
-    fishing_fleet_label,
-    by = c("fishing_fleet" = "code"),
-    suffix = c("", ".y")
-  )%>%dplyr::select(-ends_with(".y"))
-}
+    enriched_data <- dplyr::left_join(
+      enriched_data,
+      fishing_fleet_label,
+      by = c("fishing_fleet" = "code"),
+      suffix = c("", ".y")
+    )%>%dplyr::select(-ends_with(".y"))
+  }
   # Step 4: Join measurement type, measurement, processing level, and mode labels
   if("measurement_type"%in%colnames(enriched_data)){
 
-  enriched_data <- dplyr::left_join(
-    enriched_data,
-    measurement_type_df,
-    by = c("measurement_type" = "code"),
-    suffix = c("", ".y")
-  )%>%dplyr::select(-ends_with(".y"))
+    enriched_data <- dplyr::left_join(
+      enriched_data,
+      measurement_type_df,
+      by = c("measurement_type" = "code"),
+      suffix = c("", ".y")
+    )%>%dplyr::select(-ends_with(".y"))
 
   }
 
   if("measurement"%in%colnames(enriched_data)){
 
-  enriched_data <- dplyr::left_join(
-    enriched_data,
-    cl_measurement,
-    by = c("measurement" = "code"),
-    suffix = c("", ".y")
-  )%>%dplyr::select(-ends_with(".y"))
+    enriched_data <- dplyr::left_join(
+      enriched_data,
+      cl_measurement,
+      by = c("measurement" = "code"),
+      suffix = c("", ".y")
+    )%>%dplyr::select(-ends_with(".y"))
   }
 
   if("measurement_processing_level"%in%colnames(enriched_data)){
 
-  enriched_data <- dplyr::left_join(
-    enriched_data,
-    cl_measurement_processing_level,
-    by = c("measurement_processing_level" = "code"),
-    suffix = c("", ".y")
-  )%>%dplyr::select(-ends_with(".y"))
+    enriched_data <- dplyr::left_join(
+      enriched_data,
+      cl_measurement_processing_level,
+      by = c("measurement_processing_level" = "code"),
+      suffix = c("", ".y")
+    )%>%dplyr::select(-ends_with(".y"))
   }
 
   if("fishing_mode"%in%colnames(enriched_data)){
 
-  enriched_data <- dplyr::left_join(
-    enriched_data,
-    cl_fishing_mode,
-    by = c("fishing_mode" = "code"),
-    suffix = c("", ".y")
-  )%>%dplyr::select(-ends_with(".y"))
-}
+    enriched_data <- dplyr::left_join(
+      enriched_data,
+      cl_fishing_mode,
+      by = c("fishing_mode" = "code"),
+      suffix = c("", ".y")
+    )%>%dplyr::select(-ends_with(".y"))
+  }
   # Step 5: Join gridtype from shapefile.fix
   if("geographic_identifier"%in%colnames(enriched_data)){
 
-  enriched_data <- dplyr::left_join(
-    enriched_data,
-    dplyr::select(shapefile.fix,
-                  geographic_identifier = cwp_code,
-                  gridtype            = GRIDTYPE),
-    by = "geographic_identifier",
-    suffix = c("", ".y")
-  )%>%dplyr::select(-ends_with(".y"))
-}
+    enriched_data <- dplyr::left_join(
+      enriched_data,
+      dplyr::select(shapefile.fix,
+                    geographic_identifier = cwp_code,
+                    gridtype            = GRIDTYPE),
+      by = "geographic_identifier",
+      suffix = c("", ".y")
+    )%>%dplyr::select(-ends_with(".y"))
+  }
   # Step 6: Reorder columns so each code is followed by its label
   cols      <- base::names(enriched_data)
   base_cols <- base::grep("_label$", cols,
