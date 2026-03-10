@@ -20,54 +20,102 @@
 #' Bastien Grasset
 
 function_recap_each_step <- function(step_name, rds_data, explanation = "No explanation provided to this step", functions = "No function used in this step", option_list = NULL, entity = NULL) {
-  # Check if global variables exist
-  if (!exists("options_written_total")) {assign("options_written_total", "")}
-  if (!exists("explanation_total")) {assign("explanation_total", "")}
+  # Initialize global variables if needed
+  if (!exists("options_written_total", envir = .GlobalEnv)) {
+    assign("options_written_total", "", envir = .GlobalEnv)
+  }
+  if (!exists("explanation_total", envir = .GlobalEnv)) {
+    assign("explanation_total", "", envir = .GlobalEnv)
+  }
 
-  # Create directories if they do not exist
+  # Create directories
   dir.create("Markdown", showWarnings = FALSE)
-  dir.create(file.path("Markdown", step_name), showWarnings = FALSE)
-
-  # Set the directory name
   step_dir <- file.path("Markdown", step_name)
+  dir.create(step_dir, showWarnings = FALSE)
 
-  rds_data <- rds_data %>%
-    dplyr::ungroup() %>%
-    dplyr::group_by(across(-measurement_value)) %>%
-    dplyr::summarise(measurement_value = sum(measurement_value, na.rm = TRUE), .groups = 'drop')
+  # Convert to data.table
+  dt <- data.table::as.data.table(rds_data)
 
   # Ensure measurement_value is numeric
-  rds_data$measurement_value <- as.numeric(rds_data$measurement_value)
+  dt[, measurement_value := as.numeric(measurement_value)]
 
-  # Filter data based on measurement units
-  rds_t <- rds_data %>% dplyr::filter(measurement_unit %in% c("t", "MTNO", "MT"))
-  rds_no <- rds_data %>% dplyr::filter(measurement_unit %in% c("no", "NOMT", "NO"))
+  # Aggregate duplicates
+  group_cols <- setdiff(names(dt), "measurement_value")
+  dt <- dt[, .(measurement_value = sum(measurement_value, na.rm = TRUE)), by = group_cols]
 
-  # Calculate sums
-  sum_t <- sum(rds_t$measurement_value, na.rm = TRUE)
-  sum_no <- sum(rds_no$measurement_value, na.rm = TRUE)
-  lines <- nrow(rds_data)
+  # Global sums
+  sum_t <- dt[measurement_unit %in% c("t", "MTNO", "MT"), sum(measurement_value, na.rm = TRUE)]
+  sum_no <- dt[measurement_unit %in% c("no", "NOMT", "NO"), sum(measurement_value, na.rm = TRUE)]
+  lines <- nrow(dt)
 
-  # Save sums to CSV
-  fwrite(data.frame(sum_t, sum_no, lines), file.path(step_dir, "sums.csv"))
+  data.table::fwrite(
+    data.table::data.table(sum_t = sum_t, sum_no = sum_no, lines = lines),
+    file.path(step_dir, "sums.csv")
+  )
+
+  # Sums by source_authority
+  if ("source_authority" %in% names(dt)) {
+    sums_source_auth <- dt[
+      ,
+      .(
+        sum_t = sum(measurement_value[measurement_unit %in% c("t", "MTNO", "MT")], na.rm = TRUE),
+        sum_no = sum(measurement_value[measurement_unit %in% c("no", "NOMT", "NO")], na.rm = TRUE),
+        lines = .N
+      ),
+      by = source_authority
+    ]
+
+    data.table::fwrite(
+      sums_source_auth,
+      file.path(step_dir, "sums_source_auth.csv")
+    )
+  }
+
+  # Sums by species
+  if ("species" %in% names(dt)) {
+    sums_species <- dt[
+      ,
+      .(
+        sum_t = sum(measurement_value[measurement_unit %in% c("t", "MTNO", "MT")], na.rm = TRUE),
+        sum_no = sum(measurement_value[measurement_unit %in% c("no", "NOMT", "NO")], na.rm = TRUE),
+        lines = .N
+      ),
+      by = species
+    ]
+
+    data.table::fwrite(
+      sums_species,
+      file.path(step_dir, "sums_species.csv")
+    )
+  }
 
   # Handle options
   if (!is.null(option_list) && length(option_list) != 0) {
     options_substi <- as.list(substitute(option_list))[-1]
-    options_written <- ""
-    for (i in 1:length(options_substi)) {
-      options_written <- paste0(options_written, paste0(options_substi[i], " = ", option_list[[i]]), sep = " , \n ")
-    }
+    options_written <- paste(
+      vapply(
+        seq_along(options_substi),
+        function(i) paste0(options_substi[[i]], " = ", option_list[[i]]),
+        character(1)
+      ),
+      collapse = " , \n "
+    )
   } else {
     options_written <- "NONE"
   }
 
-  # Update global variables
-  assign("options_written_total", paste0(options_written_total, options_written))
-  assign("explanation_total", paste0(explanation_total, explanation))
+  # Update globals
+  options_written_total <- get("options_written_total", envir = .GlobalEnv)
+  explanation_total <- get("explanation_total", envir = .GlobalEnv)
 
-  # Save RDS and text files
-  qs::qsave(rds_data, file.path(step_dir, "data.qs"))
+  options_written_total <- paste0(options_written_total, options_written)
+  explanation_total <- paste0(explanation_total, explanation)
+
+  assign("options_written_total", options_written_total, envir = .GlobalEnv)
+  assign("explanation_total", explanation_total, envir = .GlobalEnv)
+
+  # Save files
+  qs::qsave(as.data.frame(dt), file.path(step_dir, "data.qs"))
   write(explanation, file.path(step_dir, "explanation.txt"))
   write(explanation_total, file.path(step_dir, "explanation_total.txt"))
   write(functions, file.path(step_dir, "functions.txt"))
@@ -75,8 +123,9 @@ function_recap_each_step <- function(step_name, rds_data, explanation = "No expl
   write(options_written_total, file.path(step_dir, "options_total.txt"))
   write(options_written, file.path(step_dir, "options_written.txt"))
 
-  if(!is.null(entity)){
-    if(entity$provenance$statement != "The following processes are applied to the dataset:"){
+  # Update provenance if entity is provided
+  if (!is.null(entity)) {
+    if (entity$provenance$statement != "The following processes are applied to the dataset:") {
       entity$provenance$setStatement("The following processes are applied to the dataset:")
       entity$provenance$processes <- NULL
     }
@@ -84,4 +133,6 @@ function_recap_each_step <- function(step_name, rds_data, explanation = "No expl
     rationale$rationale <- explanation
     entity$provenance$addProcess(rationale)
   }
+
+  invisible(dt)
 }
