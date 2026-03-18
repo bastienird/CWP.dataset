@@ -92,14 +92,10 @@ function_recap_each_step <- function(step_name, rds_data, explanation = "No expl
   # Handle options
   if (!is.null(option_list) && length(option_list) != 0) {
     options_substi <- as.list(substitute(option_list))[-1]
-    options_written <- paste(
-      vapply(
-        seq_along(options_substi),
-        function(i) paste0(options_substi[[i]], " = ", option_list[[i]]),
-        character(1)
-      ),
-      collapse = " , \n "
-    )
+    options_written <- ""
+    for (i in 1:length(options_substi)) {
+      options_written <- paste0(options_written, paste0(options_substi[i], " = ", option_list[[i]]), sep = " , \n ")
+    }
   } else {
     options_written <- "NONE"
   }
