@@ -11,13 +11,14 @@
 #' @param nameoutput Character, name of the .qs if saved
 #' @param usesave Logical Should we use the nameoutput .qs instead of rerunning everything ?
 #' @param sizepdf Character string. La taille peut prendre les valeurs suivantes :
-#' @return NULL. The function has side effects, such as writing files and rendering reports.
-#' @param fast_and_heavy Logical TRUE/FALSE, should we save a .qs for each dataset, and use this .qs in every markdown
 #'   \itemize{
 #'     \item `"long"` (par défaut) : Long with coverage.
 #'     \item `"middle"` : Long without coverage
 #'     \item `"short"` : Only first characteristics, first differences and main table of steps
 #'   }
+#' @param parameter_colnames_to_keep_fact Vector: what column to display
+#' @return NULL. The function has side effects, such as writing files and rendering reports.
+#' @param fast_and_heavy Logical TRUE/FALSE, should we save a .qs for each dataset, and use this .qs in every markdown
 #'
 #' @examples
 #' \dontrun{
@@ -31,7 +32,7 @@
 #' @importFrom qs qread qsave
 #' @export
 summarising_step <- function(main_dir, connectionDB, config, source_authoritylist = c("all","IOTC","WCPFC", "IATTC", "ICCAT", "CCSBT" ), sizepdf = "long",
-                             savestep = FALSE, nameoutput = NULL, usesave = FALSE, fast_and_heavy = TRUE) {
+                             savestep = FALSE, nameoutput = NULL, usesave = FALSE, fast_and_heavy = TRUE, parameter_colnames_to_keep_fact = NULL) {
 
   if(sizepdf == "long"){
     coverage = TRUE
@@ -102,18 +103,18 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
     action <- entity$data$actions[[1]]
     opts <- action$options
 
+    if(is.null(parameter_colnames_to_keep_fact)){
     if (opts$fact == "effort") {
       futile.logger::flog.warn("Effort dataset not displayed for now")
       parameter_colnames_to_keep_fact = c("source_authority", "fishing_mode_label", "geographic_identifier","fishing_fleet_label","gear_type_label",
                                           "measurement_unit", "measurement_value", "gridtype","species_group", "species_label", "measurement_type")
-      topnumberfact = 3
     } else {
       parameter_colnames_to_keep_fact = c("source_authority", "fishing_fleet_label",
                                           "fishing_mode_label", "geographic_identifier",
                                           "measurement_unit", "measurement_value", "gridtype",
-                                          "species_group", "species_label", "gear_type_label")
-      topnumberfact = 6
+                                           "species_label", "gear_type_label")
 
+    }
     }
     entity_name <- basename(entity_dir)
     setwd(here::here(entity_dir))
