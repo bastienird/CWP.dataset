@@ -155,7 +155,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     # 3. Try to load from package extdata
     package_file <- system.file(
       "extdata",
-      "UN_CONTINENT2.qs",
+      "continent.qs",
       package = "CWP.dataset"
     )
 
