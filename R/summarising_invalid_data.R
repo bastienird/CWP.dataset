@@ -119,38 +119,61 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   shape_without_geom <- tibble::as_tibble(sf::st_drop_geometry(cwp_grid))%>% dplyr::mutate(cwp_code = as.character(cwp_code))
   shapefile.fix <- cwp_grid
   rm(cwp_grid, cwp_grid_tbl)
-  try_get_continent_layer <- function(con = NULL, fallback_file = "UN_CONTINENT2.qs") {
+  try_get_continent_layer <- function(
+    con = NULL,
+    fallback_file = "UN_CONTINENT2.qs"
+  ) {
     # 1. Try to read from database
-    if (!is.null(con) && DBI::dbIsValid(con))  {
+    if (!is.null(con) && DBI::dbIsValid(con)) {
       message("Attempting to read continent layer from database...")
-      res <- try(sf::st_read(con, query = "SELECT * FROM public.continent"), silent = TRUE)
+
+      res <- try(
+        sf::st_read(con, query = "SELECT * FROM public.continent", quiet = TRUE),
+        silent = TRUE
+      )
+
       if (!inherits(res, "try-error")) {
         message("Continent layer successfully read from database.")
         sf::st_crs(res) <- 4326
-        qs::qsave(res, fallback_file)
+
+        if (!is.null(fallback_file)) {
+          qs::qsave(res, fallback_file)
+        }
+
         return(res)
       }
     }
 
     # 2. Try to load from local .qs file
-    if (file.exists(fallback_file)) {
+    if (!is.null(fallback_file) && file.exists(fallback_file)) {
       message("Loading continent layer from local file: ", fallback_file)
       continent <- qs::qread(fallback_file)
       sf::st_crs(continent) <- 4326
       return(continent)
     }
 
-    # 3. Download from FAO GeoServer using ows4R
-    message("Fetching continent layer from FAO GeoServer...")
-    WFS <- ows4R::WFSClient$new(
-      url = "https://www.fao.org/fishery/geoserver/fifao/wfs",
-      serviceVersion = "1.0.0",
-      logger = "INFO"
+    # 3. Try to load from package extdata
+    package_file <- system.file(
+      "extdata",
+      "UN_CONTINENT2.qs",
+      package = "nom_du_package"
     )
-    continent <- WFS$getFeatures("fifao:UN_CONTINENT2")
-    sf::st_crs(continent) <- 4326
-    qs::qsave(continent, fallback_file)
-    return(continent)
+
+    if (nzchar(package_file)) {
+      message("Loading continent layer from package extdata: ", package_file)
+      continent <- qs::qread(package_file)
+      sf::st_crs(continent) <- 4326
+
+      if (!is.null(fallback_file)) {
+        qs::qsave(continent, fallback_file)
+      }
+
+      return(continent)
+    }
+
+    stop(
+      "Unable to retrieve continent layer from database, local file, or package extdata."
+    )
   }
   continent <- try_get_continent_layer(connectionDB)
   require(CWP.dataset)
