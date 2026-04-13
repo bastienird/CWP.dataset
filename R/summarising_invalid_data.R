@@ -156,7 +156,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     package_file <- system.file(
       "extdata",
       "UN_CONTINENT2.qs",
-      package = "nom_du_package"
+      package = "CWP.dataset"
     )
 
     if (nzchar(package_file)) {
