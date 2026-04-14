@@ -63,7 +63,7 @@ tidying_GTA_data_for_comparison <- function(dataframe, shape = NULL,
   }
 
   dataframe <- dataframe%>%dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT","t","MTNO", "Tons")~ "Tons",
-  measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ measurement_unit))
+  measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ as.charachter(measurement_unit)))
 
   # dataframe <- dataframe %>% dplyr::mutate(measurement_value = sum(measurement_value))
 
