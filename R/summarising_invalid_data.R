@@ -353,6 +353,12 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     }
   }
   if(length(all_data) !=0){
+    all_data <- lapply(all_data, function(df) {
+      if ("measurement_unit" %in% names(df)) {
+        df$measurement_unit <- as.character(df$measurement_unit)
+      }
+      df
+    })
     combined_data <- bind_rows(all_data, .id = "entity_name")
     combined_data <- combined_data  %>%
       dplyr::rename(dataset  = entity_name) %>%
