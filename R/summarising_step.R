@@ -471,7 +471,6 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       set_flextable_defaults(fonts_ignore=TRUE)
       base::options(knitr.duplicate.label = "allow")
       bookdown_path <- CWP.dataset::generate_bookdown_yml(new_session = !fast_and_heavy)
-      if(sizepdf != "short"){
         if(fast_and_heavy){
           futile.logger::flog.info("gitbook")
           bookdown::render_book(
@@ -489,7 +488,6 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
 
         gc()
-      }
       futile.logger::flog.info("pdfdocument")
 
       if (pdf_render_available) {
@@ -520,13 +518,6 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         futile.logger::flog.warn(
           "Rendu PDF ignore pour %s : TinyTeX non detecte.",
           entity_dir
-        )
-
-        bookdown::render_book(
-          ".",
-          envir = render_env,
-          output_format = "bookdown::html_document2",
-          output_dir = nameoutput
         )
       }
 
