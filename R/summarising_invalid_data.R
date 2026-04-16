@@ -529,15 +529,41 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     }
 
   }
-  Recap_on_pre_harmo <- system.file("rmd", "Recap_on_pre_harmo.Rmd", package = "CWP.dataset")
-  rmarkdown::render(Recap_on_pre_harmo,
-                    output_dir = path,
-                    envir = environment()
+  Recap_on_pre_harmo <- system.file("rmd", "Recap_on_pre_harmo.Rmd",
+                                    package = "CWP.dataset")
+
+  rmarkdown::render(
+    Recap_on_pre_harmo,
+    output_dir = path,
+    envir = environment()
   )
 
-  rmarkdown::render(Recap_on_pre_harmo,
-                    output_dir = path,
-                    envir = environment(), output_format = "pdf_document2")
+  tinytex_available <- tryCatch({
+    requireNamespace("tinytex", quietly = TRUE) &&
+      isTRUE(tinytex::is_tinytex()) &&
+      nzchar(Sys.which("pdflatex"))
+  }, error = function(e) FALSE)
+
+  if (tinytex_available) {
+    tryCatch({
+      rmarkdown::render(
+        Recap_on_pre_harmo,
+        output_dir = path,
+        envir = environment(),
+        output_format = "pdf_document2"
+      )
+    }, error = function(e) {
+      message(
+        "Echec du rendu PDF : ", conditionMessage(e),
+        ". Le rapport HTML reste disponible."
+      )
+    })
+  } else {
+    message(
+      "TinyTeX non detecte : rendu PDF ignore. ",
+      "Le rapport HTML a ete genere normalement."
+    )
+  }
   folder_datasets_id <- "1s8sCv6j_3-zHR1MsOqhrqZrGKhGY3W_Y"
   all_files <- list.files(getwd(), pattern = "\\.html$", full.names = TRUE, recursive = TRUE)
 

@@ -41,6 +41,18 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
     stop('Please provide a correct sizepdf, "short", "middle" or "long"')
   }
 
+  pdf_render_available <- tryCatch({
+    requireNamespace("tinytex", quietly = TRUE) &&
+      isTRUE(tinytex::is_tinytex()) &&
+      nzchar(Sys.which("pdflatex"))
+  }, error = function(e) FALSE)
+
+  if (!pdf_render_available) {
+    futile.logger::flog.warn(
+      "TinyTeX non detecte : les rendus PDF seront ignores, le HTML/gitbook reste genere."
+    )
+  }
+
   futile.logger::flog.info(paste0("Size pdf is:", sizepdf))
 
   ancient_wd <- getwd()
@@ -479,16 +491,36 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         gc()
       }
       futile.logger::flog.info("pdfdocument")
-      if(fast_and_heavy){
-        bookdown::render_book(".", envir = render_env,
-                              output_format = "bookdown::pdf_document2",
-                              output_dir = nameoutput)
 
-        gc()
+      if (pdf_render_available) {
+        tryCatch({
+          if (fast_and_heavy) {
+            bookdown::render_book(
+              ".",
+              envir = render_env,
+              output_format = "bookdown::pdf_document2",
+              output_dir = nameoutput
+            )
+            gc()
+          } else {
+            CWP.dataset::build_book(
+              master_qs_rel = paste0(prefix, "renderenvpath.qs"),
+              output_format = "bookdown::pdf_document2",
+              output_dir = nameoutput
+            )
+          }
+        }, error = function(e) {
+          futile.logger::flog.warn(
+            "Echec du rendu PDF pour %s : %s",
+            entity_dir,
+            conditionMessage(e)
+          )
+        })
       } else {
-        CWP.dataset::build_book(master_qs_rel = paste0(prefix, "renderenvpath.qs"),
-                   output_format = "bookdown::pdf_document2",
-                   output_dir = nameoutput)
+        futile.logger::flog.warn(
+          "Rendu PDF ignore pour %s : TinyTeX non detecte.",
+          entity_dir
+        )
       }
 
       unlink("_bookdown.yml")
