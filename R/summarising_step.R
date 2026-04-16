@@ -521,6 +521,13 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           "Rendu PDF ignore pour %s : TinyTeX non detecte.",
           entity_dir
         )
+
+        bookdown::render_book(
+          ".",
+          envir = render_env,
+          output_format = "bookdown::html_document2",
+          output_dir = nameoutput
+        )
       }
 
       unlink("_bookdown.yml")
