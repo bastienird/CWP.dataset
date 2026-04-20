@@ -166,7 +166,7 @@ qflextable2(not_mapped_total, captionn ="Summary of the not mapped factors and s
 ```
 
 
-Overview of the data provided for which the captures are in land corresponding to CWP standards. This dataset is `r nrow(summary_invalid_data)` rows and `r sum((summary_invalid_data %>% dplyr::filter(measurement_unit == "Tons"))$measurement_value)` tons and `r sum((summary_invalid_data %>% dplyr::filter(measurement_unit == "Number of fish"))$measurement_value)` number of fish.
+Overview of the data provided for which the captures are in land corresponding to CWP standards or not CWP datasets 5 or 1 degrees. This dataset is `r nrow(summary_invalid_data)` rows and `r sum((summary_invalid_data %>% dplyr::filter(measurement_unit == "Tons"))$measurement_value)` tons and `r sum((summary_invalid_data %>% dplyr::filter(measurement_unit == "Number of fish"))$measurement_value)` number of fish.
 
 ```{r, fig.cap="Data with known issues"}
 
