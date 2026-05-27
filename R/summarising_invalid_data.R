@@ -513,8 +513,16 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       qs::qsave(render_env, file.path(entity_dir, paste0(entity_name, "render_env.qs")))
 
       Report_on_raw_data <- system.file("rmd", "Report_on_raw_data.Rmd", package = "CWP.dataset")
-      rmarkdown::render(input = Report_on_raw_data, envir = render_env, output_format = "bookdown::html_document2",
-                        output_dir =entity_dir, output_file = entity_name)
+      Report_on_raw_data_tmp <- file.path(entity_dir, "Report_on_raw_data.Rmd")
+      file.copy(Report_on_raw_data, Report_on_raw_data_tmp, overwrite = TRUE)
+
+      rmarkdown::render(
+        input = Report_on_raw_data_tmp,
+        envir = render_env,
+        output_format = "bookdown::html_document2",
+        output_dir = entity_dir,
+        output_file = entity_name
+      )
 
       # message(sprintf("Rendering: %s", entity_name, e$message))
 
