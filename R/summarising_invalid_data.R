@@ -529,11 +529,16 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     }
 
   }
-  Recap_on_pre_harmo <- system.file("rmd", "Recap_on_pre_harmo.Rmd",
-                                    package = "CWP.dataset")
+  Recap_on_pre_harmo_src <- system.file(
+    "rmd", "Recap_on_pre_harmo.Rmd",
+    package = "CWP.dataset"
+  )
+
+  Recap_on_pre_harmo_local <- file.path(path, "Recap_on_pre_harmo.Rmd")
+  file.copy(Recap_on_pre_harmo_src, Recap_on_pre_harmo_local, overwrite = TRUE)
 
   rmarkdown::render(
-    Recap_on_pre_harmo,
+    input = Recap_on_pre_harmo_local,
     output_dir = path,
     envir = environment()
   )
@@ -547,10 +552,10 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   if (tinytex_available) {
     tryCatch({
       rmarkdown::render(
-        Recap_on_pre_harmo,
+        input = Recap_on_pre_harmo_local,
         output_dir = path,
         envir = environment(),
-        output_format = "pdf_document2"
+        output_format = "bookdown::pdf_document2"
       )
     }, error = function(e) {
       message(
