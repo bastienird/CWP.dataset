@@ -75,17 +75,66 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
   shapefile.fix <- dplyr::rename(shapefile.fix,
                                  cwp_code = CWP_CODE,
                                  geom     = geom_wkt)
+  futile.logger::flog.info("New function")
 
-  continent <- tryCatch({
+  try_get_continent_layer <- function(
+    con = NULL,
+    fallback_file = "UN_CONTINENT2.qs"
+  ) {
+    # 1. Try to read from database
+    if (!is.null(con) && DBI::dbIsValid(con)) {
+      message("Attempting to read continent layer from database...")
 
-    st_read(connectionDB, query = "SELECT * FROM public.continent")
-  }, error = function(e) {
+      res <- try(
+        sf::st_read(con, query = "SELECT * FROM public.continent", quiet = TRUE),
+        silent = TRUE
+      )
 
-    futile.logger::flog.error("An error occurred while reading continent data: %s", e$message)
+      if (!inherits(res, "try-error")) {
+        message("Continent layer successfully read from database.")
+        sf::st_crs(res) <- 4326
 
-    NULL
+        if (!is.null(fallback_file)) {
+          qs::qsave(res, fallback_file)
+        }
 
-  })
+        return(res)
+      }
+    }
+
+    # 2. Try to load from local .qs file
+    if (!is.null(fallback_file) && file.exists(fallback_file)) {
+      message("Loading continent layer from local file: ", fallback_file)
+      continent <- qs::qread(fallback_file)
+      sf::st_crs(continent) <- 4326
+      return(continent)
+    }
+
+    # 3. Try to load from package extdata
+    package_file <- system.file(
+      "extdata",
+      "continent.qs",
+      package = "CWP.dataset"
+    )
+
+    if (nzchar(package_file)) {
+      message("Loading continent layer from package extdata: ", package_file)
+      continent <- qs::qread(package_file)
+      sf::st_crs(continent) <- 4326
+
+      if (!is.null(fallback_file)) {
+        qs::qsave(continent, fallback_file)
+      }
+
+      return(continent)
+    }
+
+    stop(
+      "Unable to retrieve continent layer from database, local file, or package extdata."
+    )
+  }
+
+  continent <- try_get_continent_layer(NULL)
 
   if (is.null(continent)) {
 
