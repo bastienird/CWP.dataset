@@ -113,11 +113,14 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
 
   # standardize units
   data <- data %>%
-    dplyr::mutate(measurement_unit = case_when(
-      measurement_unit == "Tons"             ~ "t",
-      measurement_unit == "Number of fish"   ~ "no",
-      TRUE                                   ~ measurement_unit
-    ))
+    dplyr::mutate(
+      measurement_unit = as.character(measurement_unit),
+      measurement_unit = dplyr::case_when(
+        measurement_unit == "Tons"           ~ "t",
+        measurement_unit == "Number of fish" ~ "no",
+        TRUE                                 ~ measurement_unit
+      )
+    )
 
   # if WKT col present
   if ("geom_wkt" %in% colnames(data)) {
