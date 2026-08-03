@@ -51,25 +51,38 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
                            measurement_value != 0]
 
   inner_join_data <- st_as_sf(inner_join(inner_join_data,
-                                shapefile.fix %>% select(code, geom),
+                                shapefile.fix %>% dplyr::select(code, geom),
                                 by = c("geographic_identifier" = "code")))
 
   if (nrow(inner_join_data%>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
 
-      image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
-        tm_fill(
-          col = "measurement_value",
-          palette = "brewer.rd_yl_gn",
-          style = "cont",
-          n = 8,
-          midpoint = 0,
-          border.col = NA,
-          lwd        = 0
-        ) +
-        tm_layout(legend.outside = FALSE,
-                  component.autoscale = FALSE) +
-        tmap:::tm_facets_grid(rows = "gridtype", columns = "source") +
-        tm_shape(continent) + tm_borders()
+    image <-
+      tm_shape(
+        inner_join_data %>%
+          dplyr::filter(measurement_unit == variable_affichee)
+      ) +
+      tm_fill(
+        col = "measurement_value",
+        palette = "brewer.rd_yl_gn",
+        style = "cont",
+        n = 8,
+        midpoint = 0,
+        border.col = NA,
+        lwd = 0
+      ) +
+      tm_layout(
+        legend.outside = FALSE,
+        component.autoscale = FALSE
+      ) +
+      tmap:::tm_facets_grid(
+        rows = "gridtype",
+        columns = "source"
+      )
+    if (inherits(continent, c("sf", "sfc", "SpatVector"))) {
+      image <- image +
+        tm_shape(continent) +
+        tm_borders()
+    }
 
 
     return(image)

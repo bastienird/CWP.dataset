@@ -10,7 +10,7 @@ map_species_to_aggregated <- function(df) {
 
   # If there are species that didn't match, fill the aggregated columns with "Unknown"
   df <- df %>%
-    mutate(
+    dplyr::mutate(
       species_aggregated_code = ifelse(is.na(species_aggregated_code), species, species_aggregated_code),
       species_aggregated_name = ifelse(is.na(species_aggregated_name), species, species_aggregated_name)
     )
