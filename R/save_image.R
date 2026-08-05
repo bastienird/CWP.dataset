@@ -10,22 +10,22 @@
 #' @return None
 #' @export
 save_image <- function(title, plott = last_plot(), folder = NULL, fig.pathinside = fig.path){
-  current <- tmap_mode()
-  title <- eval(title)
-  if(!is.null(folder)){
-    dir.create(file.path(fig.pathinside, folder), recursive = TRUE)
-
-    if(all(class(plott) == "flextable")){
-      save_as_image(plott,path = file.path(fig.pathinside, file.path(folder, paste0( make.names(title), ".png"))))
-    } else if(all(class(plott) == "tmap")){
-      tmap_mode("plot")
-      filenametmap <- file.path(fig.pathinside, file.path(folder, paste0( make.names(title), ".png")))
-      tmap_save(tm = plott, filename = filenametmap)
-      tmap_mode(current)
-    } else {
-      ggsave(paste0( make.names(title), ".png"),plot = plott,   device = "png", path = file.path(fig.pathinside, folder), create.dir = TRUE)
-    }
-  } else { print("Cannot save the image the folder does not exist")}
-  # return(plott)
+  # current <- tmap_mode()
+  # title <- eval(title)
+  # if(!is.null(folder)){
+  #   dir.create(file.path(fig.pathinside, folder), recursive = TRUE)
+  #
+  #   if(all(class(plott) == "flextable")){
+  #     save_as_image(plott,path = file.path(fig.pathinside, file.path(folder, paste0( make.names(title), ".png"))))
+  #   } else if(all(class(plott) == "tmap")){
+  #     tmap_mode("plot")
+  #     filenametmap <- file.path(fig.pathinside, file.path(folder, paste0( make.names(title), ".png")))
+  #     tmap_save(tm = plott, filename = filenametmap)
+  #     tmap_mode(current)
+  #   } else {
+  #     ggsave(paste0( make.names(title), ".png"),plot = plott,   device = "png", path = file.path(fig.pathinside, folder), create.dir = TRUE)
+  #   }
+  # } else { print("Cannot save the image the folder does not exist")}
+  # # return(plott)
 
 }
