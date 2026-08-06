@@ -42,10 +42,14 @@ qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, col
       x <- as.data.frame(x %>% dplyr::ungroup())
     }
     if (!is.null(save_folder)) {
-      if (!dir.exists(file.path(fig.pathinside, save_folder))) {
-        dir.create(file.path(fig.pathinside, save_folder), recursive = TRUE)
-      }
-      save_path_data <- file.path(fig.pathinside, save_folder, paste0(make.names(captionn), ".csv" ))  # Adjust the file name as needed
+      save_path_data <- file.path(
+        fig.pathinside,
+        save_folder,
+        paste0(make.names(captionn), ".csv")
+      )
+
+      dir.create(dirname(save_path_data), recursive = TRUE, showWarnings = FALSE)
+
       fwrite(x, file = save_path_data)
     }
 
