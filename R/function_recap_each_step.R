@@ -121,12 +121,20 @@ function_recap_each_step <- function(step_name, rds_data, explanation = "No expl
 
   # Update provenance if entity is provided
   if (!is.null(entity)) {
-    if (entity$provenance$statement != "The following processes are applied to the dataset:") {
+    # 1. Update or initialize the provenance statement
+    if (is.null(entity$provenance$statement) || entity$provenance$statement != "The following processes are applied to the dataset:") {
       entity$provenance$setStatement("The following processes are applied to the dataset:")
-      entity$provenance$processes <- NULL
+      entity$provenance$processes <- list() # Reset as an empty list instead of NULL
     }
+
+    # 2. Instantiate geoflow_process object
     rationale <- geoflow_process$new()
-    rationale$rationale <- explanation
+
+    # Set the process name and description using R6 methods
+    rationale$setProcess("data_processing_step") # Short identifier for the process
+    rationale$setDescription(explanation)
+
+    # 3. Append process to provenance
     entity$provenance$addProcess(rationale)
   }
 
