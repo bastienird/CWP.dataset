@@ -120,22 +120,35 @@ function_recap_each_step <- function(step_name, rds_data, explanation = "No expl
   write(options_written, file.path(step_dir, "options_written.txt"))
 
   # Update provenance if entity is provided
+  # Update provenance if entity is provided
   if (!is.null(entity)) {
-    # 1. Update or initialize the provenance statement
-    if (is.null(entity$provenance$statement) || entity$provenance$statement != "The following processes are applied to the dataset:") {
-      entity$provenance$setStatement("The following processes are applied to the dataset:")
-      entity$provenance$processes <- list() # Reset as an empty list instead of NULL
-    }
 
-    # 2. Instantiate geoflow_process object
-    rationale <- geoflow_process$new()
+    tryCatch({
 
-    # Set the process name and description using R6 methods
-    rationale$setProcess("data_processing_step") # Short identifier for the process
-    rationale$setDescription(explanation)
+      # Initialize provenance statement
+      if (is.null(entity$provenance$statement)) {
+        entity$provenance$setStatement(
+          "The following processes are applied to the dataset:"
+        )
+      }
 
-    # 3. Append process to provenance
-    entity$provenance$addProcess(rationale)
+      # Create process
+      rationale <- geoflow_process$new()
+
+      rationale$process <- "data_processing_step"
+      rationale$description <- explanation
+
+      # Add process to existing provenance
+      entity$provenance$addProcess(rationale)
+
+    }, error = function(e) {
+
+      warning(
+        "Provenance could not be updated: ",
+        conditionMessage(e)
+      )
+
+    })
   }
 
   invisible(dt)
