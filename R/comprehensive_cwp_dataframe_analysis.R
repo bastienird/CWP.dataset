@@ -48,7 +48,6 @@
 #'
 #' @import ggplot2
 #' @import data.table
-#' @import gridExtra
 comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final,
                                                  fig.path = getwd(),
                                                  parameter_fact = "catch",

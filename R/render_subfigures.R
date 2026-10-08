@@ -33,7 +33,7 @@ render_subfigures <- function(plots_list, titles_list, general_title) {
       
       # Combine plots with captions using gridExtra::arrangeGrob
       plot_grobs <- lapply(seq_along(plots_list), function(i) {
-        arrangeGrob(
+        gridExtra::arrangeGrob(
           plots_list[[i]], 
           bottom = grid::textGrob(
             titles_list[[i]], 
@@ -44,11 +44,11 @@ render_subfigures <- function(plots_list, titles_list, general_title) {
       })
 
       # Arrange the plots side by side using grid.arrange
-      grid.arrange(
+      gridExtra::grid.arrange(
         grobs = plot_grobs, 
         ncol = 2,  # Arrange in two columns
         widths = c(1, 1),  # Ensure equal width for each plot
-        top = textGrob(general_title, gp = gpar(fontsize = 14, fontface = "bold"))
+        top = grid::textGrob(general_title, gp = grid::gpar(fontsize = 14, fontface = "bold"))
       )
       
     } else {
