@@ -117,7 +117,7 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
         legend.outside = FALSE,
         component.autoscale = FALSE
       ) +
-      tmap:::tm_facets_grid(
+      tmap::tm_facets_grid(
         rows = "gridtype",
         columns = "source"
       )
