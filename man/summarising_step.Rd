@@ -14,7 +14,8 @@ summarising_step(
   nameoutput = NULL,
   usesave = FALSE,
   fast_and_heavy = TRUE,
-  parameter_colnames_to_keep_fact = NULL
+  parameter_colnames_to_keep_fact = NULL,
+  render_pdf = FALSE
 )
 }
 \arguments{
@@ -42,6 +43,11 @@ summarising_step(
 \item{fast_and_heavy}{Logical TRUE/FALSE, should we save a .qs for each dataset, and use this .qs in every markdown}
 
 \item{parameter_colnames_to_keep_fact}{Vector: what column to display}
+
+\item{render_pdf}{Logical. Should the PDF report be rendered in addition to the HTML one?
+Default \code{FALSE}: only the HTML report is produced, which needs no LaTeX installation. With
+\code{TRUE}, the PDF is rendered if \code{lualatex} is available (for instance through TinyTeX);
+otherwise a warning is logged and only the HTML report is produced.}
 }
 \value{
 NULL. The function has side effects, such as writing files and rendering reports.

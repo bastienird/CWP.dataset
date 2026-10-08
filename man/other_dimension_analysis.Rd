@@ -12,7 +12,8 @@ other_dimension_analysis(
   titre_2,
   unique_analyse = FALSE,
   fig.path,
-  topn = 7
+  topn = 7,
+  deferred = FALSE
 )
 }
 \arguments{
@@ -31,6 +32,9 @@ other_dimension_analysis(
 \item{fig.path}{Path to save the figures.}
 
 \item{topn}{An integer for the number of top categories to display.}
+
+\item{deferred}{Logical. If \code{TRUE}, the charts are returned as deferred plots (their description,
+to be drawn with \code{\link[=cwp_materialise_plot]{cwp_materialise_plot()}}) instead of plot objects. Default \code{FALSE}.}
 }
 \value{
 A list containing the pie charts and bar charts for each dimension.

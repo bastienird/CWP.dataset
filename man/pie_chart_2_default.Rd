@@ -12,7 +12,8 @@ pie_chart_2_default(
   titre_1 = "first",
   titre_2 = "second",
   title_yes_no = TRUE,
-  dataframe = FALSE
+  dataframe = FALSE,
+  deferred = FALSE
 )
 }
 \arguments{
@@ -31,6 +32,9 @@ pie_chart_2_default(
 \item{title_yes_no}{Logical indicating if a title should be displayed.}
 
 \item{dataframe}{Logical indicating if a data frame should be returned.}
+
+\item{deferred}{Logical. If \code{TRUE}, the chart is returned as a deferred plot (its description,
+to be drawn with \code{\link[=cwp_materialise_plot]{cwp_materialise_plot()}}) instead of a plot object. Default \code{FALSE}.}
 }
 \value{
 A pie chart or a list containing the pie chart and data frame, if specified.

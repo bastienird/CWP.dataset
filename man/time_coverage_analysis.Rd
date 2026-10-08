@@ -9,7 +9,8 @@ time_coverage_analysis(
   parameter_time_dimension,
   titre_1,
   titre_2,
-  unique_analyse = FALSE
+  unique_analyse = FALSE,
+  deferred = FALSE
 )
 }
 \arguments{
@@ -22,6 +23,9 @@ time_coverage_analysis(
 \item{titre_2}{Title for the second dataset.}
 
 \item{unique_analyse}{Logical value indicating whether the analysis is unique.}
+
+\item{deferred}{Logical. If \code{TRUE}, the plots are returned as deferred plots (their description,
+to be drawn with \code{\link[=cwp_materialise_plot]{cwp_materialise_plot()}}) instead of plot objects. Default \code{FALSE}.}
 }
 \value{
 A list containing ggplot objects for visualizing the time coverage.

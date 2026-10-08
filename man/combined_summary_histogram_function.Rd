@@ -8,7 +8,8 @@ combined_summary_histogram_function(
   init,
   parameter_titre_dataset_1 = "Init",
   final,
-  parameter_titre_dataset_2 = "Final"
+  parameter_titre_dataset_2 = "Final",
+  deferred = FALSE
 )
 }
 \arguments{
@@ -21,6 +22,9 @@ Default is \code{"Init"}.}
 
 \item{parameter_titre_dataset_2}{A character string specifying the title for the final dataset.
 Default is \code{"Final"}.}
+
+\item{deferred}{Logical. If \code{TRUE}, the plot is returned as a deferred plot (its description,
+to be drawn with \code{\link[=cwp_materialise_plot]{cwp_materialise_plot()}}) instead of a plot object. Default \code{FALSE}.}
 }
 \value{
 A ggplot2 histogram object displaying the percentage distribution of measurement units

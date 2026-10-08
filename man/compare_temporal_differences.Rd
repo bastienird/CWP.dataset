@@ -10,7 +10,8 @@ compare_temporal_differences(
   final,
   titre_1,
   titre_2,
-  unique_analyse = FALSE
+  unique_analyse = FALSE,
+  deferred = FALSE
 )
 }
 \arguments{
@@ -25,6 +26,9 @@ compare_temporal_differences(
 \item{titre_2}{Title for the second dataset.}
 
 \item{unique_analyse}{Logical value indicating whether the analysis is unique.}
+
+\item{deferred}{Logical. If \code{TRUE}, the plots are returned as deferred plots (their description,
+to be drawn with \code{\link[=cwp_materialise_plot]{cwp_materialise_plot()}}) instead of plot objects. Default \code{FALSE}.}
 }
 \value{
 A list containing ggplot objects for visualizing the temporal differences.

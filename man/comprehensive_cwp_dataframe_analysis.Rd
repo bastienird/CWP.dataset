@@ -30,7 +30,8 @@ comprehensive_cwp_dataframe_analysis(
   parameter_titre_dataset_2 = "Dataset 2",
   unique_analyse = FALSE,
   removemap = FALSE,
-  topnumber = 6
+  topnumber = 6,
+  deferred_plots = getOption("CWP.dataset.deferred_plots", TRUE)
 )
 }
 \arguments{
@@ -81,6 +82,13 @@ comprehensive_cwp_dataframe_analysis(
 \item{removemap}{Logical. Whether to remove the map from outputs. Default is \code{FALSE}.}
 
 \item{topnumber}{Integer. Number of top characteristics to display without grouping. Default is \code{6}.}
+
+\item{deferred_plots}{Logical. If \code{TRUE} (default), the plots are not drawn: the result holds
+deferred plots, i.e. the small aggregated tables and the name of the function that draws them.
+They are drawn when the report is rendered, or with \code{\link[=cwp_materialise_plot]{cwp_materialise_plot()}}. The result is
+then plain data: much lighter to save, and independent of the version of the plotting
+packages. Use \code{FALSE}, or \code{options(CWP.dataset.deferred_plots = FALSE)}, to get plot objects
+as before. Maps drawn with tmap (\code{map_engine = "tmap"}) are never deferred.}
 }
 \value{
 A list containing:
