@@ -1,5 +1,5 @@
 test_that("optional packages are not imported by the package", {
-  optional <- c("tmap", "dygraphs", "xts", "googledrive", "plotrix", "DT", "qs", "tinytex", "zoo")
+  optional <- c("tmap", "dygraphs", "xts", "googledrive", "plotrix", "DT", "qs", "tinytex", "zoo", "leaflet")
   imported <- names(getNamespaceImports("CWP.dataset"))
 
   # If this fails after devtools::document(), a roxygen @import / @importFrom
