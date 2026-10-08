@@ -23,7 +23,8 @@
   maps. This is decided when the report is rendered, from the same deferred map.
 * `summarising_step()` gains `interactive` (default `TRUE`);
   `options(CWP.dataset.interactive = FALSE)` does the same outside it.
-* {leaflet} is in Suggests: without it, the static maps are used in the HTML report too.
+* {leaflet} is in Imports, so it is installed with the package. If it cannot be loaded, the
+  static maps are used in the HTML report too.
 * The background of the interactive maps comes from an online tile provider and needs an
   internet connection when the report is read; the cells are always drawn.
 
