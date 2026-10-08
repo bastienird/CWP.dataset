@@ -116,7 +116,8 @@ n_classes <- length(classes)
 
 # Palette sécurisée selon le nombre de classes
 if (n_classes <= 12) {
-  pal <- RColorBrewer::brewer.pal(n_classes, "Paired")
+  # brewer.pal() needs at least 3 colours
+  pal <- RColorBrewer::brewer.pal(max(n_classes, 3), "Paired")[seq_len(n_classes)]
 } else {
   # Plus de 12 classes → palette alternative
   pal <- grDevices::rainbow(n_classes)
