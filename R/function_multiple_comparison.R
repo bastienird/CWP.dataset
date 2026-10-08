@@ -61,8 +61,13 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
                                      parameter_filtering = parameters_child_global$parameter_filtering)
 
   if (!identical(initfiltered, finalfiltered)) {
-    rm(initfiltered, finalfiltered)
     flog.info("Datasets are different: %s vs %s", parameter_titre_dataset_1, parameter_titre_dataset_2)
+
+    # Reuse the data already read and filtered above instead of reading both
+    # files a second time inside the analysis.
+    if (is.data.frame(initfiltered)) parameter_init <- initfiltered
+    if (is.data.frame(finalfiltered)) parameter_final <- finalfiltered
+    rm(initfiltered, finalfiltered)
 
     child_env_result <- comprehensive_cwp_dataframe_analysis(
       parameter_init = parameter_init,
