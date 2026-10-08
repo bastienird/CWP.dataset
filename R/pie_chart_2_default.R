@@ -16,6 +16,15 @@
 pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titre_1 = "first",
                                  titre_2 = "second", title_yes_no = TRUE, dataframe = FALSE)
 {
+  # Are the two distributions identical once rounded? Classes are matched by
+  # name and unit: the two tables can have different lengths or orders.
+  same_rounded_distribution <- function(x, y) {
+    key <- function(d) paste(as.character(d$class), as.character(d$measurement_unit), sep = " / ")
+    key_x <- key(x)
+    key_y <- key(y)
+    if (length(key_x) != length(key_y) || !setequal(key_x, key_y)) return(FALSE)
+    isTRUE(all(round(x$pourcentage) == round(y$pourcentage[match(key_x, key_y)])))
+  }
   first[is.na(first)] <- "NA"
   if (deparse(substitute(dimension)) == "X[[i]]") {
     r <- dimension
@@ -208,8 +217,7 @@ pal <- setNames(pal, sort(classes))
                        label_y = 1.025, axis = "l", align = "v")
     ploting_map <- cowplot::plot_grid(title, nrow = 2, cowplot::plot_grid(graph,
                                                         legend, ncol = 2), rel_heights = c(0.1, 1)) + theme(plot.background = element_rect(color = "black"))
-    if (sum(!(round(provisoire_i$pourcentage) == round(provisoire_t$pourcentage))) ==
-        0) {
+    if (same_rounded_distribution(provisoire_i, provisoire_t)) {
       title <- cowplot::ggdraw() + cowplot::draw_label(paste0("Distribution in measurement_value for the dimension : ",
                                             r, "\n(same distribution to the nearest rounding for both datasets : \n",
                                             gsub("\"", "", gsub("~\"", "", deparse(substitute(name1)))),
@@ -229,8 +237,7 @@ pal <- setNames(pal, sort(classes))
   }
   if (title_yes_no) {
     if (exists("provisoire_t"))
-      if (sum(!(round(provisoire_i$pourcentage) == round(provisoire_t$pourcentage))) ==
-          0) {
+      if (same_rounded_distribution(provisoire_i, provisoire_t)) {
         title <- cowplot::ggdraw() + cowplot::draw_label(paste0("(same distribution to the nearest rounding for both datasets :\n",
                                               gsub("\"", "", gsub("~\"", "", deparse(substitute(name1)))),
                                               " and ", gsub("\"", "", gsub("~\"", "", deparse(substitute(name2)))),
