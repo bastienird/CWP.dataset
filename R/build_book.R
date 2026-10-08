@@ -15,7 +15,7 @@
 #' @param delete_merged_file Logical; passed to Bookdown to delete intermediate merged files.
 #' @param root Root directory of the project where Bookdown should run (defaults to here::here()).
 #'
-#' @import bookdown yaml fs qs here knitr
+#' @import bookdown yaml fs here knitr
 #'
 #' @examples
 #' \dontrun{
