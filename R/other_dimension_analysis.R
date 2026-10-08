@@ -18,17 +18,19 @@
 #' other_dimension_analysis(c("Dimension1", "Dimension2"), init, final, "Dataset1", "Dataset2", FALSE, "path/to/save")
 #' }
 #' @import dplyr
+#' @param deferred Logical. If `TRUE`, the charts are returned as deferred plots (their description,
+#'   to be drawn with [cwp_materialise_plot()]) instead of plot objects. Default `FALSE`.
 #' @export
 #' @author
 #' Bastien Grasset, \email{bastien.grasset@@ird.fr}
-other_dimension_analysis <- function(Other_dimensions, init, final, titre_1, titre_2, unique_analyse = FALSE, fig.path,topn = 7) {
+other_dimension_analysis <- function(Other_dimensions, init, final, titre_1, titre_2, unique_analyse = FALSE, fig.path,topn = 7, deferred = FALSE) {
   if(nrow(final) == 0){
     unique_analyse <- TRUE
   }
   if (!unique_analyse) {
-    figures <- lapply(Other_dimensions, FUN = pie_chart_2_default, first = init, second = final, topn = topn, titre_1 = titre_1, titre_2 = titre_2)
+    figures <- lapply(Other_dimensions, FUN = pie_chart_2_default, first = init, second = final, topn = topn, titre_1 = titre_1, titre_2 = titre_2, deferred = deferred)
   } else {
-    figures <- lapply(Other_dimensions, FUN = pie_chart_2_default, first = init, topn = topn, title_yes_no = FALSE, titre_1 = titre_1)
+    figures <- lapply(Other_dimensions, FUN = pie_chart_2_default, first = init, topn = topn, title_yes_no = FALSE, titre_1 = titre_1, deferred = deferred)
   }
 
   dimension_title_subfigures <- gsub("_", ".", paste0("Distribution in value for the dimension: ", Other_dimensions))
