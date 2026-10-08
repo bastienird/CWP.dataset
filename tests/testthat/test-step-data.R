@@ -90,3 +90,25 @@ test_that("steps are listed in processing order, whatever their format or name",
 
   expect_equal(cwp_list_step_dirs(tempfile("nothing")), character())
 })
+
+test_that("a table Parquet cannot store is saved as data.rds, with a warning", {
+  step_dir <- file.path(tempfile("steps"), "odd_step")
+  dir.create(step_dir, recursive = TRUE)
+  odd <- data.frame(a = 1:2)
+  odd$nested <- list(list(1, "a"), list(2, "b"))
+
+  warned <- FALSE
+  path <- withCallingHandlers(
+    cwp_write_step_data(odd, step_dir),
+    warning = function(w) {
+      warned <<- grepl("saved as data.rds", conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  skip_if(basename(path) == "data.parquet", "nanoparquet can store this table")
+
+  expect_true(warned)
+  expect_equal(basename(path), "data.rds")
+  expect_equal(basename(cwp_step_data_path(step_dir)), "data.rds")
+  expect_equal(cwp_read_step_data(step_dir)$a, 1:2)
+})
