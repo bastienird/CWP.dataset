@@ -14,7 +14,8 @@ geographic_diff(
   plotting_type,
   titre_1,
   titre_2,
-  outputonly
+  outputonly,
+  map_engine = getOption("CWP.dataset.map_engine", "tiles")
 )
 }
 \arguments{
@@ -37,6 +38,12 @@ geographic_diff(
 \item{titre_2}{Title for the second dataset}
 
 \item{outputonly}{Boolean to specify if output should be saved only}
+
+\item{map_engine}{Character. \code{"tiles"} (default) draws the grid cells as ggplot2 tiles, which is
+much faster than one polygon per cell but gives a static map. \code{"tmap"} keeps the previous
+tmap rendering (interactive in HTML when \code{tmap_mode("view")}). The default can be set for a
+whole session with \code{options(CWP.dataset.map_engine = "tmap")}. If the cells cannot be drawn
+as tiles, tmap is used.}
 }
 \value{
 A list containing the geographic differences and a saved image

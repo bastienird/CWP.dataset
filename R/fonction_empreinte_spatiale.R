@@ -13,12 +13,18 @@
 #' @param shapefile.fix A spatial object (sf) for the polygons that defines the geographical areas.
 #' @param plotting_type A character string indicating the type of plot ("plot" or "view").
 #' @param continent An optional spatial object for adding continent borders to the plot.
+#' @param map_engine Character. `"tiles"` (default) draws the grid cells as ggplot2 tiles, which is
+#'   much faster than one polygon per cell but gives a static map. `"tmap"` keeps the previous
+#'   tmap rendering (interactive in HTML when `tmap_mode("view")`). The default can be set for a
+#'   whole session with `options(CWP.dataset.map_engine = "tmap")`. If the cells cannot be drawn
+#'   as tiles, tmap is used.
 #'
 #' @return A plot object representing the spatial footprint of the measurement values.
 #' @export
 fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final,
                                         titre_1 = "Dataset 1", titre_2 = "Dataset 2",
-                                        shapefile.fix = NULL, plotting_type = "plot", continent = NULL) {
+                                        shapefile.fix = NULL, plotting_type = "plot", continent = NULL,
+                                        map_engine = getOption("CWP.dataset.map_engine", "tiles")) {
 
   if(is.null(shapefile.fix)){
     stop("Please provide a shape for the polygons")
@@ -49,6 +55,34 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
   inner_join_data <- geo_data[, .(measurement_value = sum(measurement_value, na.rm = TRUE)),
                          by = .(geographic_identifier, measurement_unit, source, gridtype)][
                            measurement_value != 0]
+
+  if (identical(map_engine, "tiles")) {
+    unit_data <- inner_join_data[measurement_unit == variable_affichee]
+    image <- tryCatch({
+      tiles <- cwp_grid_tiles(shapefile.fix, unit_data$geographic_identifier)
+      if (is.null(tiles)) NULL else {
+        plot_data <- merge(unit_data, tiles,
+                           by.x = "geographic_identifier", by.y = "code")
+        # FALSE: tiles are usable but there is nothing to draw for this unit
+        if (nrow(plot_data) == 0) FALSE else {
+          cwp_tile_map(
+            plot_data,
+            fill = "measurement_value",
+            facet_rows = "gridtype",
+            facet_cols = "source",
+            fill_scale = ggplot2::scale_fill_gradient2(low = "#D73027", mid = "#FFFFBF",
+                                                       high = "#1A9850", midpoint = 0),
+            continent = continent
+          )
+        }
+      }
+    }, error = function(e) {
+      warning("Tile map failed (", conditionMessage(e), "), falling back to tmap.")
+      NULL
+    })
+    if (isFALSE(image)) return(invisible(NULL))
+    if (!is.null(image)) return(image)
+  }
 
   inner_join_data <- st_as_sf(inner_join(inner_join_data,
                                 shapefile.fix %>% dplyr::select(code, geom),
