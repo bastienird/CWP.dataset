@@ -12,7 +12,7 @@
 #'
 #' @param data         A \code{data.frame} or \code{sf} object following CWP conventions.
 #' @param connectionDB Optional. A DBI-compatible database connection for querying codelists.
-#' @param save_prefix  Optional. Filename prefix for saving outputs (\code{.qs} and \code{.csv}).
+#' @param save_prefix  Optional. Filename prefix for saving outputs (\code{.rds} and \code{.csv}).
 #' @param shp_raw  Optional. To prevent reading it every time that can be time consuming, we can provide it directly
 #' @param with_geom Logical. Should the geometries be attached and the \code{sf} version returned?
 #'   Default \code{TRUE}. Use \code{FALSE} when only \code{without_geom} is needed: attaching one
@@ -57,7 +57,6 @@
 #'
 #' @import dplyr
 #' @import sf
-#' @import qs
 #' @import data.table
 #' @importFrom DBI        dbGetQuery dbIsValid
 #' @importFrom utils      download.file unzip
@@ -341,7 +340,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
 
   # save if requested
   if (!is.null(save_prefix)) {
-    qsave(enriched_data, paste0(save_prefix, "_with_geom.qs"))
+    saveRDS(enriched_data, paste0(save_prefix, "_with_geom.rds"))
     df_no_geom <- as.data.frame(enriched_data)
     df_no_geom$geom <- NULL
     fwrite(df_no_geom, paste0(save_prefix, "_without_geom.csv"))

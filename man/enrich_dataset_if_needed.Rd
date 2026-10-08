@@ -17,7 +17,7 @@ enrich_dataset_if_needed(
 
 \item{connectionDB}{Optional. A DBI-compatible database connection for querying codelists.}
 
-\item{save_prefix}{Optional. Filename prefix for saving outputs (\code{.qs} and \code{.csv}).}
+\item{save_prefix}{Optional. Filename prefix for saving outputs (\code{.rds} and \code{.csv}).}
 
 \item{shp_raw}{Optional. To prevent reading it every time that can be time consuming, we can provide it directly}
 
