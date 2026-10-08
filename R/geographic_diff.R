@@ -62,7 +62,8 @@ geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_d
             facet_rows = "measurement_unit",
             facet_cols = parameter_geographical_dimension_groupping,
             fill_scale = "impact",
-            continent = continent
+            continent = continent,
+            popup_cols = c("Precision", "value_sum_1", "value_sum_2", "Difference (in %)")
           )
         ))
       }

@@ -74,7 +74,8 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
               facet_rows = "gridtype",
               facet_cols = "source",
               fill_scale = "value",
-              continent = continent
+              continent = continent,
+              popup_cols = c("geographic_identifier", "measurement_value")
             )
           ))
         }

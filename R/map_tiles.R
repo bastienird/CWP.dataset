@@ -57,6 +57,8 @@ cwp_grid_tiles <- function(shape, codes) {
 #'   (`"impact"` or `"value"`, see `cwp_tile_fill_scale()`). A name keeps the
 #'   description of a deferred map free of ggplot2 objects.
 #' @param fill_label Legend title.
+#' @param popup_cols Columns shown when a cell is clicked on the interactive
+#'   version of the map (see `cwp_leaflet_map()`). Not used here.
 #' @param continent Optional `sf`/`sfc` layer drawn as borders on every panel,
 #'   or a reference to the continent layer of the package (see
 #'   `cwp_continent_ref()`).
@@ -64,7 +66,7 @@ cwp_grid_tiles <- function(shape, codes) {
 #' @keywords internal
 #' @noRd
 cwp_tile_map <- function(plot_data, fill, facet_rows, facet_cols, fill_scale,
-                         fill_label = fill, continent = NULL) {
+                         fill_label = fill, continent = NULL, popup_cols = NULL) {
   if (is.character(fill_scale)) fill_scale <- cwp_tile_fill_scale(fill_scale)
   if (inherits(continent, "cwp_default_continent")) continent <- cwp_default_continent()
 
@@ -164,12 +166,16 @@ cwp_continent_ref <- function(continent) {
 #' @return A list of arguments for `cwp_tile_map()`.
 #' @keywords internal
 #' @noRd
-cwp_tile_map_args <- function(plot_data, fill, facet_rows, facet_cols, fill_scale, continent = NULL) {
-  columns <- unique(c("x", "y", "width", "height", fill, facet_rows, facet_cols))
+cwp_tile_map_args <- function(plot_data, fill, facet_rows, facet_cols, fill_scale, continent = NULL,
+                              popup_cols = NULL) {
+  plot_data <- as.data.frame(plot_data)
+  popup_cols <- intersect(popup_cols, names(plot_data))
+  columns <- unique(c("x", "y", "width", "height", fill, facet_rows, facet_cols, popup_cols))
   list(
-    plot_data = as.data.frame(plot_data)[, columns, drop = FALSE],
+    plot_data = plot_data[, columns, drop = FALSE],
     fill = fill, facet_rows = facet_rows, facet_cols = facet_cols,
-    fill_scale = fill_scale, continent = cwp_continent_ref(continent)
+    fill_scale = fill_scale, continent = cwp_continent_ref(continent),
+    popup_cols = popup_cols
   )
 }
 
