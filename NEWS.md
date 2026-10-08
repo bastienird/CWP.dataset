@@ -1,5 +1,18 @@
 # CWP.dataset (development version)
 
+## Storage format
+
+* The dataset of each processing step is now saved as Parquet (`data.parquet`, with
+  {nanoparquet}) instead of `data.qs`: an open, stable format, readable outside R.
+  `function_recap_each_step()` and `summarising_step()` write it; every reader goes through
+  the same internal helpers.
+* Steps written as `data.qs` by earlier versions are still read, so existing jobs keep working.
+  If a table cannot be written as Parquet, it is saved as `data.qs` with a warning.
+* `read_data()` reads `.parquet` files.
+* `summarising_step()` orders the steps by the date of their oldest dataset file, and the
+  untouched copy kept at enrichment keeps the date of the original, so the order survives an
+  interrupted run.
+
 ## Performance
 
 * `enrich_dataset_if_needed()` gains a `with_geom` argument. With `with_geom = FALSE`
