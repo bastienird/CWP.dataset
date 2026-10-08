@@ -68,45 +68,69 @@ import(sf)
 import(tidyr)
 import(tmap)
 import(yaml)
-importFrom(DBI,dbGetQuery)
-importFrom(DBI,dbIsValid)
-importFrom(data.table,fread)
-importFrom(data.table,fwrite)
-importFrom(dplyr,case_when)
-importFrom(dplyr,everything)
-importFrom(dplyr,left_join)
-importFrom(dplyr,mutate)
-importFrom(dplyr,rename)
-importFrom(dplyr,select)
-importFrom(dygraphs,dyAxis)
-importFrom(dygraphs,dyLegend)
-importFrom(dygraphs,dyRangeSelector)
-importFrom(dygraphs,dygraph)
-importFrom(futile.logger,flog.error)
-importFrom(futile.logger,flog.info)
-importFrom(futile.logger,flog.warn)
+importFrom(DBI,
+  dbGetQuery,
+  dbIsValid
+)
+importFrom(data.table,
+  fread,
+  fwrite
+)
+importFrom(dplyr,
+  case_when,
+  everything,
+  left_join,
+  mutate,
+  rename,
+  select
+)
+importFrom(dygraphs,
+  dyAxis,
+  dyLegend,
+  dyRangeSelector,
+  dygraph
+)
+importFrom(futile.logger,
+  flog.error,
+  flog.info,
+  flog.warn
+)
 importFrom(ggplot2,ggsave)
-importFrom(googledrive,as_id)
-importFrom(googledrive,drive_upload)
+importFrom(googledrive,
+  as_id,
+  drive_upload
+)
 importFrom(here,here)
 importFrom(janitor,clean_names)
-importFrom(lubridate,year)
-importFrom(lubridate,ymd)
-importFrom(qs,qread)
-importFrom(qs,qsave)
+importFrom(lubridate,
+  year,
+  ymd
+)
+importFrom(qs,
+  qread,
+  qsave
+)
 importFrom(readr,read_csv)
 importFrom(rmarkdown,render)
-importFrom(scales,hue_pal)
-importFrom(scales,percent_format)
-importFrom(sf,st_as_sf)
-importFrom(sf,st_crs)
-importFrom(sf,st_read)
+importFrom(scales,
+  hue_pal,
+  percent_format
+)
+importFrom(sf,
+  st_as_sf,
+  st_crs,
+  st_read
+)
 importFrom(stringr,str_detect)
-importFrom(tmap,tm_borders)
-importFrom(tmap,tm_facets)
-importFrom(tmap,tm_fill)
-importFrom(tmap,tm_layout)
-importFrom(tmap,tm_shape)
-importFrom(utils,download.file)
-importFrom(utils,unzip)
+importFrom(tmap,
+  tm_borders,
+  tm_facets,
+  tm_fill,
+  tm_layout,
+  tm_shape
+)
+importFrom(utils,
+  download.file,
+  unzip
+)
 importFrom(xts,xts)
