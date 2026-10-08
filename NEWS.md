@@ -15,6 +15,18 @@
 * `render_subfigures()` calls {grid} and {gridExtra} explicitly; the HTML sub-figures relied on
   {grid} being attached.
 
+## Interactive maps
+
+* In the HTML report, the maps (differences between two datasets, spatial coverage) are now
+  interactive leaflet maps: zoom, pan, and the values of a cell on click. The panels of the
+  static map become layers, chosen with a control on the map. The PDF report keeps the static
+  maps. This is decided when the report is rendered, from the same deferred map.
+* `summarising_step()` gains `interactive` (default `TRUE`);
+  `options(CWP.dataset.interactive = FALSE)` does the same outside it.
+* {leaflet} is in Suggests: without it, the static maps are used in the HTML report too.
+* The background of the interactive maps comes from an online tile provider and needs an
+  internet connection when the report is read; the cells are always drawn.
+
 ## Deferred plots
 
 * `comprehensive_cwp_dataframe_analysis()` no longer draws the plots: its result holds deferred
