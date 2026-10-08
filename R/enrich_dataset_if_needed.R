@@ -14,10 +14,14 @@
 #' @param connectionDB Optional. A DBI-compatible database connection for querying codelists.
 #' @param save_prefix  Optional. Filename prefix for saving outputs (\code{.qs} and \code{.csv}).
 #' @param shp_raw  Optional. To prevent reading it every time that can be time consuming, we can provide it directly
+#' @param with_geom Logical. Should the geometries be attached and the \code{sf} version returned?
+#'   Default \code{TRUE}. Use \code{FALSE} when only \code{without_geom} is needed: attaching one
+#'   polygon per row and parsing the grid WKT is by far the slowest part of this function.
 #'
 #' @return A \code{list} with two elements:
 #' \describe{
-#'   \item{\code{with_geom}}{An \code{sf} object enriched with geometries (CRS EPSG:4326).}
+#'   \item{\code{with_geom}}{An \code{sf} object enriched with geometries (CRS EPSG:4326),
+#'     or \code{NULL} when \code{with_geom = FALSE}.}
 #'   \item{\code{without_geom}}{A \code{data.frame} enriched without geometries.}
 #' }
 #'
@@ -66,9 +70,8 @@
 #' @importFrom data.table fwrite
 #'
 #' @export
-enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NULL, shp_raw = NULL) {
-  library(dplyr); library(sf); library(readr); library(stringr)
-  library(janitor); library(here); library(qs); library(data.table); library(DBI)
+enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NULL, shp_raw = NULL,
+                                     with_geom = TRUE) {
 
   # Fallback query helpers
   try_db_query <- function(con, query, fallback_file, fallback_read_fun, download_url = NULL) {
@@ -79,7 +82,6 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
         return(dbGetQuery(con, query))
       }
     }
-    message("No valid DB falling back to: ", fallback_file)
     if (!file.exists(fallback_file)) {
       if (!is.null(download_url)) {
         message("Downloading from ", download_url)
@@ -88,7 +90,11 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
         stop("Missing fallback file: ", fallback_file)
       }
     }
-    fallback_read_fun(fallback_file)
+    # Codelist files are read once per session
+    cwp_cached(paste0("codelist:", fallback_file), {
+      message("No valid DB falling back to: ", fallback_file)
+      fallback_read_fun(fallback_file)
+    })
   }
 
   try_st_read <- function(con, query, fallback_file, download_url = NULL) {
@@ -134,7 +140,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     con,
     "SELECT taxa_order, code FROM species.species_asfis",
     system.file("extdata", "cl_asfis_species.csv", package = "CWP.dataset"),
-    function(f) read_csv(f) %>% janitor::clean_names() %>% dplyr::select(species_label = label, species_group = taxa_order, species = code),
+    function(f) read_csv(f, show_col_types = FALSE) %>% janitor::clean_names() %>% dplyr::select(species_label = label, species_group = taxa_order, species = code),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/cl_asfis_species.csv"
   )
 
@@ -142,7 +148,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     con,
     "SELECT * FROM measurement_processing_level.measurement_processing_level",
     system.file("extdata", "cl_measurement_processing_level.csv", package = "CWP.dataset"),
-    function(f) read_csv(f) %>% janitor::clean_names() %>% dplyr::select(code, measurement_processing_level_label = label),
+    function(f) read_csv(f, show_col_types = FALSE) %>% janitor::clean_names() %>% dplyr::select(code, measurement_processing_level_label = label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/fdi/cl_measurement_processing_level.csv"
   )
 
@@ -150,7 +156,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     con,
     "SELECT * FROM measurement.measurement",
     system.file("extdata", "cl_measurement.csv", package = "CWP.dataset"),
-    function(f) read_csv(f) %>% janitor::clean_names() %>% dplyr::select(code, measurement_label = label),
+    function(f) read_csv(f, show_col_types = FALSE) %>% janitor::clean_names() %>% dplyr::select(code, measurement_label = label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/fdi/cl_measurement.csv"
   )
 
@@ -158,7 +164,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     con,
     "SELECT * FROM fishing_mode.fishing_mode",
     system.file("extdata", "cl_fishing_mode.csv", package = "CWP.dataset"),
-    function(f) read_csv(f) %>% janitor::clean_names() %>% dplyr::select(code, fishing_mode_label = label),
+    function(f) read_csv(f, show_col_types = FALSE) %>% janitor::clean_names() %>% dplyr::select(code, fishing_mode_label = label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_fishing_mode.csv"
   )
 
@@ -166,7 +172,7 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     con,
     "SELECT * FROM gear_type.isscfg_revision_1",
     system.file("extdata", "cl_isscfg_pilot_gear.csv", package = "CWP.dataset"),
-    function(f) read_csv(f) %>% dplyr::select(code, gear_type_label = label),
+    function(f) read_csv(f, show_col_types = FALSE) %>% dplyr::select(code, gear_type_label = label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_isscfg_pilot_gear.csv"
   )
 
@@ -174,32 +180,59 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
     con,
     "SELECT * FROM fishing_fleet.fishingfleet_firms",
     system.file("extdata", "cl_fishingfleet_firms.csv", package = "CWP.dataset"),
-    function(f) read_csv(f) %>% janitor::clean_names() %>% dplyr::select(code, fishing_fleet_label = label),
+    function(f) read_csv(f, show_col_types = FALSE) %>% janitor::clean_names() %>% dplyr::select(code, fishing_fleet_label = label),
     "https://raw.githubusercontent.com/fdiwg/fdi-codelists/main/global/firms/gta/cl_fishing_fleet.csv"
   )
 
   # measurement_type: still bind two CSVs shipped in inst/extdata
   catch_file  <- system.file("extdata", "cl_catch_concepts.csv", package = "CWP.dataset")
   effort_file <- system.file("extdata", "cl_measurement_types_effort.csv", package = "CWP.dataset")
-  measurement_type_df <- dplyr::bind_rows(
-    read_csv(catch_file)  %>% clean_names() %>% dplyr::select(code, label),
-    read_csv(effort_file) %>% clean_names() %>% dplyr::select(code, label)
-  ) %>% dplyr::rename(measurement_type_label = label)
+  measurement_type_df <- cwp_cached("codelist:measurement_type", dplyr::bind_rows(
+    read_csv(catch_file, show_col_types = FALSE)  %>% clean_names() %>% dplyr::select(code, label),
+    read_csv(effort_file, show_col_types = FALSE) %>% clean_names() %>% dplyr::select(code, label)
+  ) %>% dplyr::rename(measurement_type_label = label))
 
   # measurement-unit labels (global & specific) no change
 
   # CWP grid (WKT) from extdata
-  if(is.null(shp_raw)){
+  # The grid is only needed to add `gridtype` (and the geometry when
+  # `with_geom = TRUE`). Parsing the WKT of the whole grid is slow, so it is
+  # done only when geometries are requested, and cached for the packaged grid.
+  grid_from_package <- is.null(shp_raw)
+  if (grid_from_package) {
     cwp_grid_file <- system.file("extdata", "cl_areal_grid.csv", package = "CWP.dataset")
     if (!file.exists(cwp_grid_file)) {
       stop("cl_areal_grid.csv not found in inst/extdata - run data-raw/download_codelists.R")
     }
-    shp_raw <- sf::st_read(cwp_grid_file, show_col_types = FALSE)
   }
-  shapefile.fix <- sf::st_as_sf(shp_raw, wkt = "geom_wkt", crs = 4326)
-  shapefile.fix <- dplyr::rename(shapefile.fix,
-                                 cwp_code = CWP_CODE,
-                                 geom     = geom_wkt)
+  parse_grid <- function(raw) {
+    dplyr::rename(sf::st_as_sf(raw, wkt = "geom_wkt", crs = 4326),
+                  cwp_code = CWP_CODE,
+                  geom     = geom_wkt)
+  }
+  if (with_geom) {
+    shapefile.fix <- if (grid_from_package) {
+      cwp_cached("grid_sf", parse_grid(sf::st_read(cwp_grid_file, quiet = TRUE)))
+    } else {
+      parse_grid(shp_raw)
+    }
+    grid_lookup <- dplyr::select(shapefile.fix,
+                                 geographic_identifier = cwp_code,
+                                 gridtype              = GRIDTYPE)
+  } else if (grid_from_package) {
+    grid_lookup <- cwp_cached("grid_lookup", {
+      raw <- data.table::fread(cwp_grid_file, select = c("CWP_CODE", "GRIDTYPE"),
+                               colClasses = "character", data.table = FALSE)
+      data.frame(geographic_identifier = raw$CWP_CODE,
+                 gridtype              = raw$GRIDTYPE,
+                 stringsAsFactors      = FALSE)
+    })
+  } else {
+    raw <- if (inherits(shp_raw, "sf")) sf::st_drop_geometry(shp_raw) else shp_raw
+    grid_lookup <- data.frame(geographic_identifier = as.character(raw$CWP_CODE),
+                              gridtype              = as.character(raw$GRIDTYPE),
+                              stringsAsFactors      = FALSE)
+  }
   # Step 2: Join species and gear data
   if("species"%in%colnames(data)){
 
@@ -270,14 +303,12 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
       suffix = c("", ".y")
     )%>%dplyr::select(-ends_with(".y"))
   }
-  # Step 5: Join gridtype from shapefile.fix
+  # Step 5: Join gridtype (and the geometry when with_geom = TRUE)
   if("geographic_identifier"%in%colnames(enriched_data)){
 
     enriched_data <- dplyr::left_join(
       enriched_data,
-      dplyr::select(shapefile.fix,
-                    geographic_identifier = cwp_code,
-                    gridtype            = GRIDTYPE),
+      grid_lookup,
       by = "geographic_identifier",
       suffix = c("", ".y")
     )%>%dplyr::select(-ends_with(".y"))
@@ -294,6 +325,14 @@ enrich_dataset_if_needed <- function(data, connectionDB = NULL, save_prefix = NU
   final_order <- base::unique(c(new_order,
                                 base::setdiff(cols, new_order)))
   enriched_data <- enriched_data[final_order]
+
+  if (!with_geom) {
+    without_geom <- as.data.frame(enriched_data)
+    if (!is.null(save_prefix)) {
+      fwrite(without_geom, paste0(save_prefix, "_without_geom.csv"))
+    }
+    return(list(with_geom = NULL, without_geom = without_geom))
+  }
 
   # Step 7: Convert to sf if not already
   if (!inherits(enriched_data, "sf")) {

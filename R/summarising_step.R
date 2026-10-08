@@ -192,7 +192,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       if (!file.exists(gsub(pattern = basename(file), replacement = "ancient.qs", file))) {
         data <- qs::qread(file)
         file.copy(from = file, to = gsub(pattern = basename(file), replacement = "ancient.qs", file))
-        data <- CWP.dataset::enrich_dataset_if_needed(data, shp_raw = shp_raw)$without_geom
+        data <- CWP.dataset::enrich_dataset_if_needed(data, shp_raw = shp_raw, with_geom = FALSE)$without_geom
         data <- data%>%dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT","t","MTNO", "Tons")~ "Tons",
                                                                          measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ as.character(measurement_unit)))
 
