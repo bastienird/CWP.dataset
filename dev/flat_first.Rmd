@@ -495,7 +495,17 @@ generate_plot <- function(data, title, dimensioninside, topninside) {
 pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titre_1 = "first",
                                  titre_2 = "second", title_yes_no = TRUE, dataframe = FALSE)
 {
-  topn = 5
+  # Do not let the returned plots keep the full datasets alive (see R/forget.R)
+  on.exit(cwp_forget(c("first", "second"), environment()), add = TRUE)
+  # Are the two distributions identical once rounded? Classes are matched by
+  # name and unit: the two tables can have different lengths or orders.
+  same_rounded_distribution <- function(x, y) {
+    key <- function(d) paste(as.character(d$class), as.character(d$measurement_unit), sep = " / ")
+    key_x <- key(x)
+    key_y <- key(y)
+    if (length(key_x) != length(key_y) || !setequal(key_x, key_y)) return(FALSE)
+    isTRUE(all(round(x$pourcentage) == round(y$pourcentage[match(key_x, key_y)])))
+  }
   first[is.na(first)] <- "NA"
   if (deparse(substitute(dimension)) == "X[[i]]") {
     r <- dimension
@@ -512,15 +522,15 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
   if(is.null(second)){
     name1 <- ""
   }
-  all_class_i <- first %>% dplyr::group_by(across(c(dimension,
-                                                    "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+  all_class_i <- first %>% dplyr::group_by(across(dplyr::all_of(c(dimension,
+                                                    "measurement_unit")))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
                                                                                                                        na.rm = TRUE)) %>% dplyr::filter(measurement_value != 0) %>%
     dplyr::select(-measurement_value)
   colnames(all_class_i) <- c("class", "measurement_unit")
   all_class_i <- all_class_i %>% mutate(class = paste(class,
                                                       measurement_unit, sep = " / "))
-  provisoire_i <- first %>% dplyr::group_by(dplyr::across(c(dimension,
-                                                            "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+  provisoire_i <- first %>% dplyr::group_by(dplyr::across(dplyr::all_of(c(dimension,
+                                                            "measurement_unit")))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
                                                                                                                                na.rm = TRUE)) %>% dplyr::group_by(measurement_unit) %>%
     dplyr::arrange(desc(measurement_value)) %>% dplyr::mutate(id = row_number()) %>%
     dplyr::mutate(class = as.factor(ifelse(id < topn, !!rlang::sym(dimension),
@@ -533,15 +543,15 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
                                                            " ", " % ")) %>% dplyr::arrange(desc(class)) %>% dplyr::mutate(ypos_ligne = cumsum(pourcentage) -
                                                                                                                             0.5 * pourcentage) %>% dplyr::distinct() %>% dplyr::filter(!is.na(class))
   if (!is.null(second)) {
-    all_class_t <- first %>% dplyr::group_by(across(c(dimension,
-                                                      "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+    all_class_t <- second %>% dplyr::group_by(across(dplyr::all_of(c(dimension,
+                                                      "measurement_unit")))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
                                                                                                                          na.rm = TRUE)) %>% dplyr::filter(measurement_value != 0) %>%
       dplyr::select(-measurement_value)
     colnames(all_class_t) <- c("class", "measurement_unit")
     all_class_t <- all_class_t %>% mutate(class = paste(class,
                                                         measurement_unit, sep = " / "))
-    provisoire_t <- second %>% dplyr::group_by(across(c(dimension,
-                                                        "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+    provisoire_t <- second %>% dplyr::group_by(across(dplyr::all_of(c(dimension,
+                                                        "measurement_unit")))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
                                                                                                                            na.rm = TRUE)) %>% dplyr::group_by(measurement_unit) %>%
       dplyr::arrange(desc(measurement_value)) %>% dplyr::mutate(id = row_number()) %>%
       dplyr::mutate(class = as.factor(ifelse(id < topn,
@@ -587,7 +597,8 @@ n_classes <- length(classes)
 
 # Palette sécurisée selon le nombre de classes
 if (n_classes <= 12) {
-  pal <- RColorBrewer::brewer.pal(n_classes, "Paired")
+  # brewer.pal() needs at least 3 colours
+  pal <- RColorBrewer::brewer.pal(max(n_classes, 3), "Paired")[seq_len(n_classes)]
 } else {
   # Plus de 12 classes → palette alternative
   pal <- grDevices::rainbow(n_classes)
@@ -688,8 +699,7 @@ pal <- setNames(pal, sort(classes))
                        label_y = 1.025, axis = "l", align = "v")
     ploting_map <- cowplot::plot_grid(title, nrow = 2, cowplot::plot_grid(graph,
                                                         legend, ncol = 2), rel_heights = c(0.1, 1)) + theme(plot.background = element_rect(color = "black"))
-    if (sum(!(round(provisoire_i$pourcentage) == round(provisoire_t$pourcentage))) ==
-        0) {
+    if (same_rounded_distribution(provisoire_i, provisoire_t)) {
       title <- cowplot::ggdraw() + cowplot::draw_label(paste0("Distribution in measurement_value for the dimension : ",
                                             r, "\n(same distribution to the nearest rounding for both datasets : \n",
                                             gsub("\"", "", gsub("~\"", "", deparse(substitute(name1)))),
@@ -709,8 +719,7 @@ pal <- setNames(pal, sort(classes))
   }
   if (title_yes_no) {
     if (exists("provisoire_t"))
-      if (sum(!(round(provisoire_i$pourcentage) == round(provisoire_t$pourcentage))) ==
-          0) {
+      if (same_rounded_distribution(provisoire_i, provisoire_t)) {
         title <- cowplot::ggdraw() + cowplot::draw_label(paste0("(same distribution to the nearest rounding for both datasets :\n",
                                               gsub("\"", "", gsub("~\"", "", deparse(substitute(name1)))),
                                               " and ", gsub("\"", "", gsub("~\"", "", deparse(substitute(name2)))),
@@ -755,7 +764,7 @@ pal <- setNames(pal, sort(classes))
 ```{r function-fonction_empreinte_spatiale}
 #' Spatial Footprint Function
 #'
-#' This function generates a spatial representation of measurement values from two datasets, 
+#' This function generates a spatial representation of measurement values from two datasets,
 #' allowing for comparison between initial and final datasets using a provided shapefile.
 #'
 #' @param variable_affichee A character string indicating the measurement unit to be displayed.
@@ -766,57 +775,114 @@ pal <- setNames(pal, sort(classes))
 #' @param shapefile.fix A spatial object (sf) for the polygons that defines the geographical areas.
 #' @param plotting_type A character string indicating the type of plot ("plot" or "view").
 #' @param continent An optional spatial object for adding continent borders to the plot.
+#' @param map_engine Character. `"tiles"` (default) draws the grid cells as ggplot2 tiles, which is
+#'   much faster than one polygon per cell but gives a static map. `"tmap"` keeps the previous
+#'   tmap rendering (interactive in HTML when `tmap_mode("view")`). The default can be set for a
+#'   whole session with `options(CWP.dataset.map_engine = "tmap")`. If the cells cannot be drawn
+#'   as tiles, tmap is used.
 #'
 #' @return A plot object representing the spatial footprint of the measurement values.
 #' @export
-fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final, 
-                                        titre_1 = "Dataset 1", titre_2 = "Dataset 2", 
-                                        shapefile.fix = NULL, plotting_type = "plot", continent = NULL) {
-  
+fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final,
+                                        titre_1 = "Dataset 1", titre_2 = "Dataset 2",
+                                        shapefile.fix = NULL, plotting_type = "plot", continent = NULL,
+                                        map_engine = getOption("CWP.dataset.map_engine", "tiles")) {
+  # Do not let the returned plots keep the full datasets alive (see R/forget.R)
+  on.exit(cwp_forget(c("initial_dataset", "final_dataset", "Initial_dataframe", "Final_dataframe", "geo_data", "shapefile.fix"), environment()), add = TRUE)
+
   if(is.null(shapefile.fix)){
     stop("Please provide a shape for the polygons")
   }
-  
+  tmap_options(
+    show.messages = FALSE,
+    show.warnings = FALSE
+  )
+
+
   selection <- function(x) {
-    x[, .(geographic_identifier = as.character(geographic_identifier), 
-          measurement_value, 
-          gridtype, 
+    x[, .(geographic_identifier = as.character(geographic_identifier),
+          measurement_value,
+          gridtype,
           measurement_unit)]
   }
-  
+
   Initial_dataframe <- selection(as.data.table(initial_dataset))
   Final_dataframe <- selection(as.data.table(final_dataset))
-  
+
   Initial_dataframe[, source := "Initial_dataframe"]
   Final_dataframe[, source := "Final_dataframe"]
-  
+
   geo_data <- rbind(Initial_dataframe, Final_dataframe, use.names = TRUE, fill = TRUE)
   geo_data[, source := fifelse(source == "Initial_dataframe", titre_1,
                                fifelse(source == "Final_dataframe", titre_2, "Error"))]
-  
-  inner_join_data <- geo_data[, .(measurement_value = sum(measurement_value, na.rm = TRUE)), 
+
+  inner_join_data <- geo_data[, .(measurement_value = sum(measurement_value, na.rm = TRUE)),
                          by = .(geographic_identifier, measurement_unit, source, gridtype)][
                            measurement_value != 0]
-  
-  inner_join_data <- st_as_sf(inner_join(inner_join_data, 
-                                shapefile.fix %>% select(code, geom), 
-                                by = c("geographic_identifier" = "code")))
-  
-  if (nrow(inner_join_data%>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
-      # inner_join_data <- inner_join_data %>%
-      #   dplyr::mutate(Group = paste0(gridtype, "_", source))
-      
-      if (plotting_type == "view") {
-        image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
-          tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
-          tm_layout(legend.outside = FALSE) + tm_facets(by = c("gridtype", "source"), free.scales = TRUE)
-      } else {
-        image <- tm_shape(inner_join_data %>% dplyr::filter(measurement_unit == variable_affichee)) +
-          tm_fill("measurement_value", palette = "RdYlGn", style = "cont", n = 8, id = "name", midpoint = 0) +
-          tm_layout(legend.outside = FALSE) + tm_facets(by = c("gridtype", "source"), free.scales = TRUE)+
-          tm_shape(continent) + tm_borders()
+
+  if (identical(map_engine, "tiles")) {
+    unit_data <- inner_join_data[measurement_unit == variable_affichee]
+    image <- tryCatch({
+      tiles <- cwp_grid_tiles(shapefile.fix, unit_data$geographic_identifier)
+      if (is.null(tiles)) NULL else {
+        plot_data <- merge(unit_data, tiles,
+                           by.x = "geographic_identifier", by.y = "code")
+        # FALSE: tiles are usable but there is nothing to draw for this unit
+        if (nrow(plot_data) == 0) FALSE else {
+          cwp_tile_map(
+            plot_data,
+            fill = "measurement_value",
+            facet_rows = "gridtype",
+            facet_cols = "source",
+            fill_scale = ggplot2::scale_fill_gradient2(low = "#D73027", mid = "#FFFFBF",
+                                                       high = "#1A9850", midpoint = 0),
+            continent = continent
+          )
+        }
       }
-    
+    }, error = function(e) {
+      warning("Tile map failed (", conditionMessage(e), "), falling back to tmap.")
+      NULL
+    })
+    if (isFALSE(image)) return(invisible(NULL))
+    if (!is.null(image)) return(image)
+  }
+
+  inner_join_data <- st_as_sf(inner_join(inner_join_data,
+                                shapefile.fix %>% dplyr::select(code, geom),
+                                by = c("geographic_identifier" = "code")))
+
+  if (nrow(inner_join_data%>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
+
+    image <-
+      tm_shape(
+        inner_join_data %>%
+          dplyr::filter(measurement_unit == variable_affichee)
+      ) +
+      tm_fill(
+        col = "measurement_value",
+        palette = "brewer.rd_yl_gn",
+        style = "cont",
+        n = 8,
+        midpoint = 0,
+        border.col = NA,
+        lwd = 0
+      ) +
+      tm_layout(
+        legend.outside = FALSE,
+        component.autoscale = FALSE
+      ) +
+      tmap:::tm_facets_grid(
+        rows = "gridtype",
+        columns = "source"
+      )
+    if (inherits(continent, c("sf", "sfc", "SpatVector"))) {
+      image <- image +
+        tm_shape(continent) +
+        tm_borders()
+    }
+
+
     return(image)
   }
 }
@@ -1053,7 +1119,7 @@ These are only included in the present flat template file, their content will no
 ```{r function-function_multiple_comparison}
 #' Perform Multiple Comparisons Between Datasets
 #'
-#' This function performs various summarizing steps on datasets related to species and gear types. 
+#' This function performs various summarizing steps on datasets related to species and gear types.
 #' It retrieves data from a database, processes it, and generates comparison reports.
 #'
 #' @param counting Integer. The step number in the comparison process.
@@ -1067,7 +1133,7 @@ These are only included in the present flat template file, their content will no
 #'
 #' @return A list containing comparison results, metadata, and visualization elements. If the datasets are identical, it returns `NA`.
 #'
-#' @details The function compares datasets between two consecutive steps, applying data filtering and analysis. 
+#' @details The function compares datasets between two consecutive steps, applying data filtering and analysis.
 #' It generates structured output reports stored in `fig.path`.
 #'
 #' @examples
@@ -1089,21 +1155,23 @@ These are only included in the present flat template file, their content will no
 #' @import futile.logger
 #' @import qs
 #' @export
-function_multiple_comparison <- function(counting, parameter_short, sub_list_dir, 
-                                         parameters_child_global, fig.path, coverage = FALSE, 
+function_multiple_comparison <- function(counting, parameter_short, sub_list_dir,
+                                         parameters_child_global, fig.path, coverage = FALSE,
                                          shapefile.fix, continent) {
+  # Do not let the returned plots keep the full datasets alive (see R/forget.R)
+  on.exit(cwp_forget(c("parameter_init", "parameter_final", "initfiltered", "finalfiltered"), environment()), add = TRUE)
   gc()
-  
+
   parameter_init <- file.path(sub_list_dir[counting], "data.qs")
   parameter_final <- file.path(sub_list_dir[counting + 1], "data.qs")
   parameter_titre_dataset_1 <- basename(sub_list_dir[counting])
   parameter_titre_dataset_2 <- basename(sub_list_dir[counting + 1])
 
-  new_path <- file.path(fig.path, "Comparison", 
+  new_path <- file.path(fig.path, "Comparison",
                         paste0(parameter_titre_dataset_1, "_", parameter_titre_dataset_2))
   dir.create(new_path, recursive = TRUE, showWarnings = FALSE)
 
-  flog.info("Starting comparison between: %s and %s | Coverage: %s", 
+  flog.info("Starting comparison between: %s and %s | Coverage: %s",
             parameter_titre_dataset_1, parameter_titre_dataset_2, coverage)
 
   initfiltered <- filtering_function(qs::qread(parameter_init),
@@ -1112,8 +1180,13 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
                                      parameter_filtering = parameters_child_global$parameter_filtering)
 
   if (!identical(initfiltered, finalfiltered)) {
-    rm(initfiltered, finalfiltered)
     flog.info("Datasets are different: %s vs %s", parameter_titre_dataset_1, parameter_titre_dataset_2)
+
+    # Reuse the data already read and filtered above instead of reading both
+    # files a second time inside the analysis.
+    if (is.data.frame(initfiltered)) parameter_init <- initfiltered
+    if (is.data.frame(finalfiltered)) parameter_final <- finalfiltered
+    rm(initfiltered, finalfiltered)
 
     child_env_result <- comprehensive_cwp_dataframe_analysis(
       parameter_init = parameter_init,
@@ -1149,7 +1222,7 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
     return(child_env_result)
   } else {
     rm(initfiltered, finalfiltered)
-    flog.info("Datasets are identical, skipping comparison for: %s vs %s", 
+    flog.info("Datasets are identical, skipping comparison for: %s vs %s",
               parameter_titre_dataset_1, parameter_titre_dataset_2)
     return(NA)
   }
@@ -1241,9 +1314,10 @@ compute_summary_of_differences <- function(init, final, titre_1 = "Dataset 1", t
 #' @export
 fonction_groupement <- function(these_col, init, final) {
   
-  # Ensure input data are data.tables
-  init <- as.data.table(init)
-  final <- as.data.table(final)
+  # Ensure input data are data.tables. Callers looping over several dimensions
+  # should convert once and pass data.tables, so nothing is copied here.
+  if (!data.table::is.data.table(init)) init <- as.data.table(init)
+  if (!data.table::is.data.table(final)) final <- as.data.table(final)
   
   # Compute sum of values for each combination of the columns in "these_col" 
   # and "measurement_unit" in the "init" data.table
@@ -1269,8 +1343,11 @@ fonction_groupement <- function(these_col, init, final) {
                     all = TRUE, 
                     suffixes = c("_1", "_2"))
   
+  # Strata absent from one dataset: no value and no line on that side
   fulljoin[is.na(value_sum_1), value_sum_1 := 0]
   fulljoin[is.na(value_sum_2), value_sum_2 := 0]
+  fulljoin[is.na(number_lines1), number_lines1 := 0L]
+  fulljoin[is.na(number_lines2), number_lines2 := 0L]
   
   # Calculate losses and gains
   fulljoin[, loss := value_sum_1 - value_sum_2]
@@ -1291,9 +1368,6 @@ fonction_groupement <- function(these_col, init, final) {
   fulljoin[, `Difference in value` := - (value_sum_1 - value_sum_2)]
   setnames(fulljoin, "Loss_pourcent", "Difference (in %)")
   setnames(fulljoin, "loss_nb_ligne", "Difference in number of lines")
-  
-  # Replace NA with 0 for numeric columns
-  fulljoin[, lapply(.SD, function(x) replace(x, is.na(x), 0)), .SDcols = where(is.numeric)]
   
   return(fulljoin)
 }
