@@ -32,9 +32,23 @@ test_that("a map is static by default and outside an HTML report", {
   expect_error(ggplot2::ggplot_build(cwp_materialise_plot(map_spec())), NA)
 })
 
-test_that("a map can be drawn as a leaflet widget, one layer per panel", {
+is_html_output_object <- function(x) inherits(x, c("htmlwidget", "shiny.tag.list", "shiny.tag"))
+map_args <- function(data = map_table(), ...) {
+  list(plot_data = data, fill = "measurement_value", facet_rows = "gridtype",
+       facet_cols = "source", fill_scale = "value",
+       popup_cols = c("geographic_identifier", "measurement_value"), ...)
+}
+
+test_that("a deferred map is drawn as an interactive map when asked", {
   skip_if_not_installed("leaflet")
-  widget <- cwp_materialise_plot(map_spec(), interactive = TRUE)
+  drawn <- cwp_materialise_plot(map_spec(), interactive = TRUE)
+  expect_true(is_html_output_object(drawn))
+  expect_false(inherits(drawn, "ggplot"))
+})
+
+test_that("with the layers layout, the panels are layers of a single map", {
+  skip_if_not_installed("leaflet")
+  widget <- do.call(cwp_leaflet_map, map_args(layout = "layers"))
 
   expect_s3_class(widget, "leaflet")
   expect_s3_class(widget, "htmlwidget")
@@ -44,7 +58,6 @@ test_that("a map can be drawn as a leaflet widget, one layer per panel", {
   expect_equal(sum(methods == "addRectangles"), 2)
   expect_true("addLayersControl" %in% methods)
   expect_true("addLegend" %in% methods)
-  expect_true("addProviderTiles" %in% methods)
 
   control <- widget$x$calls[[which(methods == "addLayersControl")]]
   expect_equal(unlist(control$args[[1]]), c("1deg_x_1deg", "5deg_x_5deg"))
@@ -54,11 +67,43 @@ test_that("a map can be drawn as a leaflet widget, one layer per panel", {
   expect_true(any(grepl("2,500,000", unlist(rectangles$args), fixed = TRUE)))
 })
 
-test_that("a map with a single panel has no layer control", {
+test_that("with the panels layout, each panel is its own map", {
   skip_if_not_installed("leaflet")
-  one_panel <- map_table()[1:2, ]
-  widget <- cwp_leaflet_map(one_panel, fill = "measurement_value", facet_rows = "gridtype",
-                            facet_cols = "source", fill_scale = "value")
+  panels <- do.call(cwp_leaflet_map, map_args(layout = "panels"))
+
+  expect_true(is_html_output_object(panels))
+  expect_false(inherits(panels, "leaflet"))
+  html <- as.character(htmltools::renderTags(panels)$html)
+  expect_gte(lengths(regmatches(html, gregexpr("html-widget", html, fixed = TRUE))), 2)
+})
+
+test_that("several maps can be laid out side by side", {
+  skip_if_not_installed("leaflet")
+  maps <- list(cwp_leaflet_base(), cwp_leaflet_base())
+  expect_true(is_html_output_object(cwp_leaflet_panels(maps, n_cols = 2)))
+})
+
+test_that("the background is the land layer of the package, with no online tiles by default", {
+  skip_if_not_installed("leaflet")
+  land <- cwp_leaflet_land(NULL)
+  expect_s3_class(land, "sfc")
+  expect_gt(length(land), 0)
+  # Simplified: lighter than the layer it comes from
+  expect_lt(as.numeric(object.size(land)), as.numeric(object.size(sf::st_geometry(cwp_default_continent()))))
+
+  methods <- methods_of(cwp_leaflet_base(land))
+  expect_true("addPolygons" %in% methods)
+  expect_false("addProviderTiles" %in% methods)
+
+  old <- options(CWP.dataset.leaflet_provider = "Esri.OceanBasemap")
+  on.exit(options(old), add = TRUE)
+  expect_true("addProviderTiles" %in% methods_of(cwp_leaflet_base(land)))
+})
+
+test_that("a map with a single panel is one map, without layer control", {
+  skip_if_not_installed("leaflet")
+  widget <- do.call(cwp_leaflet_map, map_args(data = map_table()[1:2, ]))
+  expect_s3_class(widget, "leaflet")
   methods <- methods_of(widget)
   expect_equal(sum(methods == "addRectangles"), 1)
   expect_false("addLayersControl" %in% methods)
@@ -71,7 +116,7 @@ test_that("the map of differences uses the impact categories", {
                                         levels = cwp_impact_levels)
   impact$measurement_unit <- "Tons"
   widget <- cwp_leaflet_map(impact, fill = "Impact on the data", facet_rows = "measurement_unit",
-                            facet_cols = "gridtype", fill_scale = "impact")
+                            facet_cols = "gridtype", fill_scale = "impact", layout = "layers")
   expect_s3_class(widget, "leaflet")
   expect_equal(sum(methods_of(widget) == "addRectangles"), 2)
 })
