@@ -11,22 +11,16 @@
 #' @param titre_2 A character string for the title of the second dataset.
 #' @param title_yes_no Logical indicating if a title should be displayed.
 #' @param dataframe Logical indicating if a data frame should be returned.
+#' @param deferred Logical. If `TRUE`, the chart is returned as a deferred plot (its description,
+#'   to be drawn with [cwp_materialise_plot()]) instead of a plot object. Default `FALSE`.
 #' @return A pie chart or a list containing the pie chart and data frame, if specified.
 #' @export
 pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titre_1 = "first",
-                                 titre_2 = "second", title_yes_no = TRUE, dataframe = FALSE)
+                                 titre_2 = "second", title_yes_no = TRUE, dataframe = FALSE,
+                                 deferred = FALSE)
 {
   # Do not let the returned plots keep the full datasets alive (see R/forget.R)
   on.exit(cwp_forget(c("first", "second"), environment()), add = TRUE)
-  # Are the two distributions identical once rounded? Classes are matched by
-  # name and unit: the two tables can have different lengths or orders.
-  same_rounded_distribution <- function(x, y) {
-    key <- function(d) paste(as.character(d$class), as.character(d$measurement_unit), sep = " / ")
-    key_x <- key(x)
-    key_y <- key(y)
-    if (length(key_x) != length(key_y) || !setequal(key_x, key_y)) return(FALSE)
-    isTRUE(all(round(x$pourcentage) == round(y$pourcentage[match(key_x, key_y)])))
-  }
   first[is.na(first)] <- "NA"
   if (deparse(substitute(dimension)) == "X[[i]]") {
     r <- dimension
@@ -107,7 +101,64 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
                                                                    paste((disappearing_stratas %>% dplyr::select(class) %>%
                                                                             distinct())$class, sep = ";")), size = 10)
   }
-classes <- if (!is.null(second)) {
+  ploting_map <- cwp_plot_or_spec(
+    deferred, "cwp_plot_pie_chart",
+    provisoire_i = provisoire_i,
+    provisoire_t = if (!is.null(second)) provisoire_t else NULL,
+    r = r, name1 = name1, name2 = name2, title_yes_no = title_yes_no
+  )
+  if (exists("summary_apparition") & dataframe) {
+    df <- data.frame(` ` = c("Stratas appearing", "Stratas disappearing"),
+                     Number = c(number_appearing_stratas, number_disappearing_stratas),
+                     Detail = c(toString(paste((appearing_stratas %>%
+                                                  dplyr::select(class) %>% mutate(class = gsub(" ",
+                                                                                               "", class)) %>% distinct())$class, sep = ";")),
+                                toString(paste((disappearing_stratas %>% dplyr::select(class) %>%
+                                                  mutate(class = gsub(" ", "", class)) %>% distinct())$class,
+                                               sep = ";"))), check.names = FALSE, fix.empty.names = FALSE)
+    if (number_disappearing_stratas == 0 & number_appearing_stratas ==
+        0) {
+      df <- df %>% dplyr::select(-Detail)
+    }
+    list_df_plot <- list(plot = ploting_map, df = df)
+    return(list_df_plot)
+  }
+  else {
+    return(ploting_map)
+  }
+}
+
+#' Are two pie chart distributions identical once rounded?
+#'
+#' Classes are matched by name and unit: the two tables can have different
+#' lengths or orders.
+#'
+#' @param x,y Tables with columns `class`, `measurement_unit` and `pourcentage`.
+#' @return `TRUE` or `FALSE`.
+#' @keywords internal
+#' @noRd
+cwp_same_rounded_distribution <- function(x, y) {
+  key <- function(d) paste(as.character(d$class), as.character(d$measurement_unit), sep = " / ")
+  key_x <- key(x)
+  key_y <- key(y)
+  if (length(key_x) != length(key_y) || !setequal(key_x, key_y)) return(FALSE)
+  isTRUE(all(round(x$pourcentage) == round(y$pourcentage[match(key_x, key_y)])))
+}
+
+#' Draw the pie charts of one dimension, for one or two datasets
+#'
+#' @param provisoire_i Share of each class in the first dataset, by unit
+#'   (columns `class`, `measurement_unit`, `pourcentage`, `ypos_ligne`).
+#' @param provisoire_t The same for the second dataset, or `NULL`.
+#' @param r Name of the dimension.
+#' @param name1,name2 Titles of the datasets.
+#' @param title_yes_no Logical. Should the chart have a title?
+#' @return A cowplot grid.
+#' @keywords internal
+#' @noRd
+cwp_plot_pie_chart <- function(provisoire_i, provisoire_t = NULL, r, name1, name2,
+                               title_yes_no = TRUE) {
+classes <- if (!is.null(provisoire_t)) {
   unique(unlist(as.character(c(provisoire_i$class, provisoire_t$class))))
 } else {
   unique(as.character(provisoire_i$class))
@@ -155,7 +206,7 @@ pal <- setNames(pal, sort(classes))
   guides(fill = guide_legend(title = toupper(r))) +
   facet_wrap("measurement_unit")
 
-  if (!is.null(second)) {
+  if (!is.null(provisoire_t)) {
      to_get_legend <- ggplot(
       rbind(
         provisoire_i %>% dplyr::filter(!is.na(class)),
@@ -211,20 +262,18 @@ pal <- setNames(pal, sort(classes))
   else {
     title <- cowplot::ggdraw() + cowplot::draw_label(" \n ")
   }
-  if (!is.null(second)) {
+  if (!is.null(provisoire_t)) {
     graph <- cowplot::plot_grid(ggplot_i + theme(legend.position = "none"),
-                       ggplot_t, nrow = 2, labels = c(gsub("\"", "", gsub("~\"",
-                                                                          "", deparse(substitute(name1)))), gsub("\"",
-                                                                                                                 "", gsub("~\"", "", deparse(substitute(name2))))),
+                       ggplot_t, nrow = 2, labels = c(name1, name2),
                        label_size = 10, vjust = 1.3, label_x = c(0, 0),
                        label_y = 1.025, axis = "l", align = "v")
     ploting_map <- cowplot::plot_grid(title, nrow = 2, cowplot::plot_grid(graph,
                                                         legend, ncol = 2), rel_heights = c(0.1, 1)) + theme(plot.background = element_rect(color = "black"))
-    if (same_rounded_distribution(provisoire_i, provisoire_t)) {
+    if (cwp_same_rounded_distribution(provisoire_i, provisoire_t)) {
       title <- cowplot::ggdraw() + cowplot::draw_label(paste0("Distribution in measurement_value for the dimension : ",
                                             r, "\n(same distribution to the nearest rounding for both datasets : \n",
-                                            gsub("\"", "", gsub("~\"", "", deparse(substitute(name1)))),
-                                            " and \n", gsub("\"", "", gsub("~\"", "", deparse(substitute(name2)))),
+                                            name1,
+                                            " and \n", name2,
                                             ")"), fontface = "bold", x = 0, hjust = 0, vjust = 0.5,
                                      size = 13) + theme(plot.margin = margin(0, 0,
                                                                              0, 7))
@@ -233,17 +282,16 @@ pal <- setNames(pal, sort(classes))
   }
   else {
     graph <- cowplot::plot_grid(ggplot_i + theme(legend.position = "none"),
-                       nrow = 1, labels = c(gsub("\"", "", gsub("~\"",
-                                                                "", deparse(substitute(name1))))), label_size = 10,
+                       nrow = 1, labels = c(name1), label_size = 10,
                        vjust = 1.3, label_x = c(0, 0), label_y = 0.8, axis = "l",
                        align = "v")
   }
   if (title_yes_no) {
-    if (exists("provisoire_t"))
-      if (same_rounded_distribution(provisoire_i, provisoire_t)) {
+    if (!is.null(provisoire_t))
+      if (cwp_same_rounded_distribution(provisoire_i, provisoire_t)) {
         title <- cowplot::ggdraw() + cowplot::draw_label(paste0("(same distribution to the nearest rounding for both datasets :\n",
-                                              gsub("\"", "", gsub("~\"", "", deparse(substitute(name1)))),
-                                              " and ", gsub("\"", "", gsub("~\"", "", deparse(substitute(name2)))),
+                                              name1,
+                                              " and ", name2,
                                               ")"), fontface = "bold", x = 0, hjust = 0,
                                        vjust = 0.5, size = 13) + theme(plot.margin = margin(0,
                                                                                             0, 0, 7))
@@ -254,23 +302,5 @@ pal <- setNames(pal, sort(classes))
   }
   ploting_map <- cowplot::plot_grid(title, nrow = 2, cowplot::plot_grid(graph,
                                                       legend, ncol = 2), rel_heights = c(0.1, 1)) + theme(plot.background = element_rect(color = "black"))
-  if (exists("summary_apparition") & dataframe) {
-    df <- data.frame(` ` = c("Stratas appearing", "Stratas disappearing"),
-                     Number = c(number_appearing_stratas, number_disappearing_stratas),
-                     Detail = c(toString(paste((appearing_stratas %>%
-                                                  dplyr::select(class) %>% mutate(class = gsub(" ",
-                                                                                               "", class)) %>% distinct())$class, sep = ";")),
-                                toString(paste((disappearing_stratas %>% dplyr::select(class) %>%
-                                                  mutate(class = gsub(" ", "", class)) %>% distinct())$class,
-                                               sep = ";"))), check.names = FALSE, fix.empty.names = FALSE)
-    if (number_disappearing_stratas == 0 & number_appearing_stratas ==
-        0) {
-      df <- df %>% dplyr::select(-Detail)
-    }
-    list_df_plot <- list(plot = ploting_map, df = df)
-    return(list_df_plot)
-  }
-  else {
-    return(ploting_map)
-  }
+  ploting_map
 }
