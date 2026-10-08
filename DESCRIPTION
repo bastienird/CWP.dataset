@@ -47,7 +47,6 @@ Suggests:
     DT,
     dygraphs,
     fusen,
-    plotrix,
     qs,
     testthat,
     tinytex,

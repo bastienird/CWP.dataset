@@ -2,8 +2,12 @@
 
 ## Dependencies
 
-* Imports go from 37 to 30 packages. {tmap}, {dygraphs}, {xts}, {googledrive}, {plotrix} and
-  {DT} move to Suggests: each is only needed by an optional feature, whose function now stops
+* The upload to Google Drive is removed, and {googledrive} with it. `summarising_invalid_data()`
+  and `strata_in_georef_but_not_in_nominal_report_launching()` keep their `upload_drive` /
+  `uploadgoogledrive` arguments so that existing calls do not fail; they are ignored, with a
+  warning when `TRUE`.
+* `pie_chart_2_default_plotrix()` is removed (it was not used anywhere), and {plotrix} with it.
+* Imports go from 37 to 30 packages. {tmap}, {dygraphs}, {xts} and {DT} move to Suggests: each is only needed by an optional feature, whose function now stops
   with an explicit message when the package is missing. {tinytex} is declared in Suggests.
 * The report setup (`Setup_markdown.Rmd`) only attaches {tinytex}, {tmap}, {kableExtra} and
   {webshot} when they are installed.
