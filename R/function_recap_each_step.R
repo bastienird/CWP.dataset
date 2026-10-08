@@ -111,7 +111,7 @@ function_recap_each_step <- function(step_name, rds_data, explanation = "No expl
   assign("explanation_total", explanation_total, envir = .GlobalEnv)
 
   # Save files
-  qs::qsave(as.data.frame(dt), file.path(step_dir, "data.qs"))
+  cwp_write_step_data(dt, step_dir)
   write(explanation, file.path(step_dir, "explanation.txt"))
   write(explanation_total, file.path(step_dir, "explanation_total.txt"))
   write(functions, file.path(step_dir, "functions.txt"))
