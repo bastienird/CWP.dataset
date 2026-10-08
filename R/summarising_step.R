@@ -159,7 +159,20 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
     futile.logger::flog.info("Processing entity directory: %s", entity_dir)
 
-    entity <- config$metadata$content$entities[[i]]
+    # Match the entity on its identifier rather than on its position: the
+    # alphabetical order of the directories is not necessarily the config order.
+    entities <- config$metadata$content$entities
+    entity_ids <- vapply(entities, function(e) {
+      id <- tryCatch(as.character(e$identifiers[["id"]]), error = function(err) NA_character_)
+      if (length(id) == 1) id else NA_character_
+    }, character(1))
+    entity_index <- match(basename(entity_dir), entity_ids)
+    if (is.na(entity_index)) {
+      futile.logger::flog.warn("No entity with id '%s' in config, falling back to position %s",
+                               basename(entity_dir), i)
+      entity_index <- i
+    }
+    entity <- entities[[entity_index]]
     i <- i + 1
     action <- entity$data$actions[[1]]
     opts <- action$options
