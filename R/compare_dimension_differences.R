@@ -49,7 +49,7 @@ compare_dimension_differences <- function(Groupped_all, Other_dimensions, parame
       dplyr::ungroup() %>%
       dplyr::rename(`Values dataset 1` = "value_sum_1", `Values dataset 2` = "value_sum_2") %>%
       dplyr::filter(`Loss / Gain` != "Egal") %>%
-      dplyr::select(parameter_columns_to_keep, Other_column) %>%
+      dplyr::select(dplyr::all_of(parameter_columns_to_keep), Other_column) %>%
       dplyr::mutate(across(c("Values dataset 1", "Values dataset 2", "Difference in value"), ~ round(., digits = 0))) %>%
       dplyr::mutate_if(is.numeric, round, digits = 2) %>%
       dplyr::group_by(Dimension, measurement_unit, `Loss / Gain`) %>%

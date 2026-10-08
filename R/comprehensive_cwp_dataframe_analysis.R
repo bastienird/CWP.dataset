@@ -123,8 +123,8 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
 
   colnames_intersect <- intersect(colnames(init), colnames(final))
 
-  init <- init %>% dplyr::select(colnames_intersect)
-  final <- final %>% dplyr::select(colnames_intersect)
+  init <- init %>% dplyr::select(dplyr::all_of(colnames_intersect))
+  final <- final %>% dplyr::select(dplyr::all_of(colnames_intersect))
 
   #cat("Renaming geographic identifiers and handling non-standard units...\n")
   init <- CWP.dataset::function_geographic_identifier_renaming_and_not_standards_unit(
