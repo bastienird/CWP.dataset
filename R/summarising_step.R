@@ -22,6 +22,9 @@
 #'   Default `FALSE`: only the HTML report is produced, which needs no LaTeX installation. With
 #'   `TRUE`, the PDF is rendered if `lualatex` is available (for instance through TinyTeX);
 #'   otherwise a warning is logged and only the HTML report is produced.
+#' @param interactive Logical. Should the HTML report use the interactive version of the plots
+#'   that have one (maps, with the {leaflet} package)? Default `TRUE`. The PDF report always uses
+#'   the static plots. Without {leaflet}, the static maps are used.
 #' @param fast_and_heavy Logical TRUE/FALSE, if FALSE, each result is saved to its own .rds file and read back by the chapter that needs it, which uses less memory
 #'
 #' @examples
@@ -36,7 +39,7 @@
 #' @export
 summarising_step <- function(main_dir, connectionDB, config, source_authoritylist = c("all","IOTC","WCPFC", "IATTC", "ICCAT", "CCSBT" ), sizepdf = "long",
                              savestep = FALSE, nameoutput = NULL, usesave = FALSE, fast_and_heavy = TRUE, parameter_colnames_to_keep_fact = NULL,
-                             render_pdf = FALSE) {
+                             render_pdf = FALSE, interactive = TRUE) {
 
   if(sizepdf == "long"){
     coverage = TRUE
@@ -45,6 +48,9 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
   } else {
     stop('Please provide a correct sizepdf, "short", "middle" or "long"')
   }
+
+  old_options <- options(CWP.dataset.interactive = isTRUE(interactive))
+  on.exit(options(old_options), add = TRUE)
 
   # The HTML report only needs pandoc and is always rendered. The PDF needs a
   # LaTeX installation: it is rendered only when asked for and when the engine

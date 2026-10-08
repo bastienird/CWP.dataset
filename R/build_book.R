@@ -101,6 +101,8 @@ build_book <- function(master_qs_rel,
       "master_list <- as.list(master_env, all.names = TRUE)",
       "rm(master_env)",
       "knitr::opts_chunk$set(duplicate.label = 'allow')",
+      # Chapters can be rendered in a new R session: pass the choice on
+      sprintf("options(CWP.dataset.interactive = %s)", isTRUE(getOption("CWP.dataset.interactive", TRUE))),
       "list2env(master_list, envir = .GlobalEnv)",
       "rm(master_list)",
       "```",""
