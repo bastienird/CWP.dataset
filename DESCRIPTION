@@ -51,6 +51,7 @@ Suggests:
     plotrix,
     qs,
     testthat,
+    tinytex,
     tmap,
     xts
 VignetteBuilder: 

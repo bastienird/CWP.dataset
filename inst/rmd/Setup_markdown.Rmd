@@ -9,11 +9,18 @@ output: html_document
 ```{r include=FALSE}
 
 knitr::opts_chunk$set(duplicate.label = "allow")
-# Define all required packages (excluding 'base' and 'utils' as they are always available)
-required_packages <- c("dplyr", "flextable", "dplyr", "stringr", "tinytex", "bookdown", "tmap", "data.table", "kableExtra", "ggplot2", "knitr", "webshot", "sf", "tidyr", "tmap", "futile.logger")
+# Packages the report cannot be rendered without
+required_packages <- c("dplyr", "flextable", "stringr", "bookdown", "data.table", "ggplot2", "knitr", "sf", "tidyr", "futile.logger")
 
 lapply(required_packages, function(pkg) {
   library(pkg, character.only = TRUE)
+})
+
+# Packages only needed by optional features (PDF output, tmap maps, ...): attached when installed
+optional_packages <- c("tinytex", "tmap", "kableExtra", "webshot")
+
+lapply(optional_packages, function(pkg) {
+  if (requireNamespace(pkg, quietly = TRUE)) library(pkg, character.only = TRUE)
 })
 
 require(CWP.dataset)
