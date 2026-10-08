@@ -312,7 +312,7 @@ render_subfigures <- function(plots_list, titles_list, general_title) {
       
       # Combine plots with captions using gridExtra::arrangeGrob
       plot_grobs <- lapply(seq_along(plots_list), function(i) {
-        arrangeGrob(
+        gridExtra::arrangeGrob(
           plots_list[[i]], 
           bottom = grid::textGrob(
             titles_list[[i]], 
@@ -323,11 +323,11 @@ render_subfigures <- function(plots_list, titles_list, general_title) {
       })
 
       # Arrange the plots side by side using grid.arrange
-      grid.arrange(
+      gridExtra::grid.arrange(
         grobs = plot_grobs, 
         ncol = 2,  # Arrange in two columns
         widths = c(1, 1),  # Ensure equal width for each plot
-        top = textGrob(general_title, gp = gpar(fontsize = 14, fontface = "bold"))
+        top = grid::textGrob(general_title, gp = grid::gpar(fontsize = 14, fontface = "bold"))
       )
       
     } else {
@@ -837,10 +837,6 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
   if(is.null(shapefile.fix)){
     stop("Please provide a shape for the polygons")
   }
-  tmap_options(
-    show.messages = FALSE,
-    show.warnings = FALSE
-  )
 
 
   selection <- function(x) {
@@ -894,6 +890,12 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
     if (!is.null(image)) return(image)
   }
 
+  cwp_require_package("tmap", "to draw maps with map_engine = \"tmap\", or when the cells cannot be drawn as tiles")
+  tmap::tmap_options(
+    show.messages = FALSE,
+    show.warnings = FALSE
+  )
+
   inner_join_data <- st_as_sf(inner_join(inner_join_data,
                                 shapefile.fix %>% dplyr::select(code, geom),
                                 by = c("geographic_identifier" = "code")))
@@ -901,11 +903,11 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
   if (nrow(inner_join_data%>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
 
     image <-
-      tm_shape(
+      tmap::tm_shape(
         inner_join_data %>%
           dplyr::filter(measurement_unit == variable_affichee)
       ) +
-      tm_fill(
+      tmap::tm_fill(
         col = "measurement_value",
         palette = "brewer.rd_yl_gn",
         style = "cont",
@@ -914,18 +916,18 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
         border.col = NA,
         lwd = 0
       ) +
-      tm_layout(
+      tmap::tm_layout(
         legend.outside = FALSE,
         component.autoscale = FALSE
       ) +
-      tmap:::tm_facets_grid(
+      tmap::tm_facets_grid(
         rows = "gridtype",
         columns = "source"
       )
     if (inherits(continent, c("sf", "sfc", "SpatVector"))) {
       image <- image +
-        tm_shape(continent) +
-        tm_borders()
+        tmap::tm_shape(continent) +
+        tmap::tm_borders()
     }
 
 
@@ -1030,6 +1032,24 @@ is_ggplot <- function(obj) {
 ## qflextable2
 
 ```{r function-qflextable2}
+#' Negate `%in%` Operator
+#'
+#' This operator checks if elements are not present in a given vector.
+#'
+#' @param x A vector of elements to check.
+#' @param table A vector to check against.
+#' @return Logical vector indicating if each element of `x` is not in `table`.
+#' @export
+#'
+#' @examples
+#' 5 %notin% c(1, 2, 3) # TRUE
+#' "a" %notin% c("b", "c") # TRUE
+#' 2 %notin% c(1, 2, 3) # FALSE
+#'
+`%notin%` <- function(x, table) {
+  !(x %in% table)
+}
+
 #' Create and Save a Flextable
 #'
 #' @description This function creates a flextable from a data frame, optionally saving it as an image.
@@ -1053,17 +1073,17 @@ qflextable2 <- function(x, captionn = NULL, autonumm = autonum, pgwidth = 6, col
     if (!(all(class(x) == "data.frame"))) {
       x <- as.data.frame(x %>% dplyr::ungroup())
     }
-  if (!is.null(save_folder)) {
-    save_path_data <- file.path(
-      fig.pathinside,
-      save_folder,
-      paste0(make.names(captionn), ".csv")
-    )
-  
-    dir.create(dirname(save_path_data), recursive = TRUE, showWarnings = FALSE)
-  
-    fwrite(x, file = save_path_data)
-  }
+    if (!is.null(save_folder)) {
+      save_path_data <- file.path(
+        fig.pathinside,
+        save_folder,
+        paste0(make.names(captionn), ".csv")
+      )
+
+      dir.create(dirname(save_path_data), recursive = TRUE, showWarnings = FALSE)
+
+      fwrite(x, file = save_path_data)
+    }
 
 y <- x %>%
   dplyr::ungroup() %>%
@@ -1106,12 +1126,12 @@ y <- x %>%
   }
   if (interactive_plot) {
     # Create an interactive plot using DT
+    cwp_require_package("DT", "to display an interactive table")
     return(DT::datatable(y))
   }
   ft_out
 
 }
-
 ```
 
 ```{r test-qflextable2}
