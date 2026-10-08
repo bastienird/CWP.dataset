@@ -34,13 +34,13 @@ summarising_step(
 \item \code{"short"} : Only first characteristics, first differences and main table of steps
 }}
 
-\item{savestep}{Logical TRUE/FALSE, should the .qs result of this be saved ?}
+\item{savestep}{Logical TRUE/FALSE, should the result of this be saved (.rds) ?}
 
-\item{nameoutput}{Character, name of the .qs if saved}
+\item{nameoutput}{Character, name of the output directory of the report}
 
-\item{usesave}{Logical Should we use the nameoutput .qs instead of rerunning everything ?}
+\item{usesave}{Logical Should the results saved by a previous run be used instead of rerunning everything ?}
 
-\item{fast_and_heavy}{Logical TRUE/FALSE, should we save a .qs for each dataset, and use this .qs in every markdown}
+\item{fast_and_heavy}{Logical TRUE/FALSE, if FALSE, each result is saved to its own .rds file and read back by the chapter that needs it, which uses less memory}
 
 \item{parameter_colnames_to_keep_fact}{Vector: what column to display}
 

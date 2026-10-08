@@ -21,7 +21,7 @@ build_book(
 )
 }
 \arguments{
-\item{master_qs_rel}{Path to the master .qs file, relative to the initial working directory.}
+\item{master_qs_rel}{Path to the master environment file (.rds), relative to the initial working directory.}
 
 \item{orig_setup_rmd}{Path to the Setup_markdown.Rmd file (typically via \code{system.file()}).}
 
@@ -43,13 +43,13 @@ build_book(
 }
 \description{
 This function automates the process of building a Bookdown project with \code{new_session = TRUE}.
-It copies and injects setup and chapter files, loads a master .qs environment,
+It copies and injects setup and chapter files, loads a master environment saved with \code{\link[=cwp_save_object]{cwp_save_object()}},
 and restores the working directory after completion.
 }
 \examples{
 \dontrun{
 build_book(
-  master_qs_rel   = "everything_for_bookdown_fixed.qs",
+  master_qs_rel   = "everything_for_bookdown_fixed.rds",
   orig_setup_rmd  = system.file("rmd/Setup_markdown.Rmd", package = "CWP.dataset"),
   src_paths       = c(
     system.file("rmd/index.Rmd", package = "CWP.dataset"),
