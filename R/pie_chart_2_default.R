@@ -41,15 +41,15 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
   if(is.null(second)){
     name1 <- ""
   }
-  all_class_i <- first %>% dplyr::group_by(across(c(dimension,
-                                                    "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+  all_class_i <- first %>% dplyr::group_by(across(dplyr::all_of(c(dimension,
+                                                    "measurement_unit")))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
                                                                                                                        na.rm = TRUE)) %>% dplyr::filter(measurement_value != 0) %>%
     dplyr::select(-measurement_value)
   colnames(all_class_i) <- c("class", "measurement_unit")
   all_class_i <- all_class_i %>% mutate(class = paste(class,
                                                       measurement_unit, sep = " / "))
-  provisoire_i <- first %>% dplyr::group_by(dplyr::across(c(dimension,
-                                                            "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+  provisoire_i <- first %>% dplyr::group_by(dplyr::across(dplyr::all_of(c(dimension,
+                                                            "measurement_unit")))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
                                                                                                                                na.rm = TRUE)) %>% dplyr::group_by(measurement_unit) %>%
     dplyr::arrange(desc(measurement_value)) %>% dplyr::mutate(id = row_number()) %>%
     dplyr::mutate(class = as.factor(ifelse(id < topn, !!rlang::sym(dimension),
@@ -62,15 +62,15 @@ pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titr
                                                            " ", " % ")) %>% dplyr::arrange(desc(class)) %>% dplyr::mutate(ypos_ligne = cumsum(pourcentage) -
                                                                                                                             0.5 * pourcentage) %>% dplyr::distinct() %>% dplyr::filter(!is.na(class))
   if (!is.null(second)) {
-    all_class_t <- second %>% dplyr::group_by(across(c(dimension,
-                                                      "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+    all_class_t <- second %>% dplyr::group_by(across(dplyr::all_of(c(dimension,
+                                                      "measurement_unit")))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
                                                                                                                          na.rm = TRUE)) %>% dplyr::filter(measurement_value != 0) %>%
       dplyr::select(-measurement_value)
     colnames(all_class_t) <- c("class", "measurement_unit")
     all_class_t <- all_class_t %>% mutate(class = paste(class,
                                                         measurement_unit, sep = " / "))
-    provisoire_t <- second %>% dplyr::group_by(across(c(dimension,
-                                                        "measurement_unit"))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
+    provisoire_t <- second %>% dplyr::group_by(across(dplyr::all_of(c(dimension,
+                                                        "measurement_unit")))) %>% dplyr::summarise(measurement_value = sum(measurement_value,
                                                                                                                            na.rm = TRUE)) %>% dplyr::group_by(measurement_unit) %>%
       dplyr::arrange(desc(measurement_value)) %>% dplyr::mutate(id = row_number()) %>%
       dplyr::mutate(class = as.factor(ifelse(id < topn,
