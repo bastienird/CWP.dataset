@@ -46,8 +46,11 @@ fonction_groupement <- function(these_col, init, final) {
                     all = TRUE, 
                     suffixes = c("_1", "_2"))
   
+  # Strata absent from one dataset: no value and no line on that side
   fulljoin[is.na(value_sum_1), value_sum_1 := 0]
   fulljoin[is.na(value_sum_2), value_sum_2 := 0]
+  fulljoin[is.na(number_lines1), number_lines1 := 0L]
+  fulljoin[is.na(number_lines2), number_lines2 := 0L]
   
   # Calculate losses and gains
   fulljoin[, loss := value_sum_1 - value_sum_2]
@@ -68,9 +71,6 @@ fonction_groupement <- function(these_col, init, final) {
   fulljoin[, `Difference in value` := - (value_sum_1 - value_sum_2)]
   setnames(fulljoin, "Loss_pourcent", "Difference (in %)")
   setnames(fulljoin, "loss_nb_ligne", "Difference in number of lines")
-  
-  # Replace NA with 0 for numeric columns
-  fulljoin[, lapply(.SD, function(x) replace(x, is.na(x), 0)), .SDcols = where(is.numeric)]
   
   return(fulljoin)
 }
