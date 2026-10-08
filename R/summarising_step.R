@@ -220,7 +220,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
         } else if(sizepdf=="short" && file.exists(paste0("long", paste0(source_authoritylist[s],"renderenv.qs")))){
 
-          render_env <- qs::qread(paste0(prefix,"renderenv.qs"))
+          render_env <- qs::qread(paste0("long", source_authoritylist[s], "renderenv.qs"))
           assign("all_list", NULL, envir = render_env)
         }
       }else {
