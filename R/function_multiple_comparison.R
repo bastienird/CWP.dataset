@@ -45,8 +45,8 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
   on.exit(cwp_forget(c("parameter_init", "parameter_final", "initfiltered", "finalfiltered"), environment()), add = TRUE)
   gc()
 
-  parameter_init <- file.path(sub_list_dir[counting], "data.qs")
-  parameter_final <- file.path(sub_list_dir[counting + 1], "data.qs")
+  parameter_init <- cwp_step_data_path(sub_list_dir[counting])
+  parameter_final <- cwp_step_data_path(sub_list_dir[counting + 1])
   parameter_titre_dataset_1 <- basename(sub_list_dir[counting])
   parameter_titre_dataset_2 <- basename(sub_list_dir[counting + 1])
 
@@ -57,9 +57,9 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
   flog.info("Starting comparison between: %s and %s | Coverage: %s",
             parameter_titre_dataset_1, parameter_titre_dataset_2, coverage)
 
-  initfiltered <- filtering_function(qs::qread(parameter_init),
+  initfiltered <- filtering_function(read_data(parameter_init),
                                      parameter_filtering = parameters_child_global$parameter_filtering)
-  finalfiltered <- filtering_function(qs::qread(parameter_final),
+  finalfiltered <- filtering_function(read_data(parameter_final),
                                      parameter_filtering = parameters_child_global$parameter_filtering)
 
   if (!identical(initfiltered, finalfiltered)) {

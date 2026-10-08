@@ -19,7 +19,7 @@
 process_fisheries_effort_data <- function(sub_list_dir_2, parameter_filtering) {
   # Do not let the returned plots keep the full datasets alive (see R/forget.R)
   on.exit(cwp_forget(c("main"), environment()), add = TRUE)
-  main <- filtering_function(qs::qread(paste0(sub_list_dir_2[1], "/data.qs")), parameter_filtering = parameter_filtering)
+  main <- filtering_function(cwp_read_step_data(sub_list_dir_2[1]), parameter_filtering = parameter_filtering)
   top_units <- main %>%
     dplyr::group_by(measurement_unit) %>%
     dplyr::summarize(total_value = sum(measurement_value, na.rm = TRUE)) %>%
@@ -41,7 +41,7 @@ process_fisheries_effort_data <- function(sub_list_dir_2, parameter_filtering) {
     Functions <- readLines(paste0(i, "/functions.txt"))[1]
     Options <- if (file.exists(paste0(i, "/options_written.txt"))) readLines(paste0(i, "/options_written.txt"))[1] else "None"
 
-    main <- filtering_function(qs::qread(paste0(i, "/data.qs")), parameter_filtering = parameter_filtering)
+    main <- filtering_function(cwp_read_step_data(i), parameter_filtering = parameter_filtering)
     effort_now <- main %>% dplyr::filter(measurement_unit %in% top_units) %>%
       dplyr::group_by(measurement_unit) %>%
       dplyr::summarize(value = sum(measurement_value, na.rm = TRUE))

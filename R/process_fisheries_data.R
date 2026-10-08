@@ -65,7 +65,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
     }
 
     # Initial sums
-    main <- CWP.dataset::filtering_function(qs::qread(paste0(sub_list_dir_2[1], "/data.qs")), parameter_filtering = parameter_filtering)
+    main <- CWP.dataset::filtering_function(cwp_read_step_data(sub_list_dir_2[1]), parameter_filtering = parameter_filtering)
     tons_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("MTNO", "MT", "t", "Tons")))$measurement_value)
     nofish_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("NOMT", "NO", "no", "Number of fish")))$measurement_value)
     lines_init <- nrow(main)
@@ -80,7 +80,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
         sums <- read_csv(paste0(i, "/sums.csv"))
         sum_t <- sums$sum_t; sum_no <- sums$sum_no; nrow_i <- sums$lines
       } else {
-        main_i <- CWP.dataset::filtering_function(qs::qread(paste0(i, "/data.qs")), parameter_filtering = parameter_filtering)
+        main_i <- CWP.dataset::filtering_function(cwp_read_step_data(i), parameter_filtering = parameter_filtering)
         sum_t <- sum((main_i %>% dplyr::filter(measurement_unit %in% c("MTNO","MT","t","Tons")))$measurement_value)
         sum_no <- sum((main_i %>% dplyr::filter(measurement_unit %in% c("NOMT","NO","no","Number of fish")))$measurement_value)
         nrow_i <- nrow(main_i)
