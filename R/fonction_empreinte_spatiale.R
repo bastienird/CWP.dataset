@@ -34,10 +34,6 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
   if(is.null(shapefile.fix)){
     stop("Please provide a shape for the polygons")
   }
-  tmap_options(
-    show.messages = FALSE,
-    show.warnings = FALSE
-  )
 
 
   selection <- function(x) {
@@ -91,6 +87,12 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
     if (!is.null(image)) return(image)
   }
 
+  cwp_require_package("tmap", "to draw maps with map_engine = \"tmap\", or when the cells cannot be drawn as tiles")
+  tmap::tmap_options(
+    show.messages = FALSE,
+    show.warnings = FALSE
+  )
+
   inner_join_data <- st_as_sf(inner_join(inner_join_data,
                                 shapefile.fix %>% dplyr::select(code, geom),
                                 by = c("geographic_identifier" = "code")))
@@ -98,11 +100,11 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
   if (nrow(inner_join_data%>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
 
     image <-
-      tm_shape(
+      tmap::tm_shape(
         inner_join_data %>%
           dplyr::filter(measurement_unit == variable_affichee)
       ) +
-      tm_fill(
+      tmap::tm_fill(
         col = "measurement_value",
         palette = "brewer.rd_yl_gn",
         style = "cont",
@@ -111,7 +113,7 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
         border.col = NA,
         lwd = 0
       ) +
-      tm_layout(
+      tmap::tm_layout(
         legend.outside = FALSE,
         component.autoscale = FALSE
       ) +
@@ -121,8 +123,8 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
       )
     if (inherits(continent, c("sf", "sfc", "SpatVector"))) {
       image <- image +
-        tm_shape(continent) +
-        tm_borders()
+        tmap::tm_shape(continent) +
+        tmap::tm_borders()
     }
 
 

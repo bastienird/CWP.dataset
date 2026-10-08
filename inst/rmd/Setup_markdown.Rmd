@@ -23,7 +23,7 @@ if(!exists("plotting_type") | !knitr::opts_knit$get("rmarkdown.pandoc.to") == "h
   plotting_type  <- "plot"  
 } else{
 plotting_type <- plotting_type}
-tmap::tmap_mode(plotting_type)
+if (requireNamespace("tmap", quietly = TRUE)) tmap::tmap_mode(plotting_type)
 
 knitr::opts_chunk$set(echo = FALSE)
 

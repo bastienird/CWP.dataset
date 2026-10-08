@@ -42,7 +42,6 @@ Imports:
     stringr,
     tibble,
     tidyr,
-    tmap,
     tools,
     utils,
     xts,
@@ -52,7 +51,8 @@ Imports:
 Suggests: 
     fusen,
     qs,
-    testthat
+    testthat,
+    tmap
 VignetteBuilder: 
     knitr
 Config/fusen/version: 0.7.0

@@ -20,8 +20,6 @@
 #' @return A list containing the geographic differences and a saved image
 #' @export
 #' @import dplyr
-#' @import tmap
-#' @importFrom tmap tm_shape tm_fill tm_facets tm_layout tm_borders
 #' @importFrom ggplot2 ggsave
 #' @importFrom sf st_as_sf
 geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_dimension,
@@ -80,7 +78,8 @@ geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_d
   breaks <- dplyr::inner_join(shapefile_fix %>% dplyr::select(cwp_code, geom), geographic_dimension, by = c("cwp_code"="Precision")) %>%
     dplyr::ungroup()
 
-  image <- tm_shape(breaks) +
+  cwp_require_package("tmap", "to draw maps with map_engine = \"tmap\", or when the cells cannot be drawn as tiles")
+  image <- tmap::tm_shape(breaks) +
     tmap::tm_polygons(
       fill = "Impact on the data",
       palette = impact_palette,

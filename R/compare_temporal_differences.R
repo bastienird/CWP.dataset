@@ -17,7 +17,6 @@
 #' }
 #' @import ggplot2
 #' @import dplyr
-#' @import tmap
 #' @param deferred Logical. If `TRUE`, the plots are returned as deferred plots (their description,
 #'   to be drawn with [cwp_materialise_plot()]) instead of plot objects. Default `FALSE`.
 #' @export
