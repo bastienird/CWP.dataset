@@ -11,7 +11,6 @@
 #'
 #' @return Writes multiple summary CSV files and optional database tables, returning no explicit value.
 #' @export
-#' @importFrom googledrive drive_upload as_id
 #' @importFrom futile.logger flog.info
 summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE, upload_DB = TRUE){
   ancient_wd <- getwd()

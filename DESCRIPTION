@@ -21,7 +21,6 @@ Imports:
     flextable,
     futile.logger,
     ggplot2,
-    googledrive,
     grDevices,
     grid,
     gridExtra,
@@ -49,6 +48,7 @@ Imports:
 Suggests: 
     dygraphs,
     fusen,
+    googledrive,
     qs,
     testthat,
     tmap,

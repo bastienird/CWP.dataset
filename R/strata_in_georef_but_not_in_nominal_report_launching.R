@@ -12,7 +12,6 @@
 #' @importFrom janitor clean_names
 #' @importFrom readr read_csv
 #' @importFrom rmarkdown render
-#' @importFrom googledrive drive_upload as_id
 #' @export
 strata_in_georef_but_not_in_nominal_report_launching <- function(main.dir, connectionDB, uploadgoogledrive = TRUE) {
   ancient_wd <- getwd()
@@ -113,6 +112,7 @@ strata_in_georef_but_not_in_nominal_report_launching <- function(main.dir, conne
         # config$logger.info("Upload netcdf to Google Drive")
         folder_datasets_id <- "1vvmdaT80ZFHnDZcJyhyIOsf_mOJjB5tA"
         path_to_dataset_new <- file.path(file)
+        cwp_require_package("googledrive", "to upload the dataset to Google Drive")
         googledrive::drive_upload(path_to_dataset_new, googledrive::as_id(folder_datasets_id), overwrite = TRUE)
       }
     }
