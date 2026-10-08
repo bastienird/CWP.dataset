@@ -251,13 +251,13 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
         if(usesave && file.exists("process_fisheries_data_list.qs")){
 
-          sprintf("Using saved data for process_fisheries_data_list.qs")
+          futile.logger::flog.info("Using saved data for process_fisheries_data_list.qs")
 
         }
 
         if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"path_to_qs_final.qs"))){
 
-          sprintf("Using saved data for path_to_qs_final.qs")
+          futile.logger::flog.info("Using saved data for path_to_qs_final.qs")
           child_env_last_result <- NULL
 
         } else {
@@ -295,7 +295,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
         if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"path_to_qs_summary.qs"))){
 
-          sprintf("Using saved data for path_to_qs_summary.qs")
+          futile.logger::flog.info("Using saved data for path_to_qs_summary.qs")
           child_env_first_to_last_result <- NULL
           new_path <- file.path(parameters_child_global$fig.path, paste0("/Comparison/initfinal_", basename(sub_list_dir_2[1]), "_", basename(sub_list_dir_2[length(sub_list_dir_2)])))
         } else {
@@ -338,7 +338,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
         if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"process_fisheries_data_list.qs"))){
 
-          sprintf("Using saved data for process_fisheries_data_list.qs")
+          futile.logger::flog.info("Using saved data for process_fisheries_data_list.qs")
           process_fisheries_data_list <- NULL
 
         } else {
@@ -414,7 +414,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
                 if(usesave && file.exists(out_file)){
 
-                  sprintf("comparison_step_%02d.qs", i, " already exists, using the cached data")
+                  futile.logger::flog.info("comparison_step_%02d.qs already exists, using the cached data", i)
 
                 } else {
                   res_i <- CWP.dataset::function_multiple_comparison(
@@ -594,7 +594,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       futile.logger::flog.info("Rendered and uploaded report for entity: %s", entity_dir)
     }
 
-    sprintf("entity: %s is done", entity_dir)
+    futile.logger::flog.info("entity: %s is done", entity_dir)
 
   }
   try(setwd(ancient_wd))
