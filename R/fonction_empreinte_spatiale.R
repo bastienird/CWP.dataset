@@ -18,13 +18,16 @@
 #'   tmap rendering (interactive in HTML when `tmap_mode("view")`). The default can be set for a
 #'   whole session with `options(CWP.dataset.map_engine = "tmap")`. If the cells cannot be drawn
 #'   as tiles, tmap is used.
+#' @param deferred Logical. If `TRUE`, a tile map is returned as a deferred plot (its description,
+#'   to be drawn with [cwp_materialise_plot()]) instead of a plot object. Default `FALSE`.
 #'
 #' @return A plot object representing the spatial footprint of the measurement values.
 #' @export
 fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final,
                                         titre_1 = "Dataset 1", titre_2 = "Dataset 2",
                                         shapefile.fix = NULL, plotting_type = "plot", continent = NULL,
-                                        map_engine = getOption("CWP.dataset.map_engine", "tiles")) {
+                                        map_engine = getOption("CWP.dataset.map_engine", "tiles"),
+                                        deferred = FALSE) {
   # Do not let the returned plots keep the full datasets alive (see R/forget.R)
   on.exit(cwp_forget(c("initial_dataset", "final_dataset", "Initial_dataframe", "Final_dataframe", "geo_data", "shapefile.fix"), environment()), add = TRUE)
 
@@ -67,15 +70,17 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
                            by.x = "geographic_identifier", by.y = "code")
         # FALSE: tiles are usable but there is nothing to draw for this unit
         if (nrow(plot_data) == 0) FALSE else {
-          cwp_tile_map(
-            plot_data,
-            fill = "measurement_value",
-            facet_rows = "gridtype",
-            facet_cols = "source",
-            fill_scale = ggplot2::scale_fill_gradient2(low = "#D73027", mid = "#FFFFBF",
-                                                       high = "#1A9850", midpoint = 0),
-            continent = continent
-          )
+          do.call(cwp_plot_or_spec, c(
+            list(deferred, "cwp_tile_map"),
+            cwp_tile_map_args(
+              plot_data,
+              fill = "measurement_value",
+              facet_rows = "gridtype",
+              facet_cols = "source",
+              fill_scale = "value",
+              continent = continent
+            )
+          ))
         }
       }
     }, error = function(e) {

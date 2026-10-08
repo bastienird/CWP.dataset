@@ -15,6 +15,8 @@
 #'   tmap rendering (interactive in HTML when `tmap_mode("view")`). The default can be set for a
 #'   whole session with `options(CWP.dataset.map_engine = "tmap")`. If the cells cannot be drawn
 #'   as tiles, tmap is used.
+#' @param deferred Logical. If `TRUE`, a tile map is returned as a deferred plot (its description,
+#'   to be drawn with [cwp_materialise_plot()]) instead of a plot object. Default `FALSE`.
 #' @return A list containing the geographic differences and a saved image
 #' @export
 #' @import dplyr
@@ -25,12 +27,12 @@
 geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_dimension,
                             parameter_geographical_dimension_groupping, continent, plotting_type,
                             titre_1, titre_2, outputonly,
-                            map_engine = getOption("CWP.dataset.map_engine", "tiles")) {
+                            map_engine = getOption("CWP.dataset.map_engine", "tiles"),
+                            deferred = FALSE) {
   # Do not let the returned plots keep the full datasets alive (see R/forget.R)
   on.exit(cwp_forget(c("init", "final", "shapefile_fix", "geographic_dimension", "breaks"), environment()), add = TRUE)
 
-  impact_levels <- c("Appearing data", "Gain (more than double)", "Gain",
-                     "No differences", "Loss", "All data lost")
+  impact_levels <- cwp_impact_levels
 
   geographic_dimension <- CWP.dataset::fonction_groupement(c(parameter_geographical_dimension, parameter_geographical_dimension_groupping),
                                                            init = init , final = final) %>%
@@ -54,17 +56,17 @@ geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_d
               by.x = "Precision", by.y = "code")
       }
       if (is.null(plot_data) || nrow(plot_data) == 0) NULL else {
-        tile_palette <- impact_palette
-        names(tile_palette) <- impact_levels
-        cwp_tile_map(
-          plot_data,
-          fill = "Impact on the data",
-          facet_rows = "measurement_unit",
-          facet_cols = parameter_geographical_dimension_groupping,
-          fill_scale = ggplot2::scale_fill_manual(values = tile_palette, drop = FALSE,
-                                                  na.value = "grey80"),
-          continent = continent
-        )
+        do.call(cwp_plot_or_spec, c(
+          list(deferred, "cwp_tile_map"),
+          cwp_tile_map_args(
+            plot_data,
+            fill = "Impact on the data",
+            facet_rows = "measurement_unit",
+            facet_cols = parameter_geographical_dimension_groupping,
+            fill_scale = "impact",
+            continent = continent
+          )
+        ))
       }
     }, error = function(e) {
       warning("Tile map failed (", conditionMessage(e), "), falling back to tmap.")

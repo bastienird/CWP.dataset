@@ -120,8 +120,9 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
     if (nzchar(package_file)) {
       message("Loading continent layer from package extdata: ", package_file)
-      continent <- qs::qread(package_file)
-      sf::st_crs(continent) <- 4326
+      # Same object as cwp_default_continent(): deferred maps then keep a
+      # reference to it instead of one copy per map
+      continent <- cwp_default_continent()
 
       if (!is.null(fallback_file)) {
         qs::qsave(continent, fallback_file)
