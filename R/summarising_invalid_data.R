@@ -523,16 +523,17 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   all_files <- list.files(getwd(), pattern = "\\.html$", full.names = TRUE, recursive = TRUE)
 
   if(upload_drive){
+    cwp_require_package("googledrive", "to upload the reports to Google Drive (upload_drive = TRUE)")
     sapply(all_files, function(file) {
       destination_file <- file.path(getwd(),"Recap_on_pre_harmo", basename(file))
       file.copy(file, destination_file)
       path_to_dataset_new <- file.path(file)
-      drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)
+      googledrive::drive_upload(path_to_dataset_new, googledrive::as_id(folder_datasets_id), overwrite = TRUE)
 
     })
     #
     path_Recap <- file.path(getwd(),"Recap_on_pre_harmo.html")
-    drive_upload(path_Recap, as_id(folder_datasets_id), overwrite = TRUE)
+    googledrive::drive_upload(path_Recap, googledrive::as_id(folder_datasets_id), overwrite = TRUE)
     read_last_csv <- function(path) {
       csv_files <- list.files(path, pattern = "\\.csv$", full.names = TRUE)
       if (length(csv_files) == 0) return(NULL)
@@ -562,7 +563,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
 
     drive_upload_safe <- function(data_path) {
       tryCatch({
-        drive_upload(data_path, as_id("1fXgxn-spBydGrFLtsrayVMLrQ2LOCkeg"), overwrite = TRUE)
+        googledrive::drive_upload(data_path, googledrive::as_id("1fXgxn-spBydGrFLtsrayVMLrQ2LOCkeg"), overwrite = TRUE)
       }, error = function(e) {
         return(NULL)  # Returning NULL or any other indication of failure
       })
