@@ -25,12 +25,23 @@
 
 ## Storage format
 
+* The package no longer depends on {qs}, which moves from Imports to Suggests. Report results
+  (lists of results, environments) are saved as `.rds` through the new `cwp_save_object()` and
+  `cwp_read_object()`; tables go to Parquet. `.qs` files from earlier versions are still read
+  when {qs} is installed.
+* Result files are renamed from `.qs` to `.rds`, so results cached by an earlier version
+  (`usesave = TRUE`) are computed again.
+* `enrich_dataset_if_needed(save_prefix = )` writes `<prefix>_with_geom.rds`.
+* `summarising_step()` no longer writes a `UN_CONTINENT2` copy of the continent layer in the
+  working directory.
+* The continent layer shipped with the package is read from `inst/extdata/continent.rds` when it
+  exists; run `data-raw/convert_continent.R` once to convert it.
 * The dataset of each processing step is now saved as Parquet (`data.parquet`, with
   {nanoparquet}) instead of `data.qs`: an open, stable format, readable outside R.
   `function_recap_each_step()` and `summarising_step()` write it; every reader goes through
   the same internal helpers.
 * Steps written as `data.qs` by earlier versions are still read, so existing jobs keep working.
-  If a table cannot be written as Parquet, it is saved as `data.qs` with a warning.
+  If a table cannot be written as Parquet, it is saved as `data.rds` with a warning.
 * `read_data()` reads `.parquet` files.
 * `summarising_step()` orders the steps by the date of their oldest dataset file, and the
   untouched copy kept at enrichment keeps the date of the original, so the order survives an
