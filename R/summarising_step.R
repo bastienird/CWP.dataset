@@ -18,6 +18,10 @@
 #'   }
 #' @param parameter_colnames_to_keep_fact Vector: what column to display
 #' @return NULL. The function has side effects, such as writing files and rendering reports.
+#' @param render_pdf Logical. Should the PDF report be rendered in addition to the HTML one?
+#'   Default `FALSE`: only the HTML report is produced, which needs no LaTeX installation. With
+#'   `TRUE`, the PDF is rendered if `lualatex` is available (for instance through TinyTeX);
+#'   otherwise a warning is logged and only the HTML report is produced.
 #' @param fast_and_heavy Logical TRUE/FALSE, should we save a .qs for each dataset, and use this .qs in every markdown
 #'
 #' @examples
@@ -32,7 +36,8 @@
 #' @importFrom qs qread qsave
 #' @export
 summarising_step <- function(main_dir, connectionDB, config, source_authoritylist = c("all","IOTC","WCPFC", "IATTC", "ICCAT", "CCSBT" ), sizepdf = "long",
-                             savestep = FALSE, nameoutput = NULL, usesave = FALSE, fast_and_heavy = TRUE, parameter_colnames_to_keep_fact = NULL) {
+                             savestep = FALSE, nameoutput = NULL, usesave = FALSE, fast_and_heavy = TRUE, parameter_colnames_to_keep_fact = NULL,
+                             render_pdf = FALSE) {
 
   if(sizepdf == "long"){
     coverage = TRUE
@@ -42,16 +47,17 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
     stop('Please provide a correct sizepdf, "short", "middle" or "long"')
   }
 
-  pdf_render_available <- tryCatch({
-    requireNamespace("tinytex", quietly = TRUE) &&
-      isTRUE(tinytex::is_tinytex()) &&
-      nzchar(Sys.which("pdflatex"))
-  }, error = function(e) FALSE)
-
-  if (!pdf_render_available) {
-    futile.logger::flog.warn(
-      "TinyTeX non detecte : les rendus PDF seront ignores, le HTML/gitbook reste genere."
-    )
+  # The HTML report only needs pandoc and is always rendered. The PDF needs a
+  # LaTeX installation: it is rendered only when asked for and when the engine
+  # of the report (lualatex, see inst/rmd/index.Rmd) is available.
+  pdf_render_available <- FALSE
+  if (isTRUE(render_pdf)) {
+    pdf_render_available <- nzchar(Sys.which("lualatex"))
+    if (!pdf_render_available) {
+      futile.logger::flog.warn(
+        "PDF demande mais lualatex introuvable (TinyTeX non installe ?) : seul le HTML/gitbook sera genere."
+      )
+    }
   }
 
   futile.logger::flog.info(paste0("Size pdf is:", sizepdf))
@@ -556,9 +562,8 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
 
         gc()
-      futile.logger::flog.info("pdfdocument")
-
       if (pdf_render_available) {
+        futile.logger::flog.info("pdfdocument")
         tryCatch({
           if (fast_and_heavy) {
             bookdown::render_book(
@@ -582,11 +587,6 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
             conditionMessage(e)
           )
         })
-      } else {
-        futile.logger::flog.warn(
-          "Rendu PDF ignore pour %s : TinyTeX non detecte.",
-          entity_dir
-        )
       }
 
       unlink("_bookdown.yml")
