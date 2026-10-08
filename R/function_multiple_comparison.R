@@ -36,7 +36,6 @@
 #' @import dplyr
 #' @import sf
 #' @import futile.logger
-#' @import qs
 #' @export
 function_multiple_comparison <- function(counting, parameter_short, sub_list_dir,
                                          parameters_child_global, fig.path, coverage = FALSE,

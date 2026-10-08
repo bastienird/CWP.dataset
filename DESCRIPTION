@@ -33,7 +33,6 @@ Imports:
     nanoparquet,
     plotrix,
     purrr,
-    qs,
     RColorBrewer,
     readr,
     rlang,
@@ -52,6 +51,7 @@ Imports:
     yaml
 Suggests: 
     fusen,
+    qs,
     testthat
 VignetteBuilder: 
     knitr

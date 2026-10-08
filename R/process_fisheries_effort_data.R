@@ -15,7 +15,6 @@
 #' print(result$tons_plot)
 #' }
 #' @export
-#' @importFrom qs qread
 process_fisheries_effort_data <- function(sub_list_dir_2, parameter_filtering) {
   # Do not let the returned plots keep the full datasets alive (see R/forget.R)
   on.exit(cwp_forget(c("main"), environment()), add = TRUE)
