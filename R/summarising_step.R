@@ -533,7 +533,6 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       rm(child_env_first_to_last_result, envir = render_env)
       rm(render_env)
 
-      # drive_upload("tableau_recap_global_action_effort.html", as_id(folder_datasets_id), overwrite = TRUE)
       futile.logger::flog.info("Rendered and uploaded report for entity: %s", entity_dir)
     }
 

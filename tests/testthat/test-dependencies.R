@@ -30,3 +30,11 @@ test_that("time_coverage_analysis does not need zoo", {
   expect_length(res$plots, 1)
   expect_error(ggplot2::ggplot_build(res$plots[[1]]), NA)
 })
+
+test_that("the Google Drive upload arguments are ignored with a warning", {
+  expect_true("upload_drive" %in% names(formals(summarising_invalid_data)))
+  expect_true("uploadgoogledrive" %in% names(formals(strata_in_georef_but_not_in_nominal_report_launching)))
+  code <- c(deparse(body(summarising_invalid_data)),
+            deparse(body(strata_in_georef_but_not_in_nominal_report_launching)))
+  expect_false(any(grepl("drive_upload", code, fixed = TRUE)))
+})

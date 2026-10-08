@@ -6,13 +6,17 @@
 #'
 #' @param main_dir The main working directory containing the dataset and necessary files.
 #' @param connectionDB A database connection object used for querying relevant tables.
-#' @param upload_drive Logical, whether to upload results to Google Drive (default: FALSE).
+#' @param upload_drive Deprecated and ignored: the upload to Google Drive has been removed. Kept so
+#'   that existing calls do not fail.
 #' @param upload_DB Logical, whether to upload processed data to a database (default: TRUE).
 #'
 #' @return Writes multiple summary CSV files and optional database tables, returning no explicit value.
 #' @export
 #' @importFrom futile.logger flog.info
 summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE, upload_DB = TRUE){
+  if (isTRUE(upload_drive)) {
+    warning("upload_drive is ignored: the upload to Google Drive has been removed from CWP.dataset.")
+  }
   ancient_wd <- getwd()
   on.exit(setwd(ancient_wd), add = TRUE)
   setwd(main_dir)
@@ -519,61 +523,6 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       "Le rapport HTML a ete genere normalement."
     )
   }
-  folder_datasets_id <- "1s8sCv6j_3-zHR1MsOqhrqZrGKhGY3W_Y"
-  all_files <- list.files(getwd(), pattern = "\\.html$", full.names = TRUE, recursive = TRUE)
-
-  if(upload_drive){
-    cwp_require_package("googledrive", "to upload the reports to Google Drive (upload_drive = TRUE)")
-    sapply(all_files, function(file) {
-      destination_file <- file.path(getwd(),"Recap_on_pre_harmo", basename(file))
-      file.copy(file, destination_file)
-      path_to_dataset_new <- file.path(file)
-      googledrive::drive_upload(path_to_dataset_new, googledrive::as_id(folder_datasets_id), overwrite = TRUE)
-
-    })
-    #
-    path_Recap <- file.path(getwd(),"Recap_on_pre_harmo.html")
-    googledrive::drive_upload(path_Recap, googledrive::as_id(folder_datasets_id), overwrite = TRUE)
-    read_last_csv <- function(path) {
-      csv_files <- list.files(path, pattern = "\\.csv$", full.names = TRUE)
-      if (length(csv_files) == 0) return(NULL)
-      last_csv <- csv_files[order(file.info(csv_files)$mtime, decreasing = TRUE)[1]]
-      read_csv(last_csv)
-    }
-
-    # Liste des tRFMOs, n'inclut pas iattc car pas de binding
-    tRFMOs <- c("ccsbt", "wcpfc")
-    list_csv <- c()
-
-    combined_data_list <- lapply(tRFMOs, function(trfmo) {
-      trfmo_paths <- list.dirs(file.path(path, "entities"), recursive = FALSE)
-      trfmo_paths <- trfmo_paths[!grepl("nominal", trfmo_paths)]
-      if(length(trfmo_paths) != 0){
-        trfmo_paths <- trfmo_paths[grep(trfmo, trfmo_paths)]
-
-        trfmo_data <- lapply(file.path(trfmo_paths, "data"), read_last_csv)
-        trfmo_data <- do.call(rbind, trfmo_data)
-
-        # Enregistrement du fichier combine
-        name <- paste0(path, "/", trfmo, "_combined_data.csv")
-        write_csv(trfmo_data, name)
-        return(name)
-      } else {return(NULL)}
-    })
-
-    drive_upload_safe <- function(data_path) {
-      tryCatch({
-        googledrive::drive_upload(data_path, googledrive::as_id("1fXgxn-spBydGrFLtsrayVMLrQ2LOCkeg"), overwrite = TRUE)
-      }, error = function(e) {
-        return(NULL)  # Returning NULL or any other indication of failure
-      })
-    }
-
-    # Apply the safe upload function to each path in your list
-    result_list <- lapply(combined_data_list, drive_upload_safe)
-
-  }
-
   setwd(ancient_wd)
 
 }
