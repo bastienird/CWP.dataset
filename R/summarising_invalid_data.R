@@ -11,7 +11,6 @@
 #'
 #' @return Writes multiple summary CSV files and optional database tables, returning no explicit value.
 #' @export
-#' @importFrom qs qsave qread
 #' @importFrom googledrive drive_upload as_id
 #' @importFrom futile.logger flog.info
 summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE, upload_DB = TRUE){
@@ -119,63 +118,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   shape_without_geom <- tibble::as_tibble(sf::st_drop_geometry(cwp_grid))%>% dplyr::mutate(cwp_code = as.character(cwp_code))
   shapefile.fix <- cwp_grid
   rm(cwp_grid, cwp_grid_tbl)
-  try_get_continent_layer <- function(
-    con = NULL,
-    fallback_file = "UN_CONTINENT2.qs"
-  ) {
-    # 1. Try to read from database
-    if (!is.null(con) && DBI::dbIsValid(con)) {
-      message("Attempting to read continent layer from database...")
-
-      res <- try(
-        sf::st_read(con, query = "SELECT * FROM public.continent", quiet = TRUE),
-        silent = TRUE
-      )
-
-      if (!inherits(res, "try-error")) {
-        message("Continent layer successfully read from database.")
-        sf::st_crs(res) <- 4326
-
-        if (!is.null(fallback_file)) {
-          qs::qsave(res, fallback_file)
-        }
-
-        return(res)
-      }
-    }
-
-    # 2. Try to load from local .qs file
-    if (!is.null(fallback_file) && file.exists(fallback_file)) {
-      message("Loading continent layer from local file: ", fallback_file)
-      continent <- qs::qread(fallback_file)
-      sf::st_crs(continent) <- 4326
-      return(continent)
-    }
-
-    # 3. Try to load from package extdata
-    package_file <- system.file(
-      "extdata",
-      "continent.qs",
-      package = "CWP.dataset"
-    )
-
-    if (nzchar(package_file)) {
-      message("Loading continent layer from package extdata: ", package_file)
-      continent <- qs::qread(package_file)
-      sf::st_crs(continent) <- 4326
-
-      if (!is.null(fallback_file)) {
-        qs::qsave(continent, fallback_file)
-      }
-
-      return(continent)
-    }
-
-    stop(
-      "Unable to retrieve continent layer from database, local file, or package extdata."
-    )
-  }
-  continent <- try_get_continent_layer(connectionDB)
+  continent <- cwp_continent_layer(connectionDB)
   require(CWP.dataset)
   # PART 1: Identify entities and their respective tRFMOs
   entity_dirs <- list.dirs("entities", full.names = TRUE, recursive = FALSE)
@@ -369,8 +312,8 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     combined_data$year <- as.integer(format(combined_data$time_end, "%Y"))
     combined_data$month <- as.integer(format(combined_data$time_end, "%m"))
     combined_data$quarter <- as.integer(substr(quarters(combined_data$time_end), 2, 2))
-    # Save the combined data as a .qs file
-    qs::qsave(combined_data,"All_invalid_data.qs")
+    # Save the combined data
+    cwp_save_object(combined_data, "All_invalid_data.rds")
     if(upload_DB){
       dbExecute(connectionDB, "DROP MATERIALIZED VIEW IF EXISTS public.issueddata CASCADE;")
       dbWriteTable(connectionDB, "temp_tableissueddata", combined_data, temporary = TRUE, row.names = FALSE, append = FALSE)
@@ -510,7 +453,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       # )
       summary_invalid_data <- read_csv(file.path(entity_dir, paste0(entity_name, "_summary_invalid_data.csv")))
       render_env$summary_invalid_data <- summary_invalid_data
-      qs::qsave(render_env, file.path(entity_dir, paste0(entity_name, "render_env.qs")))
+      cwp_save_object(render_env, file.path(entity_dir, paste0(entity_name, "render_env.rds")))
 
       Report_on_raw_data <- system.file("rmd", "Report_on_raw_data.Rmd", package = "CWP.dataset")
       Report_on_raw_data_tmp <- file.path(entity_dir, "Report_on_raw_data.Rmd")

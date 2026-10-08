@@ -129,7 +129,13 @@ cwp_tile_fill_scale <- function(name) {
 #' @noRd
 cwp_default_continent <- function() {
   cwp_cached("continent", {
-    continent <- qs::qread(system.file("extdata", "continent.qs", package = "CWP.dataset"))
+    rds_file <- system.file("extdata", "continent.rds", package = "CWP.dataset")
+    continent <- if (nzchar(rds_file)) {
+      readRDS(rds_file)
+    } else {
+      # Layer not converted yet: see data-raw/convert_continent.R
+      cwp_read_legacy_qs(system.file("extdata", "continent.qs", package = "CWP.dataset"))
+    }
     sf::st_crs(continent) <- 4326
     continent
   })
@@ -165,4 +171,24 @@ cwp_tile_map_args <- function(plot_data, fill, facet_rows, facet_cols, fill_scal
     fill = fill, facet_rows = facet_rows, facet_cols = facet_cols,
     fill_scale = fill_scale, continent = cwp_continent_ref(continent)
   )
+}
+
+#' Continent layer, from the database when there is one
+#'
+#' @param con Optional DBI connection. When valid, the layer is read from
+#'   `public.continent`; otherwise, or if that fails, the layer shipped with the
+#'   package is returned.
+#' @return An `sf` object (CRS EPSG:4326).
+#' @keywords internal
+#' @noRd
+cwp_continent_layer <- function(con = NULL) {
+  if (!is.null(con) && isTRUE(tryCatch(DBI::dbIsValid(con), error = function(e) FALSE))) {
+    from_db <- try(sf::st_read(con, query = "SELECT * FROM public.continent", quiet = TRUE),
+                   silent = TRUE)
+    if (!inherits(from_db, "try-error")) {
+      sf::st_crs(from_db) <- 4326
+      return(from_db)
+    }
+  }
+  cwp_default_continent()
 }
