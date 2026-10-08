@@ -16,10 +16,12 @@
 #' }
 #' @import dplyr
 #' @import ggplot2
+#' @param deferred Logical. If `TRUE`, the plots are returned as deferred plots (their description,
+#'   to be drawn with [cwp_materialise_plot()]) instead of plot objects. Default `FALSE`.
 #' @export
 #' @author
 #' Bastien Grasset, \email{bastien.grasset@@ird.fr}
-time_coverage_analysis <- function(time_dimension_list_groupped, parameter_time_dimension, titre_1, titre_2, unique_analyse = FALSE) {
+time_coverage_analysis <- function(time_dimension_list_groupped, parameter_time_dimension, titre_1, titre_2, unique_analyse = FALSE, deferred = FALSE) {
   titles_time <- if (unique_analyse) {
     paste0("Evolutions of values for the dimension ", parameter_time_dimension, " for ", titre_1, " dataset ")
   } else {
@@ -122,21 +124,30 @@ time_coverage_analysis <- function(time_dimension_list_groupped, parameter_time_
       dplyr::group_by(Dataset, measurement_unit, TimeKey) %>%
       dplyr::summarise(Values = sum(Values, na.rm = TRUE), .groups = "drop")
 
-    p <- ggplot2::ggplot(x_plot, ggplot2::aes(x = TimeKey, y = Values, colour = Dataset, group = Dataset)) +
-      ggplot2::geom_line(linewidth = 0.6) +
-      ggplot2::geom_point(size = 1.8) +
-      ggplot2::scale_color_hue(direction = 1) +
-      ggplot2::theme_bw() +
-      ggplot2::theme(legend.position = "top") +
-      ggplot2::labs(
-        x = if ("Dimension" %in% names(x)) unique(x$Dimension) else x_lab,
-        y = "Values"
-      ) +
-      ggplot2::facet_grid(rows = ggplot2::vars(measurement_unit), scales = "free_y")+ scale_x_date(labels = scales::label_date_short())
-
-
-    p
+    cwp_plot_or_spec(deferred, "cwp_plot_time_coverage",
+                     x_plot = as.data.frame(x_plot),
+                     x_label = if ("Dimension" %in% names(x)) unique(x$Dimension) else x_lab)
   })
 
   list(titles = titles_time, plots = time_dimension_list_groupped_diff_image)
+}
+
+#' Plot the values of one or two datasets over time
+#'
+#' @param x_plot Table with columns `TimeKey` (Date), `Values`, `Dataset` and
+#'   `measurement_unit`.
+#' @param x_label Label of the x axis.
+#' @return A ggplot.
+#' @keywords internal
+#' @noRd
+cwp_plot_time_coverage <- function(x_plot, x_label) {
+  ggplot2::ggplot(x_plot, ggplot2::aes(x = TimeKey, y = Values, colour = Dataset, group = Dataset)) +
+    ggplot2::geom_line(linewidth = 0.6) +
+    ggplot2::geom_point(size = 1.8) +
+    ggplot2::scale_color_hue(direction = 1) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(legend.position = "top") +
+    ggplot2::labs(x = x_label, y = "Values") +
+    ggplot2::facet_grid(rows = ggplot2::vars(measurement_unit), scales = "free_y") +
+    ggplot2::scale_x_date(labels = scales::label_date_short())
 }
