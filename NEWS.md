@@ -18,15 +18,17 @@
 ## Interactive maps
 
 * In the HTML report, the maps (differences between two datasets, spatial coverage) are now
-  interactive leaflet maps: zoom, pan, and the values of a cell on click. The panels of the
-  static map become layers, chosen with a control on the map. The PDF report keeps the static
-  maps. This is decided when the report is rendered, from the same deferred map.
+  interactive leaflet maps: zoom, pan, and the values of a cell on click. The PDF report keeps
+  the static maps. This is decided when the report is rendered, from the same deferred map.
+* Each panel of the static map is its own interactive map, side by side; with {leafsync} they
+  move and zoom together. `options(CWP.dataset.map_layout = "layers")` gives a single map whose
+  panels are layers, one visible at a time.
+* The background is the land layer shipped with the package, simplified and embedded in the
+  map: no internet connection or API key is needed. Online tiles can be added with
+  `options(CWP.dataset.leaflet_provider = "Esri.OceanBasemap")`.
 * `summarising_step()` gains `interactive` (default `TRUE`);
   `options(CWP.dataset.interactive = FALSE)` does the same outside it.
-* {leaflet} is in Imports, so it is installed with the package. If it cannot be loaded, the
-  static maps are used in the HTML report too.
-* The background of the interactive maps comes from an online tile provider and needs an
-  internet connection when the report is read; the cells are always drawn.
+* {leaflet}, {leafsync} and {htmltools} are in Imports, so they are installed with the package.
 
 ## Deferred plots
 
