@@ -7,9 +7,9 @@
 #' @param connectionDB Object. The database connection.
 #' @param config List. Configuration list containing metadata and options for processing.
 #' @param source_authoritylist Vector. Vector of source_authority to filter on, "all" being all of them.
-#' @param savestep Logical TRUE/FALSE, should the .qs result of this be saved ?
-#' @param nameoutput Character, name of the .qs if saved
-#' @param usesave Logical Should we use the nameoutput .qs instead of rerunning everything ?
+#' @param savestep Logical TRUE/FALSE, should the result of this be saved (.rds) ?
+#' @param nameoutput Character, name of the output directory of the report
+#' @param usesave Logical Should the results saved by a previous run be used instead of rerunning everything ?
 #' @param sizepdf Character string. La taille peut prendre les valeurs suivantes :
 #'   \itemize{
 #'     \item `"long"` (par défaut) : Long with coverage.
@@ -22,7 +22,7 @@
 #'   Default `FALSE`: only the HTML report is produced, which needs no LaTeX installation. With
 #'   `TRUE`, the PDF is rendered if `lualatex` is available (for instance through TinyTeX);
 #'   otherwise a warning is logged and only the HTML report is produced.
-#' @param fast_and_heavy Logical TRUE/FALSE, should we save a .qs for each dataset, and use this .qs in every markdown
+#' @param fast_and_heavy Logical TRUE/FALSE, if FALSE, each result is saved to its own .rds file and read back by the chapter that needs it, which uses less memory
 #'
 #' @examples
 #' \dontrun{
@@ -33,7 +33,6 @@
 #' @import dplyr
 #' @import sf
 #' @importFrom futile.logger flog.info flog.warn flog.error
-#' @importFrom qs qread qsave
 #' @export
 summarising_step <- function(main_dir, connectionDB, config, source_authoritylist = c("all","IOTC","WCPFC", "IATTC", "ICCAT", "CCSBT" ), sizepdf = "long",
                              savestep = FALSE, nameoutput = NULL, usesave = FALSE, fast_and_heavy = TRUE, parameter_colnames_to_keep_fact = NULL,
@@ -84,65 +83,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
                                  geom     = geom_wkt)
   futile.logger::flog.info("New function")
 
-  try_get_continent_layer <- function(
-    con = NULL,
-    fallback_file = "UN_CONTINENT2.qs"
-  ) {
-    # 1. Try to read from database
-    if (!is.null(con) && DBI::dbIsValid(con)) {
-      message("Attempting to read continent layer from database...")
-
-      res <- try(
-        sf::st_read(con, query = "SELECT * FROM public.continent", quiet = TRUE),
-        silent = TRUE
-      )
-
-      if (!inherits(res, "try-error")) {
-        message("Continent layer successfully read from database.")
-        sf::st_crs(res) <- 4326
-
-        if (!is.null(fallback_file)) {
-          qs::qsave(res, fallback_file)
-        }
-
-        return(res)
-      }
-    }
-
-    # 2. Try to load from local .qs file
-    if (!is.null(fallback_file) && file.exists(fallback_file)) {
-      message("Loading continent layer from local file: ", fallback_file)
-      continent <- qs::qread(fallback_file)
-      sf::st_crs(continent) <- 4326
-      return(continent)
-    }
-
-    # 3. Try to load from package extdata
-    package_file <- system.file(
-      "extdata",
-      "continent.qs",
-      package = "CWP.dataset"
-    )
-
-    if (nzchar(package_file)) {
-      message("Loading continent layer from package extdata: ", package_file)
-      # Same object as cwp_default_continent(): deferred maps then keep a
-      # reference to it instead of one copy per map
-      continent <- cwp_default_continent()
-
-      if (!is.null(fallback_file)) {
-        qs::qsave(continent, fallback_file)
-      }
-
-      return(continent)
-    }
-
-    stop(
-      "Unable to retrieve continent layer from database, local file, or package extdata."
-    )
-  }
-
-  continent <- try_get_continent_layer(NULL)
+  continent <- cwp_default_continent()
 
   if (is.null(continent)) {
 
@@ -237,14 +178,14 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       prefix <- paste0(sizepdf, source_authoritylist[s])
 
-      if(usesave & file.exists(paste0(prefix, "renderenv.qs")) | (sizepdf=="short" && file.exists(paste0("long", paste0(source_authoritylist[s],"renderenv.qs"))))){ # if the size pdf is short but the .qs for long exists we can use it
-        if(file.exists(paste0(prefix, "renderenv.qs"))){
+      if(usesave & file.exists(paste0(prefix, "renderenv.rds")) | (sizepdf=="short" && file.exists(paste0("long", paste0(source_authoritylist[s],"renderenv.rds"))))){ # if the size pdf is short but the .qs for long exists we can use it
+        if(file.exists(paste0(prefix, "renderenv.rds"))){
 
-          render_env <- qs::qread(paste0(sizepdf,paste0(source_authoritylist[s],"renderenv.qs")))
+          render_env <- cwp_read_object(paste0(sizepdf,paste0(source_authoritylist[s],"renderenv.rds")))
 
-        } else if(sizepdf=="short" && file.exists(paste0("long", paste0(source_authoritylist[s],"renderenv.qs")))){
+        } else if(sizepdf=="short" && file.exists(paste0("long", paste0(source_authoritylist[s],"renderenv.rds")))){
 
-          render_env <- qs::qread(paste0("long", source_authoritylist[s], "renderenv.qs"))
+          render_env <- cwp_read_object(paste0("long", source_authoritylist[s], "renderenv.rds"))
           assign("all_list", NULL, envir = render_env)
         }
       }else {
@@ -260,15 +201,15 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         render_env <- list2env(as.list(child_env), parent = child_env)
         list2env(parameters_child_global, envir = render_env)
 
-        if(usesave && file.exists("process_fisheries_data_list.qs")){
+        if(usesave && file.exists("process_fisheries_data_list.rds")){
 
-          futile.logger::flog.info("Using saved data for process_fisheries_data_list.qs")
+          futile.logger::flog.info("Using saved data for process_fisheries_data_list.rds")
 
         }
 
-        if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"path_to_qs_final.qs"))){
+        if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"path_to_qs_final.rds"))){
 
-          futile.logger::flog.info("Using saved data for path_to_qs_final.qs")
+          futile.logger::flog.info("Using saved data for path_to_qs_final.rds")
           child_env_last_result <- NULL
 
         } else {
@@ -300,13 +241,13 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           child_env_last_result$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
           # child_env_last_result$parameter_titre_dataset_2 <- NULL
           if(!fast_and_heavy){
-            qs::qsave(child_env_last_result, paste0(prefix, "path_to_qs_final.qs"))
+            cwp_save_object(child_env_last_result, paste0(prefix, "path_to_qs_final.rds"))
           }
         }
 
-        if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"path_to_qs_summary.qs"))){
+        if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"path_to_qs_summary.rds"))){
 
-          futile.logger::flog.info("Using saved data for path_to_qs_summary.qs")
+          futile.logger::flog.info("Using saved data for path_to_qs_summary.rds")
           child_env_first_to_last_result <- NULL
           new_path <- file.path(parameters_child_global$fig.path, paste0("/Comparison/initfinal_", basename(sub_list_dir_2[1]), "_", basename(sub_list_dir_2[length(sub_list_dir_2)])))
         } else {
@@ -339,7 +280,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           child_env_first_to_last_result$child_header <- "#"
 
           if(!fast_and_heavy){
-            qs::qsave(child_env_first_to_last_result, paste0(prefix,"path_to_qs_summary.qs"))
+            cwp_save_object(child_env_first_to_last_result, paste0(prefix,"path_to_qs_summary.rds"))
           }
 
         }
@@ -347,9 +288,9 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         sub_list_dir_3 <- dirname(sub_list_dir_2)
         render_env$sub_list_dir_3 <- sub_list_dir_3
 
-        if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"process_fisheries_data_list.qs"))){
+        if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"process_fisheries_data_list.rds"))){
 
-          futile.logger::flog.info("Using saved data for process_fisheries_data_list.qs")
+          futile.logger::flog.info("Using saved data for process_fisheries_data_list.rds")
           process_fisheries_data_list <- NULL
 
         } else {
@@ -361,7 +302,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           }
           if(!fast_and_heavy){
 
-            qs::qsave(process_fisheries_data_list, paste0(prefix,"process_fisheries_data_list.qs"))
+            cwp_save_object(process_fisheries_data_list, paste0(prefix,"process_fisheries_data_list.rds"))
           }
         }
         futile.logger::flog.info("Processed process_fisheries_data_list")
@@ -421,11 +362,11 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
               all_paths <- lapply(seq_i, function(i) {
 
                 out_file <- file.path(fig.path,
-                                      sprintf("comparison_step_%02d.qs", i))
+                                      sprintf("comparison_step_%02d.rds", i))
 
                 if(usesave && file.exists(out_file)){
 
-                  futile.logger::flog.info("comparison_step_%02d.qs already exists, using the cached data", i)
+                  futile.logger::flog.info("comparison_step_%02d.rds already exists, using the cached data", i)
 
                 } else {
                   res_i <- CWP.dataset::function_multiple_comparison(
@@ -440,7 +381,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
                   )
 
 
-                  qs::qsave(res_i, file = out_file, preset = "high")
+                  cwp_save_object(res_i, file = out_file)
                   rm(res_i); gc()
                 }
                 out_file
@@ -486,15 +427,15 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
         if(fast_and_heavy){
           if(savestep){
-            qs::qsave(render_env, file = paste0(prefix, "renderenv.qs"))
+            cwp_save_object(render_env, file = paste0(prefix, "renderenv.rds"))
           }
         } else {
           render_env$child_env_first_to_last_result <- NULL
           render_env$child_env_last_result <- NULL
           render_env$process_fisheries_data_list <- NULL
-          render_env$path_to_qs_summary <- paste0(prefix, "path_to_qs_summary.qs")
-          render_env$path_to_process_fisheries_data_list <- paste0(prefix, "process_fisheries_data_list.qs")
-          render_env$path_to_qs_final <- paste0(prefix, "path_to_qs_final.qs")
+          render_env$path_to_qs_summary <- paste0(prefix, "path_to_qs_summary.rds")
+          render_env$path_to_process_fisheries_data_list <- paste0(prefix, "process_fisheries_data_list.rds")
+          render_env$path_to_qs_final <- paste0(prefix, "path_to_qs_final.rds")
 
           # 1) créer un env « propre » sans parent
           minimal_env <- new.env(parent = emptyenv())
@@ -529,10 +470,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           minimal_env$tmap_mode <- "view"
           minimal_env$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
           # 3) sauvegarder le minimal_env à la place de render_env
-          qs::qsave(
-            minimal_env,
-            file = paste0(prefix, "renderenvpath.qs"),
-          )
+          cwp_save_object(minimal_env, file = paste0(prefix, "renderenvpath.rds"))
 
           gc()
         }
@@ -555,7 +493,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           )
         } else {
 
-        CWP.dataset::build_book(master_qs_rel = paste0(prefix, "renderenvpath.qs"),
+        CWP.dataset::build_book(master_qs_rel = paste0(prefix, "renderenvpath.rds"),
                      output_format = "bookdown::gitbook",
                      output_dir = nameoutput)
         }
@@ -575,7 +513,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
             gc()
           } else {
             CWP.dataset::build_book(
-              master_qs_rel = paste0(prefix, "renderenvpath.qs"),
+              master_qs_rel = paste0(prefix, "renderenvpath.rds"),
               output_format = "bookdown::pdf_document2",
               output_dir = nameoutput
             )

@@ -15,7 +15,7 @@ if (!is.null(all_list)) {
 # Function to process each list item and knit the child document
 process_list_item <- function(list_item, template) {
   if(is.character(list_item)){
-    list_item <- qs::qread(list_item)
+    list_item <- CWP.dataset::cwp_read_object(list_item)
   }
   if (!(length(list_item) == 1 && is.na(list_item))) {
   child_env_result <- list2env(list_item, new.env())
