@@ -14,6 +14,7 @@
 pie_chart_2_default_plotrix <- function (dimension, first, second = NULL, topn = 5, titre_1 = "first",
                                          titre_2 = "second", title_yes_no = TRUE, dataframe = FALSE)
 {
+  cwp_require_package("plotrix", "to draw 3D pie charts")
   topn = 5
   first[is.na(first)] <- "NA"
   if (deparse(substitute(dimension)) == "X[[i]]") {
