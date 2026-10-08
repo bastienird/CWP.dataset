@@ -17,9 +17,10 @@
 #' @export
 fonction_groupement <- function(these_col, init, final) {
   
-  # Ensure input data are data.tables
-  init <- as.data.table(init)
-  final <- as.data.table(final)
+  # Ensure input data are data.tables. Callers looping over several dimensions
+  # should convert once and pass data.tables, so nothing is copied here.
+  if (!data.table::is.data.table(init)) init <- as.data.table(init)
+  if (!data.table::is.data.table(final)) final <- as.data.table(final)
   
   # Compute sum of values for each combination of the columns in "these_col" 
   # and "measurement_unit" in the "init" data.table

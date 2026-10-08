@@ -22,13 +22,11 @@
 #' @author
 #' Bastien Grasset, \email{bastien.grasset@@ird.fr}
 compare_temporal_differences <- function(parameter_time_dimension, init, final, titre_1, titre_2, unique_analyse = FALSE) {
-  Groupped_all_time <- data.frame()
-  for (i in parameter_time_dimension) {
-    temporaire <- fonction_groupement(i, init, final)
-    assign(paste0("Groupped", i), temporaire)
-
-    Groupped_all_time <- rbind(Groupped_all_time, temporaire)
-  }
+  init <- data.table::as.data.table(init)
+  final <- data.table::as.data.table(final)
+  Groupped_all_time <- data.table::rbindlist(
+    lapply(parameter_time_dimension, fonction_groupement, init = init, final = final)
+  )
 
   timediffplot <- lapply(parameter_time_dimension, function(filtering_unit, dataframe) {
     df_plot <- dataframe %>%
