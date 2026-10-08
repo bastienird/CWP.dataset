@@ -148,7 +148,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
     for (step_dir in step_dirs) {
       `%notin%` <- Negate(`%in%`)
       # An "ancient" copy means the dataset of this step is already enriched
-      if (length(list.files(step_dir, pattern = "^ancient\\.(parquet|qs)$")) == 0) {
+      if (length(list.files(step_dir, pattern = "^ancient\\.(parquet|rds|qs)$")) == 0) {
         file <- cwp_step_data_path(step_dir)
         data <- read_data(file)
         # copy.date keeps the original date, which gives the order of the steps

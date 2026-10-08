@@ -6,7 +6,6 @@
 #' @param file_path A character string indicating the path of the file to read.
 #' @return Data read from the specified file, either as a data frame or data table.
 #' @importFrom data.table fread 
-#' @importFrom qs qread 
 #' @export
 #' @examples
 #' # Example: Reading a CSV file
@@ -19,7 +18,8 @@ read_data <- function(file_path){
   } else if (grepl("\\.csv$", file_path)) {
     data.table::fread(file_path)
   } else if (grepl("\\.qs$", file_path)) {
-    qs::qread(file_path)
+    # Files from earlier versions of the package; needs {qs}
+    cwp_read_legacy_qs(file_path)
   } else if (grepl("\\.parquet$", file_path)) {
     # as.data.frame() drops the "tbl" class nanoparquet adds by default
     as.data.frame(nanoparquet::read_parquet(file_path))
