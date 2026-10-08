@@ -15,7 +15,8 @@ summarising_step(
   usesave = FALSE,
   fast_and_heavy = TRUE,
   parameter_colnames_to_keep_fact = NULL,
-  render_pdf = FALSE
+  render_pdf = FALSE,
+  interactive = TRUE
 )
 }
 \arguments{
@@ -48,6 +49,10 @@ summarising_step(
 Default \code{FALSE}: only the HTML report is produced, which needs no LaTeX installation. With
 \code{TRUE}, the PDF is rendered if \code{lualatex} is available (for instance through TinyTeX);
 otherwise a warning is logged and only the HTML report is produced.}
+
+\item{interactive}{Logical. Should the HTML report use the interactive version of the plots
+that have one (maps, with the {leaflet} package)? Default \code{TRUE}. The PDF report always uses
+the static plots. Without {leaflet}, the static maps are used.}
 }
 \value{
 NULL. The function has side effects, such as writing files and rendering reports.
