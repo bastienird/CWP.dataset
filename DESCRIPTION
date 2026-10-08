@@ -18,7 +18,6 @@ Imports:
     data.table,
     dplyr,
     DT,
-    dygraphs,
     flextable,
     futile.logger,
     ggplot2,
@@ -44,15 +43,16 @@ Imports:
     tidyr,
     tools,
     utils,
-    xts,
     DBI, 
     fs, 
     yaml
 Suggests: 
+    dygraphs,
     fusen,
     qs,
     testthat,
-    tmap
+    tmap,
+    xts
 VignetteBuilder: 
     knitr
 Config/fusen/version: 0.7.0
