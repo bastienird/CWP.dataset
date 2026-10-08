@@ -194,28 +194,31 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
     setwd(here::here(entity_dir))
     # copy_project_files(original_repo_path = here::here("Analysis_markdown"), new_repo_path = getwd())
 
-    sub_list_dir_2 <- list.files("Markdown", recursive = TRUE, pattern = "data.qs", full.names = TRUE)
-    details <- file.info(sub_list_dir_2)
-    details <- details[with(details, order(as.POSIXct(mtime))), ]
-    sub_list_dir_2 <- rownames(details)
-    futile.logger::flog.info("Processed sub_list_dir_2")
+    step_dirs <- cwp_list_step_dirs("Markdown")
+    futile.logger::flog.info("Listed %s step directories", length(step_dirs))
 
-    for (file in sub_list_dir_2) {
+    for (step_dir in step_dirs) {
       `%notin%` <- Negate(`%in%`)
-      if (!file.exists(gsub(pattern = basename(file), replacement = "ancient.qs", file))) {
-        data <- qs::qread(file)
-        file.copy(from = file, to = gsub(pattern = basename(file), replacement = "ancient.qs", file))
+      # An "ancient" copy means the dataset of this step is already enriched
+      if (length(list.files(step_dir, pattern = "^ancient\\.(parquet|qs)$")) == 0) {
+        file <- cwp_step_data_path(step_dir)
+        data <- read_data(file)
+        # copy.date keeps the original date, which gives the order of the steps
+        file.copy(from = file, to = file.path(step_dir, paste0("ancient.", tools::file_ext(file))),
+                  copy.date = TRUE)
         data <- CWP.dataset::enrich_dataset_if_needed(data, shp_raw = shp_raw, with_geom = FALSE)$without_geom
         data <- data%>%dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT","t","MTNO", "Tons")~ "Tons",
                                                                          measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ as.character(measurement_unit)))
 
-        qs::qsave(data, file = file)
+        cwp_write_step_data(data, step_dir)
         rm(data)
-        futile.logger::flog.info("Processed and saved data for file: %s", file)
+        futile.logger::flog.info("Processed and saved data for step: %s", step_dir)
       } else {
-        futile.logger::flog.info("Retrieving processed data: %s", file)
+        futile.logger::flog.info("Retrieving processed data: %s", step_dir)
       }
     }
+    # Path of the dataset of each step, in processing order
+    sub_list_dir_2 <- vapply(step_dirs, cwp_step_data_path, character(1), USE.NAMES = FALSE)
     parameter_resolution_filter <- opts$resolution_filter
     parameter_filtering <- opts$parameter_filtering
     for (s in 1:length(source_authoritylist)){
@@ -334,7 +337,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
         }
 
-        sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
+        sub_list_dir_3 <- dirname(sub_list_dir_2)
         render_env$sub_list_dir_3 <- sub_list_dir_3
 
         if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"process_fisheries_data_list.qs"))){
