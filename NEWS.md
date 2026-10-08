@@ -1,5 +1,28 @@
 # CWP.dataset (development version)
 
+## Deferred plots
+
+* `comprehensive_cwp_dataframe_analysis()` no longer draws the plots: its result holds deferred
+  plots, i.e. the small aggregated tables and the name of the internal function that draws each
+  plot. They are drawn when the report is rendered (`knitting_plots_subfigures()`,
+  `render_subfigures()` and the templates do it), or with the new `cwp_materialise_plot()`.
+  Saved results are plain data: much lighter, cheaper to load at rendering, and no longer tied
+  to the version of ggplot2 or cowplot they were created with.
+* `deferred_plots = FALSE`, or `options(CWP.dataset.deferred_plots = FALSE)`, gives plot objects
+  as before. The functions that build the plots (`compare_temporal_differences()`,
+  `time_coverage_analysis()`, `combined_summary_histogram_function()`, `geographic_diff()`,
+  `fonction_empreinte_spatiale()`, `spatial_coverage_analysis()`, `pie_chart_2_default()`,
+  `other_dimension_analysis()`) gain a `deferred` argument, `FALSE` by default.
+* Deferred maps refer to the continent layer of the package instead of carrying one copy each.
+* Not deferred: maps drawn with tmap, and the plots of `process_fisheries_data()`.
+
+## Report rendering
+
+* `summarising_step()` gains `render_pdf` (default `FALSE`): the HTML report, which only needs
+  pandoc, is always rendered; the PDF is rendered only when asked for and when `lualatex` is
+  available. The availability check used to look for `pdflatex`, which is not the engine of the
+  report.
+
 ## Storage format
 
 * The dataset of each processing step is now saved as Parquet (`data.parquet`, with
