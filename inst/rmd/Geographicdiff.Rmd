@@ -9,7 +9,8 @@ Here is represented for each area the polygons keeping all the initial informati
 
 ```{r nametitleplotting, echo=FALSE, fig.cap=Geographicdiff$title, out.width="100%"}
 
-Geographicdiff$plott
+# The map may be a deferred plot: draw it now
+CWP.dataset::cwp_materialise_plot(Geographicdiff$plott)
 
 ```
 

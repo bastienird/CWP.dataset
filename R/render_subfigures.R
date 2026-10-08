@@ -17,6 +17,9 @@ render_subfigures <- function(plots_list, titles_list, general_title) {
     stop("The lengths of plots_list and titles_list are not the same.")
   }
   
+  # Deferred plots are drawn here, when the report is rendered
+  plots_list <- lapply(plots_list, cwp_materialise_plot)
+
   # Check if all plots are ggplots
   if (!all(sapply(plots_list, inherits, "gg"))) {
     stop("Not all items in plots_list are ggplot objects.")

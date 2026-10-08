@@ -13,6 +13,9 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
   # Check if the function is being run in a knitr environment
   in_knitr <- !is.null(knitr::opts_knit$get("out.format"))
 
+  # A deferred plot is drawn here, when the report is rendered
+  plot <- cwp_materialise_plot(plot)
+
   # Save the ggplot object in the current environment with a unique name
   if(is_ggplot(plot)) {
     CWP.dataset::save_image(title = title, plott = plot, folder = folder, fig.pathinside = fig.pathinside)
