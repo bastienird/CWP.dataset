@@ -103,7 +103,6 @@ time_coverage_analysis <- function(time_dimension_list_groupped, parameter_time_
       dplyr::mutate(
         is_annual  = all(lubridate::mday(Time) == 1 & lubridate::month(Time) == 1),
         is_monthly = !is_annual & all(lubridate::mday(Time) == 1),
-        TimeMonth  = zoo::as.yearmon(Time),
         TimeYearD  = as.Date(paste0(lubridate::year(Time), "-01-01"))
       )
 
