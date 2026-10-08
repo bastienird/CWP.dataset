@@ -1,5 +1,16 @@
 # CWP.dataset (development version)
 
+## Dependencies
+
+* Imports go from 37 to 30 packages. {tmap}, {dygraphs}, {xts}, {googledrive}, {plotrix} and
+  {DT} move to Suggests: each is only needed by an optional feature, whose function now stops
+  with an explicit message when the package is missing. {tinytex} is declared in Suggests.
+* The report setup (`Setup_markdown.Rmd`) only attaches {tinytex}, {tmap}, {kableExtra} and
+  {webshot} when they are installed.
+* `time_coverage_analysis()` no longer calls {zoo}, which was not declared.
+* `render_subfigures()` calls {grid} and {gridExtra} explicitly; the HTML sub-figures relied on
+  {grid} being attached.
+
 ## Deferred plots
 
 * `comprehensive_cwp_dataframe_analysis()` no longer draws the plots: its result holds deferred
