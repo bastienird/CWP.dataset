@@ -210,6 +210,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
                                                                          measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ as.character(measurement_unit)))
 
         qs::qsave(data, file = file)
+        rm(data)
         futile.logger::flog.info("Processed and saved data for file: %s", file)
       } else {
         futile.logger::flog.info("Retrieving processed data: %s", file)

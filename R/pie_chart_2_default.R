@@ -16,6 +16,8 @@
 pie_chart_2_default <- function (dimension, first, second = NULL, topn = 5, titre_1 = "first",
                                  titre_2 = "second", title_yes_no = TRUE, dataframe = FALSE)
 {
+  # Do not let the returned plots keep the full datasets alive (see R/forget.R)
+  on.exit(cwp_forget(c("first", "second"), environment()), add = TRUE)
   # Are the two distributions identical once rounded? Classes are matched by
   # name and unit: the two tables can have different lengths or orders.
   same_rounded_distribution <- function(x, y) {

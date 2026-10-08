@@ -41,6 +41,8 @@
 function_multiple_comparison <- function(counting, parameter_short, sub_list_dir,
                                          parameters_child_global, fig.path, coverage = FALSE,
                                          shapefile.fix, continent) {
+  # Do not let the returned plots keep the full datasets alive (see R/forget.R)
+  on.exit(cwp_forget(c("parameter_init", "parameter_final", "initfiltered", "finalfiltered"), environment()), add = TRUE)
   gc()
 
   parameter_init <- file.path(sub_list_dir[counting], "data.qs")

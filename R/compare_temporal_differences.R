@@ -22,6 +22,8 @@
 #' @author
 #' Bastien Grasset, \email{bastien.grasset@@ird.fr}
 compare_temporal_differences <- function(parameter_time_dimension, init, final, titre_1, titre_2, unique_analyse = FALSE) {
+  # Do not let the returned plots keep the full datasets alive (see R/forget.R)
+  on.exit(cwp_forget(c("init", "final"), environment()), add = TRUE)
   init <- data.table::as.data.table(init)
   final <- data.table::as.data.table(final)
   Groupped_all_time <- data.table::rbindlist(

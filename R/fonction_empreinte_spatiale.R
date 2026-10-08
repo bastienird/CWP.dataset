@@ -25,6 +25,8 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
                                         titre_1 = "Dataset 1", titre_2 = "Dataset 2",
                                         shapefile.fix = NULL, plotting_type = "plot", continent = NULL,
                                         map_engine = getOption("CWP.dataset.map_engine", "tiles")) {
+  # Do not let the returned plots keep the full datasets alive (see R/forget.R)
+  on.exit(cwp_forget(c("initial_dataset", "final_dataset", "Initial_dataframe", "Final_dataframe", "geo_data", "shapefile.fix"), environment()), add = TRUE)
 
   if(is.null(shapefile.fix)){
     stop("Please provide a shape for the polygons")

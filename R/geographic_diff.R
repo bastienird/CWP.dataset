@@ -26,6 +26,8 @@ geographic_diff <- function(init, final, shapefile_fix, parameter_geographical_d
                             parameter_geographical_dimension_groupping, continent, plotting_type,
                             titre_1, titre_2, outputonly,
                             map_engine = getOption("CWP.dataset.map_engine", "tiles")) {
+  # Do not let the returned plots keep the full datasets alive (see R/forget.R)
+  on.exit(cwp_forget(c("init", "final", "shapefile_fix", "geographic_dimension", "breaks"), environment()), add = TRUE)
 
   impact_levels <- c("Appearing data", "Gain (more than double)", "Gain",
                      "No differences", "Loss", "All data lost")

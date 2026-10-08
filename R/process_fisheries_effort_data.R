@@ -17,6 +17,8 @@
 #' @export
 #' @importFrom qs qread
 process_fisheries_effort_data <- function(sub_list_dir_2, parameter_filtering) {
+  # Do not let the returned plots keep the full datasets alive (see R/forget.R)
+  on.exit(cwp_forget(c("main"), environment()), add = TRUE)
   main <- filtering_function(qs::qread(paste0(sub_list_dir_2[1], "/data.qs")), parameter_filtering = parameter_filtering)
   top_units <- main %>%
     dplyr::group_by(measurement_unit) %>%

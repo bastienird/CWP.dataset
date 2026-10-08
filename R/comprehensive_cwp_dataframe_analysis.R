@@ -68,6 +68,8 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
                                                  parameter_titre_dataset_2 = "Dataset 2",
                                                  unique_analyse = FALSE,
                                                  removemap = FALSE, topnumber = 6) {
+  # Do not let the returned plots keep the full datasets alive (see R/forget.R)
+  on.exit(cwp_forget(c("parameter_init", "parameter_final", "init", "final"), environment()), add = TRUE)
   # Process 'parameter_init'
   if (is.character(parameter_init)) {
     init <- read_data(parameter_init) %>%

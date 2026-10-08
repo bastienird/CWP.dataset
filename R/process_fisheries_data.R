@@ -19,6 +19,8 @@
 #' @importFrom qs qread
 #' @import ggplot2
 process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_filtering) {
+  # Do not let the returned plots keep the full datasets alive (see R/forget.R)
+  on.exit(cwp_forget(c("main", "main_i", "nominal_dataset"), environment()), add = TRUE)
 
   if (parameter_fact == "catch") {
 

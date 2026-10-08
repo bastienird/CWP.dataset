@@ -27,6 +27,8 @@
 #' @export
 combined_summary_histogram_function <- function(init, parameter_titre_dataset_1 = "Init",
                                                 final, parameter_titre_dataset_2 = "Final") {
+  # Do not let the returned plots keep the full datasets alive (see R/forget.R)
+  on.exit(cwp_forget(c("init", "final"), environment()), add = TRUE)
   # Convertir en data.table
   setDT(init)
   summary_number_row_init <- init[, .(Number_different_stratas = .N), by = "measurement_unit"]
