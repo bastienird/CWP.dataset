@@ -28,6 +28,12 @@ compare_dimension_differences <- function(Groupped_all, Other_dimensions, parame
     dplyr::filter(Dimension %in% Other_dimensions)
   
   if (nrow(Groupped_all_not_disap_or_app) != 0) {
+    # Columns summed when the classes beyond the top n are merged into "Others":
+    # every numeric column, and the rank computed below
+    numeric_cols <- c(
+      names(Groupped_all_not_disap_or_app)[vapply(Groupped_all_not_disap_or_app, is.numeric, logical(1))],
+      "id"
+    )
     Groupped_all_not_disap_or_app <- Groupped_all_not_disap_or_app %>% 
       dplyr::mutate(`Loss / Gain` = ifelse(loss >= 0, "Loss", "Gain")) %>%
       dplyr::mutate(`Loss / Gain` = dplyr::case_when(is.na(`Loss / Gain`) ~ "Gain", value_sum_1 == value_sum_2 ~ "Egal", TRUE ~ `Loss / Gain`)) %>%
@@ -38,7 +44,7 @@ compare_dimension_differences <- function(Groupped_all, Other_dimensions, parame
       dplyr::mutate(Precision = as.factor(ifelse(id > topn, "Others", as.character(Precision)))) %>%
       dplyr::ungroup() %>%
       dplyr::group_by(`Loss / Gain`, Dimension, Precision, measurement_unit) %>%
-      dplyr::summarise(across(is.numeric, sum)) %>%
+      dplyr::summarise(dplyr::across(dplyr::all_of(numeric_cols), sum)) %>%
       dplyr::mutate(`Difference (in %)` = (`Difference in value` / value_sum_1) * 100) %>%
       dplyr::select(-id, -number_lines2) %>%
       dplyr::group_by(`Loss / Gain`, Dimension, measurement_unit) %>%
