@@ -39,7 +39,7 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
       # This will run if outside a knitr/RMarkdown environment (e.g., in a plain R script)
       print(plot)
     }
-  } else if (inherits(plot, "tmap")) {
+  } else if (inherits(plot, "tmap") || inherits(plot, "htmlwidget")) {
     if(in_knitr) {
       # This will run if inside a knitr/RMarkdown environment
 
@@ -61,7 +61,7 @@ knitting_plots_subfigures <- function(plot, title, folder = "Unknown_folder", fi
       plot
     }
   } else {
-    stop("Not a ggplot or tmap object")
+    stop("Not a ggplot, tmap or htmlwidget object")
   }
 }
 
