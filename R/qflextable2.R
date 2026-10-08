@@ -94,6 +94,7 @@ y <- x %>%
   }
   if (interactive_plot) {
     # Create an interactive plot using DT
+    cwp_require_package("DT", "to display an interactive table")
     return(DT::datatable(y))
   }
   ft_out

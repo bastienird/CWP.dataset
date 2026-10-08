@@ -170,7 +170,7 @@ Overview of the data provided for which the captures are in land corresponding t
 
 ```{r, fig.cap="Data with known issues"}
 
-DT::datatable(summary_invalid_data)
+if (requireNamespace("DT", quietly = TRUE)) DT::datatable(summary_invalid_data) else knitr::kable(summary_invalid_data)
 
 ```
 
