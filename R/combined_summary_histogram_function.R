@@ -24,9 +24,12 @@
 #' @import ggplot2
 #' @import data.table
 #' @importFrom scales hue_pal percent_format
+#' @param deferred Logical. If `TRUE`, the plot is returned as a deferred plot (its description,
+#'   to be drawn with [cwp_materialise_plot()]) instead of a plot object. Default `FALSE`.
 #' @export
 combined_summary_histogram_function <- function(init, parameter_titre_dataset_1 = "Init",
-                                                final, parameter_titre_dataset_2 = "Final") {
+                                                final, parameter_titre_dataset_2 = "Final",
+                                                deferred = FALSE) {
   # Do not let the returned plots keep the full datasets alive (see R/forget.R)
   on.exit(cwp_forget(c("init", "final"), environment()), add = TRUE)
   # Convertir en data.table
@@ -49,10 +52,26 @@ combined_summary_histogram_function <- function(init, parameter_titre_dataset_1 
   color_palette <- scales::hue_pal()(length(unique_units))
   names(color_palette) <- unique_units
 
+  combined_summary_histogram <- cwp_plot_or_spec(
+    deferred, "cwp_plot_combined_summary",
+    combined_summary = as.data.frame(combined_summary), color_palette = color_palette
+  )
+
+  return(combined_summary_histogram)
+}
+
+#' Plot the share of each measurement unit in the number of strata, by dataset
+#'
+#' @param combined_summary Table with columns `data_source`, `Percent` and
+#'   `measurement_unit`.
+#' @param color_palette Named vector of colours, one per measurement unit.
+#' @return A ggplot.
+#' @keywords internal
+#' @noRd
+cwp_plot_combined_summary <- function(combined_summary, color_palette) {
   # Créer le graphique principal (histogramme)
-  combined_summary_histogram <- ggplot(combined_summary,
-                                       aes(x = factor(data_source),
-                                           y = Percent, fill = measurement_unit)) +
+  ggplot(combined_summary,
+         aes(x = factor(data_source), y = Percent, fill = measurement_unit)) +
     geom_bar(stat = "identity", position = "fill") +  # Barres empilées avec échelle à 100%
     scale_fill_manual(values = color_palette) +
     scale_y_continuous(labels = scales::percent_format()) +
@@ -63,7 +82,4 @@ combined_summary_histogram_function <- function(init, parameter_titre_dataset_1 
          y = "Percentage",
          fill = "Measurement unit") +
     theme_minimal()
-
-  return(combined_summary_histogram)
 }
-
