@@ -20,6 +20,9 @@ read_data <- function(file_path){
     data.table::fread(file_path)
   } else if (grepl("\\.qs$", file_path)) {
     qs::qread(file_path)
+  } else if (grepl("\\.parquet$", file_path)) {
+    # as.data.frame() drops the "tbl" class nanoparquet adds by default
+    as.data.frame(nanoparquet::read_parquet(file_path))
   } else {    stop("File type not supported")
   }
 }

@@ -30,6 +30,7 @@ Imports:
     janitor,
     knitr,
     lubridate,
+    nanoparquet,
     plotrix,
     purrr,
     qs,
