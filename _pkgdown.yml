@@ -2,3 +2,10 @@ url: https://bastienird.github.io/CWP.dataset
 template:
   bootstrap: 5
 
+navbar:
+  structure:
+    left: [intro, reference, articles, tutorials, news, example]
+  components:
+    example:
+      text: Example report
+      href: example-report/index.html
