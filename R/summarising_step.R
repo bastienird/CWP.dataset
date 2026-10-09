@@ -355,7 +355,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
                 # 3) si des noms manquent, on les génère
                 nms <- names(res_i)
                 if (is.null(nms) || any(nms == "")) {
-                  nms <- nms %||% rep("", length(res_i))  # %||% = si NULL, remplace par ""
+                  if (is.null(nms)) nms <- rep("", length(res_i))  # %||% = si NULL, remplace par ""
                   empty <- which(nms == "")
                   nms[empty] <- paste0("item", empty)
                   names(res_i) <- nms
@@ -486,7 +486,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         nameoutput <- paste0(prefix,"recappdf")
       }
 
-      set_flextable_defaults(fonts_ignore=TRUE)
+      flextable::set_flextable_defaults(fonts_ignore=TRUE)
       base::options(knitr.duplicate.label = "allow")
       bookdown_path <- CWP.dataset::generate_bookdown_yml(new_session = !fast_and_heavy)
         if(fast_and_heavy){
