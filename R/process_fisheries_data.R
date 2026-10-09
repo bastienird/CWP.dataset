@@ -70,7 +70,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
     lines_init <- nrow(main)
 
     for (i in sub_list_dir_2) {
-      step <- tail(str_split(i, "/")[[1]], n = 1)
+      step <- basename(i)
       Explanation <- readLines(paste0(i, "/explanation.txt"))[1]
       Functions   <- readLines(paste0(i, "/functions.txt"))[1]
       Options     <- if (file.exists(paste0(i, "/options_written.txt"))) readLines(paste0(i, "/options_written.txt"))[1] else "None"

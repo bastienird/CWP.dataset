@@ -62,7 +62,7 @@ y <- x %>%
 
 
     if(!is.null(grouped_data)){
-      y <- as_grouped_data(y, groups = grouped_data)
+      y <- flextable::as_grouped_data(y, groups = grouped_data)
     }
 
     if (!is.null(columns_to_color)) {
@@ -85,12 +85,12 @@ y <- x %>%
 
 
 
-  ft_out <- flextable_captionned %>% autofit()
-  ft_out <- width(ft_out, width = dim(ft_out)$widths * pgwidth / flextable_dim(ft_out)$widths)
+  ft_out <- flextable_captionned %>% flextable::autofit()
+  ft_out <- flextable::width(ft_out, width = dim(ft_out)$widths * pgwidth / flextable::flextable_dim(ft_out)$widths)
 
   if (!is.null(save_folder)) {
     save_path_flextable <- file.path(fig.pathinside, save_folder, paste0(make.names(captionn), ".png"))  # Adjust the file name as needed
-    save_as_image(ft_out, path = save_path_flextable)
+    flextable::save_as_image(ft_out, path = save_path_flextable)
   }
   if (interactive_plot) {
     # Create an interactive plot using DT

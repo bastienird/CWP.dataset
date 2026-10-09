@@ -2,7 +2,7 @@ recap_all_markdown <- function(action, entity, config, options){
     opts <- action$options
     debugging <- if(!is.null(opts$debugging)) opts$debugging else FALSE
 
-    last_path = function(y){tail(str_split(y,"/")[[1]],n=1)}
+    last_path = function(y){basename(y)}
 
     url_analysis_markdown <- "https://raw.githubusercontent.com/firms-gta/geoflow-tunaatlas/master/Analysis_markdown/"
     target_dir <- getwd()  # Current working directory
@@ -12,7 +12,8 @@ recap_all_markdown <- function(action, entity, config, options){
 
       if (!file.exists(target_file)) {
         download_url <- paste0(url_path, x)
-        curl_download(download_url, target_file)
+        cwp_require_package("curl", "to download the report templates")
+        curl::curl_download(download_url, target_file)
       }
     }
 

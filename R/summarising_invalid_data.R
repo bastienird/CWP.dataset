@@ -293,7 +293,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
 
       flog.info("writingcombinedproblematic")
       # Write the combined data frame to a CSV file
-      write_csv(combined_problematic_data, file.path(entity_dir, paste0(entity_name, "_summary_invalid_data.csv")),
+      readr::write_csv(combined_problematic_data, file.path(entity_dir, paste0(entity_name, "_summary_invalid_data.csv")),
                 progress = show_progress())
 
     }
@@ -318,14 +318,14 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     # Save the combined data
     cwp_save_object(combined_data, "All_invalid_data.rds")
     if(upload_DB){
-      dbExecute(connectionDB, "DROP MATERIALIZED VIEW IF EXISTS public.issueddata CASCADE;")
-      dbWriteTable(connectionDB, "temp_tableissueddata", combined_data, temporary = TRUE, row.names = FALSE, append = FALSE)
-      dbExecute(connectionDB, "
+      DBI::dbExecute(connectionDB, "DROP MATERIALIZED VIEW IF EXISTS public.issueddata CASCADE;")
+      DBI::dbWriteTable(connectionDB, "temp_tableissueddata", combined_data, temporary = TRUE, row.names = FALSE, append = FALSE)
+      DBI::dbExecute(connectionDB, "
     CREATE MATERIALIZED VIEW public.issueddata AS
     SELECT * FROM temp_tableissueddata;
   ")
-      dbExecute(connectionDB, "REFRESH MATERIALIZED VIEW public.issueddata;")
-      # dbExecute(connectionDB, "DROP TABLE IF EXISTS temp_tableissueddata CASCADE;")
+      DBI::dbExecute(connectionDB, "REFRESH MATERIALIZED VIEW public.issueddata;")
+      # DBI::dbExecute(connectionDB, "DROP TABLE IF EXISTS temp_tableissueddata CASCADE;")
     }
   }
   # Directory for the R Markdown template
