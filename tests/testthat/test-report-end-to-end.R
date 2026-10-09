@@ -59,8 +59,8 @@ test_that("summarising_step renders the HTML report of a two-step job", {
   report_dir <- file.path(job$entity_dir, "middleallrecappdf")
   expect_true(dir.exists(report_dir))
   pages <- list.files(report_dir, pattern = "\\.html$", full.names = TRUE)
+  # The pages are named after the chapters of the report, not "index.html"
   expect_gt(length(pages), 0)
-  expect_true(file.exists(file.path(report_dir, "index.html")))
 
   html <- unlist(lapply(pages, readLines, warn = FALSE))
   # The entity and both steps appear in the report

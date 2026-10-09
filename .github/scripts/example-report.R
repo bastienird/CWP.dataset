@@ -32,8 +32,8 @@ summarising_step(
 setwd(old_wd)
 
 report_dir <- file.path(job$entity_dir, "longallrecappdf")
-if (!file.exists(file.path(report_dir, "index.html"))) {
-  stop("The example report was not rendered: no index.html in ", report_dir)
+if (length(list.files(report_dir, pattern = "\\.html$")) == 0) {
+  stop("The example report was not rendered: no HTML page in ", report_dir)
 }
 
 unlink(output_dir, recursive = TRUE)
@@ -41,7 +41,26 @@ dir.create(output_dir, recursive = TRUE)
 copied <- file.copy(list.files(report_dir, full.names = TRUE), output_dir, recursive = TRUE)
 if (!all(copied)) stop("Some files of the report could not be copied to ", output_dir)
 
+# The pages are named after the chapters of the report. An index.html pointing
+# to the first one gives the report a fixed address.
 pages <- list.files(output_dir, pattern = "\\.html$")
+if (!"index.html" %in% pages) {
+  has_previous <- vapply(pages, function(page) {
+    any(grepl("navigation-prev", readLines(file.path(output_dir, page), warn = FALSE), fixed = TRUE))
+  }, logical(1))
+  first_page <- if (any(!has_previous)) pages[!has_previous][1] else pages[1]
+  writeLines(c(
+    "<!DOCTYPE html>",
+    "<html><head>",
+    "<meta charset=\"utf-8\">",
+    sprintf("<meta http-equiv=\"refresh\" content=\"0; url=%s\">", first_page),
+    "<title>Example report</title>",
+    "</head><body>",
+    sprintf("<p><a href=\"%s\">Open the example report</a></p>", first_page),
+    "</body></html>"
+  ), file.path(output_dir, "index.html"))
+  message("First page of the report: ", first_page)
+}
 size_mb <- sum(file.info(list.files(output_dir, recursive = TRUE, full.names = TRUE))$size) / 1e6
 message("Example report written to ", output_dir, ": ", length(pages), " pages, ",
         round(size_mb, 1), " MB")
