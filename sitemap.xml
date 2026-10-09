@@ -22,6 +22,8 @@
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/comprehensive_cwp_dataframe_analysis.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/compute_summary_of_differences.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/create_dygraph_for_unit.html</loc></url>
+<url><loc>https://bastienird.github.io/CWP.dataset/reference/cwp_materialise_plot.html</loc></url>
+<url><loc>https://bastienird.github.io/CWP.dataset/reference/cwp_save_object.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/download_codelists.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/enrich_dataset_if_needed.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/filtering_function.html</loc></url>
@@ -50,7 +52,7 @@
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/parameter_init_catch.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/parameter_init_effort.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/pie_chart_2_default.html</loc></url>
-<url><loc>https://bastienird.github.io/CWP.dataset/reference/pie_chart_2_default_plotrix.html</loc></url>
+<url><loc>https://bastienird.github.io/CWP.dataset/reference/print.cwp_plot_spec.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/process_fisheries_data.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/process_fisheries_effort_data.html</loc></url>
 <url><loc>https://bastienird.github.io/CWP.dataset/reference/qflextable2.html</loc></url>

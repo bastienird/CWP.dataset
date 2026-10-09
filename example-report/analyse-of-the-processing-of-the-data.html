@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>3 Analyse of the processing of the data | Summary of the treatment for a specific dataset of the Global Tuna Atlas</title>
+  <meta name="description" content="3 Analyse of the processing of the data | Summary of the treatment for a specific dataset of the Global Tuna Atlas" />
+  <meta name="generator" content="bookdown 0.48 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="3 Analyse of the processing of the data | Summary of the treatment for a specific dataset of the Global Tuna Atlas" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="3 Analyse of the processing of the data | Summary of the treatment for a specific dataset of the Global Tuna Atlas" />
+  
+  
+  
+
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html"/>
+<link rel="next" href="detail-of-all-the-steps-of-treatment-of-the-data.html"/>
+<style type="text/css">
+p.abstract{
+  text-align: center;
+  font-weight: bold;
+}
+div.abstract{
+  margin: auto;
+  width: 90%;
+}
+</style>
+<script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+<link href="libs/anchor-sections-1.1.0/anchor-sections.css" rel="stylesheet" />
+<link href="libs/anchor-sections-1.1.0/anchor-sections-hash.css" rel="stylesheet" />
+<script src="libs/anchor-sections-1.1.0/anchor-sections.js"></script>
+<script src="libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<link href="libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-1.3.1/leaflet.js"></script>
+<link href="libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
+<script src="libs/proj4-2.6.2/proj4.min.js"></script>
+<script src="libs/Proj4Leaflet-1.0.1/proj4leaflet.js"></script>
+<link href="libs/rstudio_leaflet-1.3.1/rstudio_leaflet.css" rel="stylesheet" />
+<script src="libs/leaflet-binding-2.2.3/leaflet.js"></script>
+<script src="libs/Leaflet.Sync-0.0.5/L.Map.Sync.js"></script>
+<link href="libs/tabwid-1.1.3/tabwid.css" rel="stylesheet" />
+<script src="libs/tabwid-1.1.3/tabwid.js"></script>
+
+
+
+<style type="text/css">
+  
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="1" data-path="summary-of-the-final-provided-data-examplecatchdataset.html"><a href="summary-of-the-final-provided-data-examplecatchdataset.html"><i class="fa fa-check"></i><b>1</b> Summary of the final provided data : examplecatchdataset</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="summary-of-the-final-provided-data-examplecatchdataset.html"><a href="summary-of-the-final-provided-data-examplecatchdataset.html#time-coverage"><i class="fa fa-check"></i><b>1.1</b> Time coverage</a></li>
+<li class="chapter" data-level="1.2" data-path="summary-of-the-final-provided-data-examplecatchdataset.html"><a href="summary-of-the-final-provided-data-examplecatchdataset.html#spatial-coverage"><i class="fa fa-check"></i><b>1.2</b> Spatial coverage</a></li>
+<li class="chapter" data-level="1.3" data-path="summary-of-the-final-provided-data-examplecatchdataset.html"><a href="summary-of-the-final-provided-data-examplecatchdataset.html#coverage-for-other-dimensions"><i class="fa fa-check"></i><b>1.3</b> Coverage for other dimensions</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html"><a href="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html"><i class="fa fa-check"></i><b>2</b> Summary of the treatment done on the data (comparison between the Initial data and the data resulting from treatments)</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html"><a href="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html#main-differences"><i class="fa fa-check"></i><b>2.1</b> Main differences</a>
+<ul>
+<li class="chapter" data-level="2.1.1" data-path="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html"><a href="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html#differences-in-temporal-data"><i class="fa fa-check"></i><b>2.1.1</b> Differences in temporal data</a></li>
+<li class="chapter" data-level="2.1.2" data-path="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html"><a href="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html#differences-in-geographical-data"><i class="fa fa-check"></i><b>2.1.2</b> Differences in geographical data</a></li>
+<li class="chapter" data-level="2.1.3" data-path="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html"><a href="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html#the-differences-for-each-other-dimension"><i class="fa fa-check"></i><b>2.1.3</b> The differences for each other dimension</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html"><a href="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html#main-characteristics-of-the-two-datasets"><i class="fa fa-check"></i><b>2.2</b> Main characteristics of the two datasets</a>
+<ul>
+<li class="chapter" data-level="2.2.1" data-path="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html"><a href="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html#time-coverage-1"><i class="fa fa-check"></i><b>2.2.1</b> Time coverage</a></li>
+<li class="chapter" data-level="2.2.2" data-path="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html"><a href="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html#spatial-coverage-1"><i class="fa fa-check"></i><b>2.2.2</b> Spatial coverage</a></li>
+<li class="chapter" data-level="2.2.3" data-path="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html"><a href="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html#coverage-for-other-dimensions-1"><i class="fa fa-check"></i><b>2.2.3</b> Coverage for other dimensions</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="analyse-of-the-processing-of-the-data.html"><a href="analyse-of-the-processing-of-the-data.html"><i class="fa fa-check"></i><b>3</b> Analyse of the processing of the data</a></li>
+<li class="chapter" data-level="4" data-path="detail-of-all-the-steps-of-treatment-of-the-data.html"><a href="detail-of-all-the-steps-of-treatment-of-the-data.html"><i class="fa fa-check"></i><b>4</b> Detail of all the steps of treatment of the data</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="detail-of-all-the-steps-of-treatment-of-the-data.html"><a href="detail-of-all-the-steps-of-treatment-of-the-data.html#treatment-step2_processed"><i class="fa fa-check"></i><b>4.1</b> Treatment : step2_processed</a>
+<ul>
+<li class="chapter" data-level="4.1.1" data-path="detail-of-all-the-steps-of-treatment-of-the-data.html"><a href="detail-of-all-the-steps-of-treatment-of-the-data.html#main-differences-1"><i class="fa fa-check"></i><b>4.1.1</b> Main differences</a></li>
+<li class="chapter" data-level="4.1.2" data-path="detail-of-all-the-steps-of-treatment-of-the-data.html"><a href="detail-of-all-the-steps-of-treatment-of-the-data.html#main-characteristics-of-the-two-datasets-1"><i class="fa fa-check"></i><b>4.1.2</b> Main characteristics of the two datasets</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="annexe.html"><a href="annexe.html"><i class="fa fa-check"></i><b>5</b> Annexe</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Summary of the treatment for a specific dataset of the Global Tuna Atlas</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="analyse-of-the-processing-of-the-data" class="section level1 hasAnchor" number="3">
+<h1><span class="header-section-number">3</span> Analyse of the processing of the data<a href="analyse-of-the-processing-of-the-data.html#analyse-of-the-processing-of-the-data" class="anchor-section" aria-label="Anchor link to header"></a></h1>
+<p>The following table recap all the treatment done on the mapped and standardized rawdata provided by tRFMOs.</p>
+<div class="tabwid"><style>.cl-d8bad469{}.cl-377b090d{font-family:'DejaVu Sans';font-size:10pt;font-weight:bold;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-f95cb0b7{font-family:'DejaVu Sans';font-size:10pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-7329fabf{font-family:'DejaVu Sans';font-size:10pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:rgba(255, 0, 0, 1.00);}.cl-a2e5c7a5{font-family:'DejaVu Sans';font-size:10pt;font-weight:normal;font-style:normal;text-decoration:none;color:rgba(0, 0, 0, 1.00);background-color:transparent;}.cl-6477613b{margin:0;text-align:left;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-a1958ec5{margin:0;text-align:right;border-bottom: 0 solid rgba(0, 0, 0, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0 solid rgba(0, 0, 0, 1.00);border-right: 0 solid rgba(0, 0, 0, 1.00);padding-bottom:5pt;padding-top:5pt;padding-left:5pt;padding-right:5pt;line-height: 1;background-color:transparent;}.cl-5b51ceca{width:0.709in;background-color:transparent;vertical-align: middle;border-bottom: 0.75pt solid rgba(102, 102, 102, 1.00);border-top: 0.75pt solid rgba(102, 102, 102, 1.00);border-left: 0.75pt solid rgba(102, 102, 102, 1.00);border-right: 0.75pt solid rgba(102, 102, 102, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-7fb21f8b{width:0.735in;background-color:transparent;vertical-align: middle;border-bottom: 0.75pt solid rgba(102, 102, 102, 1.00);border-top: 0.75pt solid rgba(102, 102, 102, 1.00);border-left: 0.75pt solid rgba(102, 102, 102, 1.00);border-right: 0.75pt solid rgba(102, 102, 102, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9fe5d415{width:0.708in;background-color:transparent;vertical-align: middle;border-bottom: 0.75pt solid rgba(102, 102, 102, 1.00);border-top: 0.75pt solid rgba(102, 102, 102, 1.00);border-left: 0.75pt solid rgba(102, 102, 102, 1.00);border-right: 0.75pt solid rgba(102, 102, 102, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-dbc96cc8{width:1.091in;background-color:transparent;vertical-align: middle;border-bottom: 0.75pt solid rgba(102, 102, 102, 1.00);border-top: 0.75pt solid rgba(102, 102, 102, 1.00);border-left: 0.75pt solid rgba(102, 102, 102, 1.00);border-right: 0.75pt solid rgba(102, 102, 102, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-53d69af3{width:1.064in;background-color:transparent;vertical-align: middle;border-bottom: 0.75pt solid rgba(102, 102, 102, 1.00);border-top: 0.75pt solid rgba(102, 102, 102, 1.00);border-left: 0.75pt solid rgba(102, 102, 102, 1.00);border-right: 0.75pt solid rgba(102, 102, 102, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-ffebaac1{width:1.05in;background-color:transparent;vertical-align: middle;border-bottom: 0.75pt solid rgba(102, 102, 102, 1.00);border-top: 0.75pt solid rgba(102, 102, 102, 1.00);border-left: 0.75pt solid rgba(102, 102, 102, 1.00);border-right: 0.75pt solid rgba(102, 102, 102, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-5109ec98{width:0.642in;background-color:transparent;vertical-align: middle;border-bottom: 0.75pt solid rgba(102, 102, 102, 1.00);border-top: 0.75pt solid rgba(102, 102, 102, 1.00);border-left: 0.75pt solid rgba(102, 102, 102, 1.00);border-right: 0.75pt solid rgba(102, 102, 102, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-41edd74b{width:0.709in;background-color:transparent;vertical-align: middle;border-bottom: 0.75pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0.75pt solid rgba(102, 102, 102, 1.00);border-right: 0.75pt solid rgba(102, 102, 102, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f7c95a80{width:0.735in;background-color:transparent;vertical-align: middle;border-bottom: 0.75pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0.75pt solid rgba(102, 102, 102, 1.00);border-right: 0.75pt solid rgba(102, 102, 102, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-9cdcfcd5{width:0.708in;background-color:transparent;vertical-align: middle;border-bottom: 0.75pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0.75pt solid rgba(102, 102, 102, 1.00);border-right: 0.75pt solid rgba(102, 102, 102, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-331b197f{width:1.091in;background-color:transparent;vertical-align: middle;border-bottom: 0.75pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0.75pt solid rgba(102, 102, 102, 1.00);border-right: 0.75pt solid rgba(102, 102, 102, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-de3e8475{width:1.064in;background-color:transparent;vertical-align: middle;border-bottom: 0.75pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0.75pt solid rgba(102, 102, 102, 1.00);border-right: 0.75pt solid rgba(102, 102, 102, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-26f2919c{width:1.05in;background-color:transparent;vertical-align: middle;border-bottom: 0.75pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0.75pt solid rgba(102, 102, 102, 1.00);border-right: 0.75pt solid rgba(102, 102, 102, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}.cl-f228b7a1{width:0.642in;background-color:transparent;vertical-align: middle;border-bottom: 0.75pt solid rgba(102, 102, 102, 1.00);border-top: 0 solid rgba(0, 0, 0, 1.00);border-left: 0.75pt solid rgba(102, 102, 102, 1.00);border-right: 0.75pt solid rgba(102, 102, 102, 1.00);margin-bottom:0;margin-top:0;margin-left:0;margin-right:0;}</style><table data-quarto-disable-processing='true' class='cl-d8bad469'>
+<caption style="display:table-caption;margin:0pt;text-align:center;border-bottom: 0.00pt solid transparent;border-top: 0.00pt solid transparent;border-left: 0.00pt solid transparent;border-right: 0.00pt solid transparent;padding-top:3pt;padding-bottom:3pt;padding-left:3pt;padding-right:3pt;line-height: 1;background-color:transparent;"><span id="tab:analysislast-3">Table 3.1: </span><span>Evolution of captures in tons and number of fish during the process</span></caption>
+<thead><tr style="overflow-wrap:break-word;"><th class="cl-5b51ceca"><p class="cl-6477613b"><span class="cl-377b090d">Step</span></p></th><th class="cl-7fb21f8b"><p class="cl-a1958ec5"><span class="cl-377b090d">Millions of tons</span></p></th><th class="cl-9fe5d415"><p class="cl-a1958ec5"><span class="cl-377b090d">Millions of fish</span></p></th><th class="cl-dbc96cc8"><p class="cl-a1958ec5"><span class="cl-377b090d">Difference (in % of tons)</span></p></th><th class="cl-53d69af3"><p class="cl-a1958ec5"><span class="cl-377b090d">Difference (in % of fish)</span></p></th><th class="cl-ffebaac1"><p class="cl-a1958ec5"><span class="cl-377b090d">Conversion factors (kg)</span></p></th><th class="cl-5109ec98"><p class="cl-a1958ec5"><span class="cl-377b090d">Step number</span></p></th></tr></thead><tbody><tr style="overflow-wrap:break-word;"><td class="cl-41edd74b"><p class="cl-6477613b"><span class="cl-f95cb0b7">step1-raw</span></p></td><td class="cl-f7c95a80"><p class="cl-a1958ec5"><span class="cl-f95cb0b7">0</span></p></td><td class="cl-9cdcfcd5"><p class="cl-a1958ec5"><span class="cl-f95cb0b7">0</span></p></td><td class="cl-331b197f"><p class="cl-a1958ec5"><span class="cl-7329fabf">-100</span></p></td><td class="cl-de3e8475"><p class="cl-a1958ec5"><span class="cl-7329fabf">-100</span></p></td><td class="cl-26f2919c"><p class="cl-a1958ec5"><span class="cl-f95cb0b7">136.36</span></p></td><td class="cl-f228b7a1"><p class="cl-a1958ec5"><span class="cl-f95cb0b7">1</span></p></td></tr><tr style="overflow-wrap:break-word;"><td class="cl-5b51ceca"><p class="cl-6477613b"><span class="cl-f95cb0b7">step2-processed</span></p></td><td class="cl-7fb21f8b"><p class="cl-a1958ec5"><span class="cl-f95cb0b7">0</span></p></td><td class="cl-9fe5d415"><p class="cl-a1958ec5"><span class="cl-f95cb0b7">0</span></p></td><td class="cl-dbc96cc8"><p class="cl-a1958ec5"><span class="cl-a2e5c7a5"></span></p></td><td class="cl-53d69af3"><p class="cl-a1958ec5"><span class="cl-a2e5c7a5"></span></p></td><td class="cl-ffebaac1"><p class="cl-a1958ec5"><span class="cl-f95cb0b7"></span></p></td><td class="cl-5109ec98"><p class="cl-a1958ec5"><span class="cl-f95cb0b7">2</span></p></td></tr></tbody></table></div>
+<pre><code>## NULL</code></pre>
+<div class="figure"><span style="display:block;" id="fig:evolamountduringprocess"></span>
+<img src="tableau_recapbookdowntest_files/figure-html/evolamountduringprocess-1.png" alt="Evolution of captures in tons and number of fish during the process" width="100%" />
+<p class="caption">
+Figure 3.1: Evolution of captures in tons and number of fish during the process
+</p>
+</div>
+
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="summary-of-the-treatment-done-on-the-data-comparison-between-the-initial-data-and-the-data-resulting-from-treatments.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="detail-of-all-the-steps-of-treatment-of-the-data.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+  "sharing": {
+    "github": false,
+    "facebook": true,
+    "twitter": true,
+    "linkedin": false,
+    "weibo": false,
+    "instapaper": false,
+    "vk": false,
+    "whatsapp": false,
+    "all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+  },
+  "fontsettings": {
+    "theme": "white",
+    "family": "sans",
+    "size": 2
+  },
+  "edit": {
+    "link": null,
+    "text": null
+  },
+  "history": {
+    "link": null,
+    "text": null
+  },
+  "view": {
+    "link": null,
+    "text": null
+  },
+  "download": null,
+  "search": {
+    "engine": "fuse",
+    "options": null
+  },
+  "toc": {
+    "collapse": "subsection",
+    "scroll_highlight": true
+  }
+});
+});
+</script>
+
+</body>
+
+</html>
