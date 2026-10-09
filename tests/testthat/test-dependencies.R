@@ -62,5 +62,8 @@ test_that("every function called in the package can be found", {
   report <- vapply(names(missing), function(name) {
     paste0(name, "(): ", paste(missing[[name]], collapse = ", "))
   }, character(1))
-  expect_equal(unname(report), character())
+  expect(
+    length(report) == 0,
+    paste0("Functions called but not found:\n", paste0("  ", report, collapse = "\n"))
+  )
 })
