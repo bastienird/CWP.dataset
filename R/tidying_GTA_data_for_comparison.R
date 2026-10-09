@@ -42,7 +42,7 @@
 tidying_GTA_data_for_comparison <- function(dataframe, shape = NULL,
                                             species_group_dataframe = NULL,
                                             cl_cwp_gear_level2_dataframe = NULL) {
-  if(is_string(dataframe)){
+  if(rlang::is_string(dataframe)){
     dataframe <- readRDS(dataframe)
   }
 

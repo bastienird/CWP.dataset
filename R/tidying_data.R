@@ -9,7 +9,7 @@
 tidying_data <- function(dataframe, parameter_colnames_to_keep_dataframe, time_dimension){
   dataframe <- dataframe %>% ungroup()
   dataframe <- dataframe %>% dplyr::select(any_of(parameter_colnames_to_keep_dataframe))
-  dataframe <- dataframe %>% mutate_at(all_of(time_dimension), as.character)
+  dataframe <- dataframe %>% dplyr::mutate(dplyr::across(dplyr::all_of(time_dimension), as.character))
   return(dataframe)
 
 }

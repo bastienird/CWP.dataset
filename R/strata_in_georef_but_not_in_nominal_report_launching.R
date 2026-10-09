@@ -4,7 +4,8 @@
 #'
 #' @param main.dir Directory containing the main data files.
 #' @param connectionDB Database connection object.
-#' @param uploadgoogledrive Logical indicating whether to upload the report to Google Drive.
+#' @param uploadgoogledrive Deprecated and ignored: the upload to Google Drive has been removed.
+#'   Kept so that existing calls do not fail.
 #' @return Data frame containing the upgraded nominal data.
 #' @import dplyr
 #' @importFrom lubridate year
@@ -12,9 +13,11 @@
 #' @importFrom janitor clean_names
 #' @importFrom readr read_csv
 #' @importFrom rmarkdown render
-#' @importFrom googledrive drive_upload as_id
 #' @export
-strata_in_georef_but_not_in_nominal_report_launching <- function(main.dir, connectionDB, uploadgoogledrive = TRUE) {
+strata_in_georef_but_not_in_nominal_report_launching <- function(main.dir, connectionDB, uploadgoogledrive = FALSE) {
+  if (isTRUE(uploadgoogledrive)) {
+    warning("uploadgoogledrive is ignored: the upload to Google Drive has been removed from CWP.dataset.")
+  }
   ancient_wd <- getwd()
   setwd(main.dir)
   path <- getwd()
@@ -108,13 +111,6 @@ strata_in_georef_but_not_in_nominal_report_launching <- function(main.dir, conne
     for (file in files) {
       new_name <- create_new_name(file)
       file.copy(file, file.path(target_directory, new_name))
-
-      if (uploadgoogledrive) {
-        # config$logger.info("Upload netcdf to Google Drive")
-        folder_datasets_id <- "1vvmdaT80ZFHnDZcJyhyIOsf_mOJjB5tA"
-        path_to_dataset_new <- file.path(file)
-        googledrive::drive_upload(path_to_dataset_new, googledrive::as_id(folder_datasets_id), overwrite = TRUE)
-      }
     }
 
     # upgradded_nominal <- rbind(nominal, georef_no_nominal_all)

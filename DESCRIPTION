@@ -17,22 +17,21 @@ Imports:
     cowplot,
     data.table,
     dplyr,
-    DT,
-    dygraphs,
     flextable,
     futile.logger,
     ggplot2,
-    googledrive,
     grDevices,
     grid,
     gridExtra,
     here,
+    htmltools,
     janitor,
     knitr,
+    leaflet,
+    leafsync,
     lubridate,
-    plotrix,
+    nanoparquet,
     purrr,
-    qs,
     RColorBrewer,
     readr,
     rlang,
@@ -42,20 +41,26 @@ Imports:
     stringr,
     tibble,
     tidyr,
-    tmap,
     tools,
     utils,
-    xts,
     DBI, 
     fs, 
     yaml
 Suggests: 
+    codetools,
+    curl,
+    DT,
+    dygraphs,
     fusen,
-    testthat
+    testthat,
+    tinytex,
+    tmap,
+    usethis,
+    xts
 VignetteBuilder: 
     knitr
 Config/fusen/version: 0.7.0
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+Config/roxygen2/version: 8.1.0

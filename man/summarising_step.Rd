@@ -13,7 +13,10 @@ summarising_step(
   savestep = FALSE,
   nameoutput = NULL,
   usesave = FALSE,
-  fast_and_heavy = TRUE
+  fast_and_heavy = TRUE,
+  parameter_colnames_to_keep_fact = NULL,
+  render_pdf = FALSE,
+  interactive = TRUE
 )
 }
 \arguments{
@@ -25,20 +28,31 @@ summarising_step(
 
 \item{source_authoritylist}{Vector. Vector of source_authority to filter on, "all" being all of them.}
 
-\item{sizepdf}{Character string. La taille peut prendre les valeurs suivantes :}
-
-\item{savestep}{Logical TRUE/FALSE, should the .qs result of this be saved ?}
-
-\item{nameoutput}{Character, name of the .qs if saved}
-
-\item{usesave}{Logical Should we use the nameoutput .qs instead of rerunning everything ?}
-
-\item{fast_and_heavy}{Logical TRUE/FALSE, should we save a .qs for each dataset, and use this .qs in every markdown
+\item{sizepdf}{Character string. La taille peut prendre les valeurs suivantes :
 \itemize{
 \item \code{"long"} (par défaut) : Long with coverage.
 \item \code{"middle"} : Long without coverage
 \item \code{"short"} : Only first characteristics, first differences and main table of steps
 }}
+
+\item{savestep}{Logical TRUE/FALSE, should the result of this be saved (.rds) ?}
+
+\item{nameoutput}{Character, name of the output directory of the report}
+
+\item{usesave}{Logical Should the results saved by a previous run be used instead of rerunning everything ?}
+
+\item{fast_and_heavy}{Logical TRUE/FALSE, if FALSE, each result is saved to its own .rds file and read back by the chapter that needs it, which uses less memory}
+
+\item{parameter_colnames_to_keep_fact}{Vector: what column to display}
+
+\item{render_pdf}{Logical. Should the PDF report be rendered in addition to the HTML one?
+Default \code{FALSE}: only the HTML report is produced, which needs no LaTeX installation. With
+\code{TRUE}, the PDF is rendered if \code{lualatex} is available (for instance through TinyTeX);
+otherwise a warning is logged and only the HTML report is produced.}
+
+\item{interactive}{Logical. Should the HTML report use the interactive version of the plots
+that have one (maps, with the {leaflet} package)? Default \code{TRUE}. The PDF report always uses
+the static plots. Without {leaflet}, the static maps are used.}
 }
 \value{
 NULL. The function has side effects, such as writing files and rendering reports.

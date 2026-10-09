@@ -38,11 +38,16 @@
 #' - **Comparisons across time, space, and other dimensions**
 #' - **Optional visualizations**
 #'
+#' @param deferred_plots Logical. If `TRUE` (default), the plots are not drawn: the result holds
+#'   deferred plots, i.e. the small aggregated tables and the name of the function that draws them.
+#'   They are drawn when the report is rendered, or with [cwp_materialise_plot()]. The result is
+#'   then plain data: much lighter to save, and independent of the version of the plotting
+#'   packages. Use `FALSE`, or `options(CWP.dataset.deferred_plots = FALSE)`, to get plot objects
+#'   as before. Maps drawn with tmap (`map_engine = "tmap"`) are never deferred.
 #' @export
 #'
 #' @import ggplot2
 #' @import data.table
-#' @import gridExtra
 comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final,
                                                  fig.path = getwd(),
                                                  parameter_fact = "catch",
@@ -67,7 +72,10 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
                                                  parameter_titre_dataset_1 = "Dataset 1",
                                                  parameter_titre_dataset_2 = "Dataset 2",
                                                  unique_analyse = FALSE,
-                                                 removemap = FALSE, topnumber = 6) {
+                                                 removemap = FALSE, topnumber = 6,
+                                                 deferred_plots = getOption("CWP.dataset.deferred_plots", TRUE)) {
+  # Do not let the returned plots keep the full datasets alive (see R/forget.R)
+  on.exit(cwp_forget(c("parameter_init", "parameter_final", "init", "final"), environment()), add = TRUE)
   # Process 'parameter_init'
   if (is.character(parameter_init)) {
     init <- read_data(parameter_init) %>%
@@ -123,8 +131,8 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
 
   colnames_intersect <- intersect(colnames(init), colnames(final))
 
-  init <- init %>% dplyr::select(colnames_intersect)
-  final <- final %>% dplyr::select(colnames_intersect)
+  init <- init %>% dplyr::select(dplyr::all_of(colnames_intersect))
+  final <- final %>% dplyr::select(dplyr::all_of(colnames_intersect))
 
   #cat("Renaming geographic identifiers and handling non-standard units...\n")
   init <- CWP.dataset::function_geographic_identifier_renaming_and_not_standards_unit(
@@ -178,12 +186,12 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
     compare_dimension_differences_list$title <-paste0("Difference between the non appearing/disappearing stratas between ", parameter_titre_dataset_1, " and ", parameter_titre_dataset_2)
 
     if (length(parameter_time_dimension) != 0) {
-      plot_titles_list <- CWP.dataset::compare_temporal_differences(parameter_time_dimension, init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse = FALSE)
+      plot_titles_list <- CWP.dataset::compare_temporal_differences(parameter_time_dimension, init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse = FALSE, deferred = deferred_plots)
     }
 
     if (length(parameter_geographical_dimension) != 0 && print_map) {
       Geographicdiff <- CWP.dataset::geographic_diff(init, final, shapefile_fix, parameter_geographical_dimension, parameter_geographical_dimension_groupping, continent, plotting_type = plotting_type, parameter_titre_dataset_1,
-                                        parameter_titre_dataset_2, outputonly)
+                                        parameter_titre_dataset_2, outputonly, deferred = deferred_plots)
       if(removemap| !print_map){
         Geographicdiff$plott <- NULL
         gc()
@@ -201,23 +209,23 @@ comprehensive_cwp_dataframe_analysis <- function(parameter_init, parameter_final
   }
 
   if (length(parameter_time_dimension) != 0 && coverage) {
-    time_coverage_analysis_list <- CWP.dataset::time_coverage_analysis(time_dimension_list_groupped, parameter_time_dimension, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse)
+    time_coverage_analysis_list <- CWP.dataset::time_coverage_analysis(time_dimension_list_groupped, parameter_time_dimension, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse, deferred = deferred_plots)
   } else {
     time_coverage_analysis_list <- NULL
   }
 
   if(coverage){
-    other_dimension_analysis_list <- CWP.dataset::other_dimension_analysis(Other_dimensions, init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse)
+    other_dimension_analysis_list <- CWP.dataset::other_dimension_analysis(Other_dimensions, init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, unique_analyse, deferred = deferred_plots)
   } else {
     other_dimension_analysis_list <- NULL
   }
   if (print_map && coverage) {
-    spatial_coverage_analysis_list <- CWP.dataset::spatial_coverage_analysis(init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, shapefile_fix, plotting_type = plotting_type, continent, TRUE, Grouppedgridtype)
+    spatial_coverage_analysis_list <- CWP.dataset::spatial_coverage_analysis(init, final, parameter_titre_dataset_1, parameter_titre_dataset_2, shapefile_fix, plotting_type = plotting_type, continent, TRUE, Grouppedgridtype, deferred = deferred_plots)
   } else {
     spatial_coverage_analysis_list <- NULL
   }
 
-  combined_summary_histogram <- CWP.dataset::combined_summary_histogram_function(init, parameter_titre_dataset_1, final, parameter_titre_dataset_2)
+  combined_summary_histogram <- CWP.dataset::combined_summary_histogram_function(init, parameter_titre_dataset_1, final, parameter_titre_dataset_2, deferred = deferred_plots)
 
   rm(init)
   rm(final)

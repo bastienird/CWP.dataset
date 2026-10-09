@@ -12,7 +12,9 @@ fonction_empreinte_spatiale(
   titre_2 = "Dataset 2",
   shapefile.fix = NULL,
   plotting_type = "plot",
-  continent = NULL
+  continent = NULL,
+  map_engine = getOption("CWP.dataset.map_engine", "tiles"),
+  deferred = FALSE
 )
 }
 \arguments{
@@ -31,6 +33,15 @@ fonction_empreinte_spatiale(
 \item{plotting_type}{A character string indicating the type of plot ("plot" or "view").}
 
 \item{continent}{An optional spatial object for adding continent borders to the plot.}
+
+\item{map_engine}{Character. \code{"tiles"} (default) draws the grid cells as ggplot2 tiles, which is
+much faster than one polygon per cell but gives a static map. \code{"tmap"} keeps the previous
+tmap rendering (interactive in HTML when \code{tmap_mode("view")}). The default can be set for a
+whole session with \code{options(CWP.dataset.map_engine = "tmap")}. If the cells cannot be drawn
+as tiles, tmap is used.}
+
+\item{deferred}{Logical. If \code{TRUE}, a tile map is returned as a deferred plot (its description,
+to be drawn with \code{\link[=cwp_materialise_plot]{cwp_materialise_plot()}}) instead of a plot object. Default \code{FALSE}.}
 }
 \value{
 A plot object representing the spatial footprint of the measurement values.

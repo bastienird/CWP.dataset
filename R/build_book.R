@@ -1,10 +1,10 @@
 #' Build a bookdown project in isolated sessions
 #'
 #' This function automates the process of building a Bookdown project with `new_session = TRUE`.
-#' It copies and injects setup and chapter files, loads a master .qs environment,
+#' It copies and injects setup and chapter files, loads a master environment saved with [cwp_save_object()],
 #' and restores the working directory after completion.
 #'
-#' @param master_qs_rel Path to the master .qs file, relative to the initial working directory.
+#' @param master_qs_rel Path to the master environment file (.rds), relative to the initial working directory.
 #' @param orig_setup_rmd Path to the Setup_markdown.Rmd file (typically via `system.file()`).
 #' @param src_paths Character vector of source Rmd paths to include in the book.
 #' @param book_filename Filename (without extension) for the output book.
@@ -15,12 +15,12 @@
 #' @param delete_merged_file Logical; passed to Bookdown to delete intermediate merged files.
 #' @param root Root directory of the project where Bookdown should run (defaults to here::here()).
 #'
-#' @import bookdown yaml fs qs here knitr
+#' @import bookdown yaml fs here knitr
 #'
 #' @examples
 #' \dontrun{
 #' build_book(
-#'   master_qs_rel   = "everything_for_bookdown_fixed.qs",
+#'   master_qs_rel   = "everything_for_bookdown_fixed.rds",
 #'   orig_setup_rmd  = system.file("rmd/Setup_markdown.Rmd", package = "CWP.dataset"),
 #'   src_paths       = c(
 #'     system.file("rmd/index.Rmd", package = "CWP.dataset"),
@@ -57,7 +57,7 @@ build_book <- function(master_qs_rel,
   master_qs_abs <- fs::path_abs(master_qs_rel, start = orig_wd)
 
   # Read and fix the master environment paths
-  absolute_path_env <- qs::qread(master_qs_abs)
+  absolute_path_env <- cwp_read_object(master_qs_abs)
   fixed_env <- new.env(parent = emptyenv())
   for (nm in ls(absolute_path_env, all.names = TRUE)) {
     val <- get(nm, envir = absolute_path_env)
@@ -66,9 +66,9 @@ build_book <- function(master_qs_rel,
     }
     assign(nm, val, envir = fixed_env)
   }
-  fixed_qs <- "everything_for_bookdown_fixed.qs"
+  fixed_qs <- "everything_for_bookdown_fixed.rds"
   if (file.exists(fixed_qs)) unlink(fixed_qs)
-  qs::qsave(fixed_env, fixed_qs)
+  cwp_save_object(fixed_env, fixed_qs)
   master_qs_abs <- fs::path_abs(fixed_qs, start = orig_wd)
 
   # Prepare Bookdown configuration
@@ -97,10 +97,12 @@ build_book <- function(master_qs_rel,
     lines <- readLines(dest, warn = FALSE)
     chunk_load_master <- c(
       "```{r load_master, include=FALSE}",
-      sprintf("master_env <- qs::qread('%s')", master_qs_abs),
+      sprintf("master_env <- CWP.dataset::cwp_read_object('%s')", master_qs_abs),
       "master_list <- as.list(master_env, all.names = TRUE)",
       "rm(master_env)",
       "knitr::opts_chunk$set(duplicate.label = 'allow')",
+      # Chapters can be rendered in a new R session: pass the choice on
+      sprintf("options(CWP.dataset.interactive = %s)", isTRUE(getOption("CWP.dataset.interactive", TRUE))),
       "list2env(master_list, envir = .GlobalEnv)",
       "rm(master_list)",
       "```",""

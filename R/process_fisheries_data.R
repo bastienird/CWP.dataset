@@ -16,9 +16,10 @@
 #' print(result$tons_plot)
 #' }
 #' @export
-#' @importFrom qs qread
 #' @import ggplot2
 process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_filtering) {
+  # Do not let the returned plots keep the full datasets alive (see R/forget.R)
+  on.exit(cwp_forget(c("main", "main_i", "nominal_dataset"), environment()), add = TRUE)
 
   if (parameter_fact == "catch") {
 
@@ -31,7 +32,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
         fname <- if (file.exists(nom_file1)) nom_file1 else nom_file2
         nominal_dataset <- readr::read_csv(fname)
         nominal_dataset$measurement_unit <- "t"
-        nominal_dataset <- CWP.dataset::enrich_dataset_if_needed(nominal_dataset)$without_geom
+        nominal_dataset <- CWP.dataset::enrich_dataset_if_needed(nominal_dataset, with_geom = FALSE)$without_geom
         nominal_dataset <- CWP.dataset::filtering_function(nominal_dataset, parameter_filtering = parameter_filtering)
         nominal <- sum(nominal_dataset$measurement_value)
         have_nominal <- TRUE
@@ -63,13 +64,13 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
     }
 
     # Initial sums
-    main <- CWP.dataset::filtering_function(qs::qread(paste0(sub_list_dir_2[1], "/data.qs")), parameter_filtering = parameter_filtering)
+    main <- CWP.dataset::filtering_function(cwp_read_step_data(sub_list_dir_2[1]), parameter_filtering = parameter_filtering)
     tons_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("MTNO", "MT", "t", "Tons")))$measurement_value)
     nofish_init <- sum((main %>% dplyr::filter(measurement_unit %in% c("NOMT", "NO", "no", "Number of fish")))$measurement_value)
     lines_init <- nrow(main)
 
     for (i in sub_list_dir_2) {
-      step <- tail(str_split(i, "/")[[1]], n = 1)
+      step <- basename(i)
       Explanation <- readLines(paste0(i, "/explanation.txt"))[1]
       Functions   <- readLines(paste0(i, "/functions.txt"))[1]
       Options     <- if (file.exists(paste0(i, "/options_written.txt"))) readLines(paste0(i, "/options_written.txt"))[1] else "None"
@@ -78,7 +79,7 @@ process_fisheries_data <- function(sub_list_dir_2, parameter_fact, parameter_fil
         sums <- read_csv(paste0(i, "/sums.csv"))
         sum_t <- sums$sum_t; sum_no <- sums$sum_no; nrow_i <- sums$lines
       } else {
-        main_i <- CWP.dataset::filtering_function(qs::qread(paste0(i, "/data.qs")), parameter_filtering = parameter_filtering)
+        main_i <- CWP.dataset::filtering_function(cwp_read_step_data(i), parameter_filtering = parameter_filtering)
         sum_t <- sum((main_i %>% dplyr::filter(measurement_unit %in% c("MTNO","MT","t","Tons")))$measurement_value)
         sum_no <- sum((main_i %>% dplyr::filter(measurement_unit %in% c("NOMT","NO","no","Number of fish")))$measurement_value)
         nrow_i <- nrow(main_i)

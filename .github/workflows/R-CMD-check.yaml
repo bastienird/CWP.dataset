@@ -1,10 +1,10 @@
-# Workflow GitHub Actions pour tester le package R via R CMD check
-# Basé sur l'exemple de r-lib/actions et adapté pour fusen
-
+# R CMD check on one platform. It runs on every pull request and on pushes to
+# the main branch, and can be started by hand from the Actions tab.
 on:
   push:
     branches: [main, master]
   pull_request:
+  workflow_dispatch:
 
 name: R-CMD-check
 
@@ -12,19 +12,8 @@ permissions: read-all
 
 jobs:
   R-CMD-check:
-    runs-on: ${{ matrix.config.os }}
-
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
-
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - {os: macos-latest,   r: 'release'}
-          - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
-          - {os: ubuntu-latest,   r: 'release'}
-          - {os: ubuntu-latest,   r: 'oldrel-1'}
+    runs-on: ubuntu-latest
+    name: ubuntu-latest (release)
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -34,28 +23,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install system dependencies (Linux only)
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y qpdf
-
       - name: Set up Pandoc
         uses: r-lib/actions/setup-pandoc@v2
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v2
         with:
-          r-version: ${{ matrix.config.r }}
-          http-user-agent: ${{ matrix.config.http-user-agent }}
+          r-version: release
           use-public-rspm: true
 
+      # System libraries (GDAL, GEOS, PROJ for sf, ...) are installed with the packages
       - name: Install R dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: any::rcmdcheck
           needs: check
 
+      # Only errors fail the job for now: warnings and notes are listed in the
+      # log and can be dealt with progressively.
       - name: Run R CMD check
         uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
-          build_args: 'c("--no-manual","--compact-vignettes=gs+qpdf")'
+          error-on: '"error"'

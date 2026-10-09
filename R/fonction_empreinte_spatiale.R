@@ -13,20 +13,27 @@
 #' @param shapefile.fix A spatial object (sf) for the polygons that defines the geographical areas.
 #' @param plotting_type A character string indicating the type of plot ("plot" or "view").
 #' @param continent An optional spatial object for adding continent borders to the plot.
+#' @param map_engine Character. `"tiles"` (default) draws the grid cells as ggplot2 tiles, which is
+#'   much faster than one polygon per cell but gives a static map. `"tmap"` keeps the previous
+#'   tmap rendering (interactive in HTML when `tmap_mode("view")`). The default can be set for a
+#'   whole session with `options(CWP.dataset.map_engine = "tmap")`. If the cells cannot be drawn
+#'   as tiles, tmap is used.
+#' @param deferred Logical. If `TRUE`, a tile map is returned as a deferred plot (its description,
+#'   to be drawn with [cwp_materialise_plot()]) instead of a plot object. Default `FALSE`.
 #'
 #' @return A plot object representing the spatial footprint of the measurement values.
 #' @export
 fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = init, final_dataset = final,
                                         titre_1 = "Dataset 1", titre_2 = "Dataset 2",
-                                        shapefile.fix = NULL, plotting_type = "plot", continent = NULL) {
+                                        shapefile.fix = NULL, plotting_type = "plot", continent = NULL,
+                                        map_engine = getOption("CWP.dataset.map_engine", "tiles"),
+                                        deferred = FALSE) {
+  # Do not let the returned plots keep the full datasets alive (see R/forget.R)
+  on.exit(cwp_forget(c("initial_dataset", "final_dataset", "Initial_dataframe", "Final_dataframe", "geo_data", "shapefile.fix"), environment()), add = TRUE)
 
   if(is.null(shapefile.fix)){
     stop("Please provide a shape for the polygons")
   }
-  tmap_options(
-    show.messages = FALSE,
-    show.warnings = FALSE
-  )
 
 
   selection <- function(x) {
@@ -50,6 +57,43 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
                          by = .(geographic_identifier, measurement_unit, source, gridtype)][
                            measurement_value != 0]
 
+  if (identical(map_engine, "tiles")) {
+    unit_data <- inner_join_data[measurement_unit == variable_affichee]
+    image <- tryCatch({
+      tiles <- cwp_grid_tiles(shapefile.fix, unit_data$geographic_identifier)
+      if (is.null(tiles)) NULL else {
+        plot_data <- merge(unit_data, tiles,
+                           by.x = "geographic_identifier", by.y = "code")
+        # FALSE: tiles are usable but there is nothing to draw for this unit
+        if (nrow(plot_data) == 0) FALSE else {
+          do.call(cwp_plot_or_spec, c(
+            list(deferred, "cwp_tile_map"),
+            cwp_tile_map_args(
+              plot_data,
+              fill = "measurement_value",
+              facet_rows = "gridtype",
+              facet_cols = "source",
+              fill_scale = "value",
+              continent = continent,
+              popup_cols = c("geographic_identifier", "measurement_value")
+            )
+          ))
+        }
+      }
+    }, error = function(e) {
+      warning("Tile map failed (", conditionMessage(e), "), falling back to tmap.")
+      NULL
+    })
+    if (isFALSE(image)) return(invisible(NULL))
+    if (!is.null(image)) return(image)
+  }
+
+  cwp_require_package("tmap", "to draw maps with map_engine = \"tmap\", or when the cells cannot be drawn as tiles")
+  tmap::tmap_options(
+    show.messages = FALSE,
+    show.warnings = FALSE
+  )
+
   inner_join_data <- st_as_sf(inner_join(inner_join_data,
                                 shapefile.fix %>% dplyr::select(code, geom),
                                 by = c("geographic_identifier" = "code")))
@@ -57,11 +101,11 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
   if (nrow(inner_join_data%>% dplyr::filter(measurement_unit == variable_affichee)) != 0) {
 
     image <-
-      tm_shape(
+      tmap::tm_shape(
         inner_join_data %>%
           dplyr::filter(measurement_unit == variable_affichee)
       ) +
-      tm_fill(
+      tmap::tm_fill(
         col = "measurement_value",
         palette = "brewer.rd_yl_gn",
         style = "cont",
@@ -70,18 +114,18 @@ fonction_empreinte_spatiale <- function(variable_affichee, initial_dataset = ini
         border.col = NA,
         lwd = 0
       ) +
-      tm_layout(
+      tmap::tm_layout(
         legend.outside = FALSE,
         component.autoscale = FALSE
       ) +
-      tmap:::tm_facets_grid(
+      tmap::tm_facets_grid(
         rows = "gridtype",
         columns = "source"
       )
     if (inherits(continent, c("sf", "sfc", "SpatVector"))) {
       image <- image +
-        tm_shape(continent) +
-        tm_borders()
+        tmap::tm_shape(continent) +
+        tmap::tm_borders()
     }
 
 

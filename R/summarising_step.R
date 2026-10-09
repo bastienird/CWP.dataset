@@ -7,9 +7,9 @@
 #' @param connectionDB Object. The database connection.
 #' @param config List. Configuration list containing metadata and options for processing.
 #' @param source_authoritylist Vector. Vector of source_authority to filter on, "all" being all of them.
-#' @param savestep Logical TRUE/FALSE, should the .qs result of this be saved ?
-#' @param nameoutput Character, name of the .qs if saved
-#' @param usesave Logical Should we use the nameoutput .qs instead of rerunning everything ?
+#' @param savestep Logical TRUE/FALSE, should the result of this be saved (.rds) ?
+#' @param nameoutput Character, name of the output directory of the report
+#' @param usesave Logical Should the results saved by a previous run be used instead of rerunning everything ?
 #' @param sizepdf Character string. La taille peut prendre les valeurs suivantes :
 #'   \itemize{
 #'     \item `"long"` (par défaut) : Long with coverage.
@@ -18,7 +18,14 @@
 #'   }
 #' @param parameter_colnames_to_keep_fact Vector: what column to display
 #' @return NULL. The function has side effects, such as writing files and rendering reports.
-#' @param fast_and_heavy Logical TRUE/FALSE, should we save a .qs for each dataset, and use this .qs in every markdown
+#' @param render_pdf Logical. Should the PDF report be rendered in addition to the HTML one?
+#'   Default `FALSE`: only the HTML report is produced, which needs no LaTeX installation. With
+#'   `TRUE`, the PDF is rendered if `lualatex` is available (for instance through TinyTeX);
+#'   otherwise a warning is logged and only the HTML report is produced.
+#' @param interactive Logical. Should the HTML report use the interactive version of the plots
+#'   that have one (maps, with the {leaflet} package)? Default `TRUE`. The PDF report always uses
+#'   the static plots. Without {leaflet}, the static maps are used.
+#' @param fast_and_heavy Logical TRUE/FALSE, if FALSE, each result is saved to its own .rds file and read back by the chapter that needs it, which uses less memory
 #'
 #' @examples
 #' \dontrun{
@@ -29,10 +36,10 @@
 #' @import dplyr
 #' @import sf
 #' @importFrom futile.logger flog.info flog.warn flog.error
-#' @importFrom qs qread qsave
 #' @export
 summarising_step <- function(main_dir, connectionDB, config, source_authoritylist = c("all","IOTC","WCPFC", "IATTC", "ICCAT", "CCSBT" ), sizepdf = "long",
-                             savestep = FALSE, nameoutput = NULL, usesave = FALSE, fast_and_heavy = TRUE, parameter_colnames_to_keep_fact = NULL) {
+                             savestep = FALSE, nameoutput = NULL, usesave = FALSE, fast_and_heavy = TRUE, parameter_colnames_to_keep_fact = NULL,
+                             render_pdf = FALSE, interactive = TRUE) {
 
   if(sizepdf == "long"){
     coverage = TRUE
@@ -42,16 +49,20 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
     stop('Please provide a correct sizepdf, "short", "middle" or "long"')
   }
 
-  pdf_render_available <- tryCatch({
-    requireNamespace("tinytex", quietly = TRUE) &&
-      isTRUE(tinytex::is_tinytex()) &&
-      nzchar(Sys.which("pdflatex"))
-  }, error = function(e) FALSE)
+  old_options <- options(CWP.dataset.interactive = isTRUE(interactive))
+  on.exit(options(old_options), add = TRUE)
 
-  if (!pdf_render_available) {
-    futile.logger::flog.warn(
-      "TinyTeX non detecte : les rendus PDF seront ignores, le HTML/gitbook reste genere."
-    )
+  # The HTML report only needs pandoc and is always rendered. The PDF needs a
+  # LaTeX installation: it is rendered only when asked for and when the engine
+  # of the report (lualatex, see inst/rmd/index.Rmd) is available.
+  pdf_render_available <- FALSE
+  if (isTRUE(render_pdf)) {
+    pdf_render_available <- nzchar(Sys.which("lualatex"))
+    if (!pdf_render_available) {
+      futile.logger::flog.warn(
+        "PDF demande mais lualatex introuvable (TinyTeX non installe ?) : seul le HTML/gitbook sera genere."
+      )
+    }
   }
 
   futile.logger::flog.info(paste0("Size pdf is:", sizepdf))
@@ -78,64 +89,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
                                  geom     = geom_wkt)
   futile.logger::flog.info("New function")
 
-  try_get_continent_layer <- function(
-    con = NULL,
-    fallback_file = "UN_CONTINENT2.qs"
-  ) {
-    # 1. Try to read from database
-    if (!is.null(con) && DBI::dbIsValid(con)) {
-      message("Attempting to read continent layer from database...")
-
-      res <- try(
-        sf::st_read(con, query = "SELECT * FROM public.continent", quiet = TRUE),
-        silent = TRUE
-      )
-
-      if (!inherits(res, "try-error")) {
-        message("Continent layer successfully read from database.")
-        sf::st_crs(res) <- 4326
-
-        if (!is.null(fallback_file)) {
-          qs::qsave(res, fallback_file)
-        }
-
-        return(res)
-      }
-    }
-
-    # 2. Try to load from local .qs file
-    if (!is.null(fallback_file) && file.exists(fallback_file)) {
-      message("Loading continent layer from local file: ", fallback_file)
-      continent <- qs::qread(fallback_file)
-      sf::st_crs(continent) <- 4326
-      return(continent)
-    }
-
-    # 3. Try to load from package extdata
-    package_file <- system.file(
-      "extdata",
-      "continent.qs",
-      package = "CWP.dataset"
-    )
-
-    if (nzchar(package_file)) {
-      message("Loading continent layer from package extdata: ", package_file)
-      continent <- qs::qread(package_file)
-      sf::st_crs(continent) <- 4326
-
-      if (!is.null(fallback_file)) {
-        qs::qsave(continent, fallback_file)
-      }
-
-      return(continent)
-    }
-
-    stop(
-      "Unable to retrieve continent layer from database, local file, or package extdata."
-    )
-  }
-
-  continent <- try_get_continent_layer(NULL)
+  continent <- cwp_default_continent()
 
   if (is.null(continent)) {
 
@@ -159,7 +113,20 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
     futile.logger::flog.info("Processing entity directory: %s", entity_dir)
 
-    entity <- config$metadata$content$entities[[i]]
+    # Match the entity on its identifier rather than on its position: the
+    # alphabetical order of the directories is not necessarily the config order.
+    entities <- config$metadata$content$entities
+    entity_ids <- vapply(entities, function(e) {
+      id <- tryCatch(as.character(e$identifiers[["id"]]), error = function(err) NA_character_)
+      if (length(id) == 1) id else NA_character_
+    }, character(1))
+    entity_index <- match(basename(entity_dir), entity_ids)
+    if (is.na(entity_index)) {
+      futile.logger::flog.warn("No entity with id '%s' in config, falling back to position %s",
+                               basename(entity_dir), i)
+      entity_index <- i
+    }
+    entity <- entities[[entity_index]]
     i <- i + 1
     action <- entity$data$actions[[1]]
     opts <- action$options
@@ -181,27 +148,31 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
     setwd(here::here(entity_dir))
     # copy_project_files(original_repo_path = here::here("Analysis_markdown"), new_repo_path = getwd())
 
-    sub_list_dir_2 <- list.files("Markdown", recursive = TRUE, pattern = "data.qs", full.names = TRUE)
-    details <- file.info(sub_list_dir_2)
-    details <- details[with(details, order(as.POSIXct(mtime))), ]
-    sub_list_dir_2 <- rownames(details)
-    futile.logger::flog.info("Processed sub_list_dir_2")
+    step_dirs <- cwp_list_step_dirs("Markdown")
+    futile.logger::flog.info("Listed %s step directories", length(step_dirs))
 
-    for (file in sub_list_dir_2) {
+    for (step_dir in step_dirs) {
       `%notin%` <- Negate(`%in%`)
-      if (!file.exists(gsub(pattern = basename(file), replacement = "ancient.qs", file))) {
-        data <- qs::qread(file)
-        file.copy(from = file, to = gsub(pattern = basename(file), replacement = "ancient.qs", file))
-        data <- CWP.dataset::enrich_dataset_if_needed(data, shp_raw = shp_raw)$without_geom
+      # An "ancient" copy means the dataset of this step is already enriched
+      if (length(list.files(step_dir, pattern = "^ancient\\.(parquet|rds|qs)$")) == 0) {
+        file <- cwp_step_data_path(step_dir)
+        data <- read_data(file)
+        # copy.date keeps the original date, which gives the order of the steps
+        file.copy(from = file, to = file.path(step_dir, paste0("ancient.", tools::file_ext(file))),
+                  copy.date = TRUE)
+        data <- CWP.dataset::enrich_dataset_if_needed(data, shp_raw = shp_raw, with_geom = FALSE)$without_geom
         data <- data%>%dplyr::mutate(measurement_unit = dplyr::case_when(measurement_unit %in% c("MT","t","MTNO", "Tons")~ "Tons",
                                                                          measurement_unit %in% c("NO", "NOMT","no", "Number of fish")~"Number of fish", TRUE ~ as.character(measurement_unit)))
 
-        qs::qsave(data, file = file)
-        futile.logger::flog.info("Processed and saved data for file: %s", file)
+        cwp_write_step_data(data, step_dir)
+        rm(data)
+        futile.logger::flog.info("Processed and saved data for step: %s", step_dir)
       } else {
-        futile.logger::flog.info("Retrieving processed data: %s", file)
+        futile.logger::flog.info("Retrieving processed data: %s", step_dir)
       }
     }
+    # Path of the dataset of each step, in processing order
+    sub_list_dir_2 <- vapply(step_dirs, cwp_step_data_path, character(1), USE.NAMES = FALSE)
     parameter_resolution_filter <- opts$resolution_filter
     parameter_filtering <- opts$parameter_filtering
     for (s in 1:length(source_authoritylist)){
@@ -213,14 +184,14 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       prefix <- paste0(sizepdf, source_authoritylist[s])
 
-      if(usesave & file.exists(paste0(prefix, "renderenv.qs")) | (sizepdf=="short" && file.exists(paste0("long", paste0(source_authoritylist[s],"renderenv.qs"))))){ # if the size pdf is short but the .qs for long exists we can use it
-        if(file.exists(paste0(prefix, "renderenv.qs"))){
+      if(usesave & file.exists(paste0(prefix, "renderenv.rds")) | (sizepdf=="short" && file.exists(paste0("long", paste0(source_authoritylist[s],"renderenv.rds"))))){ # if the size pdf is short but the .qs for long exists we can use it
+        if(file.exists(paste0(prefix, "renderenv.rds"))){
 
-          render_env <- qs::qread(paste0(sizepdf,paste0(source_authoritylist[s],"renderenv.qs")))
+          render_env <- cwp_read_object(paste0(sizepdf,paste0(source_authoritylist[s],"renderenv.rds")))
 
-        } else if(sizepdf=="short" && file.exists(paste0("long", paste0(source_authoritylist[s],"renderenv.qs")))){
+        } else if(sizepdf=="short" && file.exists(paste0("long", paste0(source_authoritylist[s],"renderenv.rds")))){
 
-          render_env <- qs::qread(paste0(prefix,"renderenv.qs"))
+          render_env <- cwp_read_object(paste0("long", source_authoritylist[s], "renderenv.rds"))
           assign("all_list", NULL, envir = render_env)
         }
       }else {
@@ -236,15 +207,15 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         render_env <- list2env(as.list(child_env), parent = child_env)
         list2env(parameters_child_global, envir = render_env)
 
-        if(usesave && file.exists("process_fisheries_data_list.qs")){
+        if(usesave && file.exists("process_fisheries_data_list.rds")){
 
-          sprintf("Using saved data for process_fisheries_data_list.qs")
+          futile.logger::flog.info("Using saved data for process_fisheries_data_list.rds")
 
         }
 
-        if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"path_to_qs_final.qs"))){
+        if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"path_to_qs_final.rds"))){
 
-          sprintf("Using saved data for path_to_qs_final.qs")
+          futile.logger::flog.info("Using saved data for path_to_qs_final.rds")
           child_env_last_result <- NULL
 
         } else {
@@ -276,13 +247,13 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           child_env_last_result$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
           # child_env_last_result$parameter_titre_dataset_2 <- NULL
           if(!fast_and_heavy){
-            qs::qsave(child_env_last_result, paste0(prefix, "path_to_qs_final.qs"))
+            cwp_save_object(child_env_last_result, paste0(prefix, "path_to_qs_final.rds"))
           }
         }
 
-        if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"path_to_qs_summary.qs"))){
+        if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"path_to_qs_summary.rds"))){
 
-          sprintf("Using saved data for path_to_qs_summary.qs")
+          futile.logger::flog.info("Using saved data for path_to_qs_summary.rds")
           child_env_first_to_last_result <- NULL
           new_path <- file.path(parameters_child_global$fig.path, paste0("/Comparison/initfinal_", basename(sub_list_dir_2[1]), "_", basename(sub_list_dir_2[length(sub_list_dir_2)])))
         } else {
@@ -315,17 +286,17 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           child_env_first_to_last_result$child_header <- "#"
 
           if(!fast_and_heavy){
-            qs::qsave(child_env_first_to_last_result, paste0(prefix,"path_to_qs_summary.qs"))
+            cwp_save_object(child_env_first_to_last_result, paste0(prefix,"path_to_qs_summary.rds"))
           }
 
         }
 
-        sub_list_dir_3 <- gsub("/data.qs", "", sub_list_dir_2)
+        sub_list_dir_3 <- dirname(sub_list_dir_2)
         render_env$sub_list_dir_3 <- sub_list_dir_3
 
-        if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"process_fisheries_data_list.qs"))){
+        if(!fast_and_heavy && usesave && file.exists(paste0(prefix,"process_fisheries_data_list.rds"))){
 
-          sprintf("Using saved data for process_fisheries_data_list.qs")
+          futile.logger::flog.info("Using saved data for process_fisheries_data_list.rds")
           process_fisheries_data_list <- NULL
 
         } else {
@@ -337,7 +308,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           }
           if(!fast_and_heavy){
 
-            qs::qsave(process_fisheries_data_list, paste0(prefix,"process_fisheries_data_list.qs"))
+            cwp_save_object(process_fisheries_data_list, paste0(prefix,"process_fisheries_data_list.rds"))
           }
         }
         futile.logger::flog.info("Processed process_fisheries_data_list")
@@ -384,7 +355,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
                 # 3) si des noms manquent, on les génère
                 nms <- names(res_i)
                 if (is.null(nms) || any(nms == "")) {
-                  nms <- nms %||% rep("", length(res_i))  # %||% = si NULL, remplace par ""
+                  if (is.null(nms)) nms <- rep("", length(res_i))  # %||% = si NULL, remplace par ""
                   empty <- which(nms == "")
                   nms[empty] <- paste0("item", empty)
                   names(res_i) <- nms
@@ -397,11 +368,11 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
               all_paths <- lapply(seq_i, function(i) {
 
                 out_file <- file.path(fig.path,
-                                      sprintf("comparison_step_%02d.qs", i))
+                                      sprintf("comparison_step_%02d.rds", i))
 
                 if(usesave && file.exists(out_file)){
 
-                  sprintf("comparison_step_%02d.qs", i, " already exists, using the cached data")
+                  futile.logger::flog.info("comparison_step_%02d.rds already exists, using the cached data", i)
 
                 } else {
                   res_i <- CWP.dataset::function_multiple_comparison(
@@ -416,7 +387,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
                   )
 
 
-                  qs::qsave(res_i, file = out_file, preset = "high")
+                  cwp_save_object(res_i, file = out_file)
                   rm(res_i); gc()
                 }
                 out_file
@@ -462,15 +433,15 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
         if(fast_and_heavy){
           if(savestep){
-            qs::qsave(render_env, file = paste0(prefix, "renderenv.qs"))
+            cwp_save_object(render_env, file = paste0(prefix, "renderenv.rds"))
           }
         } else {
           render_env$child_env_first_to_last_result <- NULL
           render_env$child_env_last_result <- NULL
           render_env$process_fisheries_data_list <- NULL
-          render_env$path_to_qs_summary <- paste0(prefix, "path_to_qs_summary.qs")
-          render_env$path_to_process_fisheries_data_list <- paste0(prefix, "process_fisheries_data_list.qs")
-          render_env$path_to_qs_final <- paste0(prefix, "path_to_qs_final.qs")
+          render_env$path_to_qs_summary <- paste0(prefix, "path_to_qs_summary.rds")
+          render_env$path_to_process_fisheries_data_list <- paste0(prefix, "process_fisheries_data_list.rds")
+          render_env$path_to_qs_final <- paste0(prefix, "path_to_qs_final.rds")
 
           # 1) créer un env « propre » sans parent
           minimal_env <- new.env(parent = emptyenv())
@@ -505,10 +476,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           minimal_env$tmap_mode <- "view"
           minimal_env$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
           # 3) sauvegarder le minimal_env à la place de render_env
-          qs::qsave(
-            minimal_env,
-            file = paste0(prefix, "renderenvpath.qs"),
-          )
+          cwp_save_object(minimal_env, file = paste0(prefix, "renderenvpath.rds"))
 
           gc()
         }
@@ -518,7 +486,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         nameoutput <- paste0(prefix,"recappdf")
       }
 
-      set_flextable_defaults(fonts_ignore=TRUE)
+      flextable::set_flextable_defaults(fonts_ignore=TRUE)
       base::options(knitr.duplicate.label = "allow")
       bookdown_path <- CWP.dataset::generate_bookdown_yml(new_session = !fast_and_heavy)
         if(fast_and_heavy){
@@ -531,16 +499,15 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           )
         } else {
 
-        CWP.dataset::build_book(master_qs_rel = paste0(prefix, "renderenvpath.qs"),
+        CWP.dataset::build_book(master_qs_rel = paste0(prefix, "renderenvpath.rds"),
                      output_format = "bookdown::gitbook",
                      output_dir = nameoutput)
         }
 
 
         gc()
-      futile.logger::flog.info("pdfdocument")
-
       if (pdf_render_available) {
+        futile.logger::flog.info("pdfdocument")
         tryCatch({
           if (fast_and_heavy) {
             bookdown::render_book(
@@ -552,7 +519,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
             gc()
           } else {
             CWP.dataset::build_book(
-              master_qs_rel = paste0(prefix, "renderenvpath.qs"),
+              master_qs_rel = paste0(prefix, "renderenvpath.rds"),
               output_format = "bookdown::pdf_document2",
               output_dir = nameoutput
             )
@@ -564,11 +531,6 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
             conditionMessage(e)
           )
         })
-      } else {
-        futile.logger::flog.warn(
-          "Rendu PDF ignore pour %s : TinyTeX non detecte.",
-          entity_dir
-        )
       }
 
       unlink("_bookdown.yml")
@@ -577,11 +539,10 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       rm(child_env_first_to_last_result, envir = render_env)
       rm(render_env)
 
-      # drive_upload("tableau_recap_global_action_effort.html", as_id(folder_datasets_id), overwrite = TRUE)
       futile.logger::flog.info("Rendered and uploaded report for entity: %s", entity_dir)
     }
 
-    sprintf("entity: %s is done", entity_dir)
+    futile.logger::flog.info("entity: %s is done", entity_dir)
 
   }
   try(setwd(ancient_wd))

@@ -16,7 +16,8 @@ summarising_invalid_data(
 
 \item{connectionDB}{A database connection object used for querying relevant tables.}
 
-\item{upload_drive}{Logical, whether to upload results to Google Drive (default: FALSE).}
+\item{upload_drive}{Deprecated and ignored: the upload to Google Drive has been removed. Kept so
+that existing calls do not fail.}
 
 \item{upload_DB}{Logical, whether to upload processed data to a database (default: TRUE).}
 }

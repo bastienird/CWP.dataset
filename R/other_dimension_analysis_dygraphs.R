@@ -18,10 +18,10 @@
 #' data_dimension_analysis_dygraphs(c("Dimension1", "Dimension2"), init, final, "Dataset1", "Dataset2", FALSE)
 #' }
 #' @import dplyr
-#' @importFrom xts xts
-#' @importFrom dygraphs dygraph dyAxis dyRangeSelector dyLegend
 #' @export
 other_dimension_analysis_dygraphs <- function(Other_dimensions, init, final = NULL, titre_1 = "Dataset1", titre_2 = "Dataset2", unique_analyse = FALSE, fig.path = NULL, topn = 7) {
+  cwp_require_package("dygraphs", "to draw interactive time series")
+  cwp_require_package("xts", "to draw interactive time series")
   # Check if final dataset is empty, meaning a unique analysis is needed
   if (is.null(final) || nrow(final) == 0) {
     unique_analyse <- TRUE
@@ -38,7 +38,7 @@ other_dimension_analysis_dygraphs <- function(Other_dimensions, init, final = NU
       dplyr::select(Time, measurement_value)
 
     # Create xts object for the first dataset
-    first_xts <- xts(provisoire_i$measurement_value, order.by = provisoire_i$Time)
+    first_xts <- xts::xts(provisoire_i$measurement_value, order.by = provisoire_i$Time)
     colnames(first_xts) <- titre_1
 
     if (!is.null(second)) {

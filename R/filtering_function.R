@@ -24,7 +24,7 @@ filtering_function <- function(dataframe_to_filter, parameter_filtering) {
 
     }
     )
-    dataframe_to_filter <- dataframe_to_filter%>% dplyr::filter(!! rlang::parse_expr(str_c(colnames_to_filter, matchingList, sep = '%in%', collapse="&")))}
+    dataframe_to_filter <- dataframe_to_filter%>% dplyr::filter(!! rlang::parse_expr(stringr::str_c(colnames_to_filter, matchingList, sep = '%in%', collapse="&")))}
   return(dataframe_to_filter)
 }
 

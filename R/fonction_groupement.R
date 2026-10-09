@@ -17,9 +17,10 @@
 #' @export
 fonction_groupement <- function(these_col, init, final) {
   
-  # Ensure input data are data.tables
-  init <- as.data.table(init)
-  final <- as.data.table(final)
+  # Ensure input data are data.tables. Callers looping over several dimensions
+  # should convert once and pass data.tables, so nothing is copied here.
+  if (!data.table::is.data.table(init)) init <- as.data.table(init)
+  if (!data.table::is.data.table(final)) final <- as.data.table(final)
   
   # Compute sum of values for each combination of the columns in "these_col" 
   # and "measurement_unit" in the "init" data.table
@@ -45,8 +46,11 @@ fonction_groupement <- function(these_col, init, final) {
                     all = TRUE, 
                     suffixes = c("_1", "_2"))
   
+  # Strata absent from one dataset: no value and no line on that side
   fulljoin[is.na(value_sum_1), value_sum_1 := 0]
   fulljoin[is.na(value_sum_2), value_sum_2 := 0]
+  fulljoin[is.na(number_lines1), number_lines1 := 0L]
+  fulljoin[is.na(number_lines2), number_lines2 := 0L]
   
   # Calculate losses and gains
   fulljoin[, loss := value_sum_1 - value_sum_2]
@@ -67,9 +71,6 @@ fonction_groupement <- function(these_col, init, final) {
   fulljoin[, `Difference in value` := - (value_sum_1 - value_sum_2)]
   setnames(fulljoin, "Loss_pourcent", "Difference (in %)")
   setnames(fulljoin, "loss_nb_ligne", "Difference in number of lines")
-  
-  # Replace NA with 0 for numeric columns
-  fulljoin[, lapply(.SD, function(x) replace(x, is.na(x), 0)), .SDcols = where(is.numeric)]
   
   return(fulljoin)
 }

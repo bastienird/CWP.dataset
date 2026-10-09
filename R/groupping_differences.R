@@ -25,16 +25,14 @@ groupping_differences <- function(init, final, parameter_time_dimension, paramet
 
   Dimensions <- Other_dimensions
 
-  carte_init <- fonction_groupement(Dimensions[[1]], init %>% head(1), final %>% head(1))
+  # Convert once: fonction_groupement() is called for every dimension and would
+  # otherwise copy both datasets each time.
+  init <- data.table::as.data.table(init)
+  final <- data.table::as.data.table(final)
 
-  Groupped_all <- carte_init[0,]
-
-  for (i in Dimensions) {
-    temporaire <- fonction_groupement(i, init, final)
-    assign(paste0("Groupped", i), temporaire)
-
-    Groupped_all <- rbind(Groupped_all, temporaire)
-  }
+  Groupped_all <- data.table::rbindlist(
+    lapply(Dimensions, fonction_groupement, init = init, final = final)
+  )
 
   Groupped_all$Dimension <- as.character(Groupped_all$Dimension)
   Groupped_all$Precision <- as.character(Groupped_all$Precision)

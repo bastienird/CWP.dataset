@@ -6,15 +6,17 @@
 #'
 #' @param main_dir The main working directory containing the dataset and necessary files.
 #' @param connectionDB A database connection object used for querying relevant tables.
-#' @param upload_drive Logical, whether to upload results to Google Drive (default: FALSE).
+#' @param upload_drive Deprecated and ignored: the upload to Google Drive has been removed. Kept so
+#'   that existing calls do not fail.
 #' @param upload_DB Logical, whether to upload processed data to a database (default: TRUE).
 #'
 #' @return Writes multiple summary CSV files and optional database tables, returning no explicit value.
 #' @export
-#' @importFrom qs qsave qread
-#' @importFrom googledrive drive_upload as_id
 #' @importFrom futile.logger flog.info
 summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE, upload_DB = TRUE){
+  if (isTRUE(upload_drive)) {
+    warning("upload_drive is ignored: the upload to Google Drive has been removed from CWP.dataset.")
+  }
   ancient_wd <- getwd()
   on.exit(setwd(ancient_wd), add = TRUE)
   setwd(main_dir)
@@ -119,63 +121,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
   shape_without_geom <- tibble::as_tibble(sf::st_drop_geometry(cwp_grid))%>% dplyr::mutate(cwp_code = as.character(cwp_code))
   shapefile.fix <- cwp_grid
   rm(cwp_grid, cwp_grid_tbl)
-  try_get_continent_layer <- function(
-    con = NULL,
-    fallback_file = "UN_CONTINENT2.qs"
-  ) {
-    # 1. Try to read from database
-    if (!is.null(con) && DBI::dbIsValid(con)) {
-      message("Attempting to read continent layer from database...")
-
-      res <- try(
-        sf::st_read(con, query = "SELECT * FROM public.continent", quiet = TRUE),
-        silent = TRUE
-      )
-
-      if (!inherits(res, "try-error")) {
-        message("Continent layer successfully read from database.")
-        sf::st_crs(res) <- 4326
-
-        if (!is.null(fallback_file)) {
-          qs::qsave(res, fallback_file)
-        }
-
-        return(res)
-      }
-    }
-
-    # 2. Try to load from local .qs file
-    if (!is.null(fallback_file) && file.exists(fallback_file)) {
-      message("Loading continent layer from local file: ", fallback_file)
-      continent <- qs::qread(fallback_file)
-      sf::st_crs(continent) <- 4326
-      return(continent)
-    }
-
-    # 3. Try to load from package extdata
-    package_file <- system.file(
-      "extdata",
-      "continent.qs",
-      package = "CWP.dataset"
-    )
-
-    if (nzchar(package_file)) {
-      message("Loading continent layer from package extdata: ", package_file)
-      continent <- qs::qread(package_file)
-      sf::st_crs(continent) <- 4326
-
-      if (!is.null(fallback_file)) {
-        qs::qsave(continent, fallback_file)
-      }
-
-      return(continent)
-    }
-
-    stop(
-      "Unable to retrieve continent layer from database, local file, or package extdata."
-    )
-  }
-  continent <- try_get_continent_layer(connectionDB)
+  continent <- cwp_continent_layer(connectionDB)
   require(CWP.dataset)
   # PART 1: Identify entities and their respective tRFMOs
   entity_dirs <- list.dirs("entities", full.names = TRUE, recursive = FALSE)
@@ -347,8 +293,8 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
 
       flog.info("writingcombinedproblematic")
       # Write the combined data frame to a CSV file
-      write_csv(combined_problematic_data, file.path(entity_dir, paste0(entity_name, "_summary_invalid_data.csv")),
-                progress = show_progress())
+      readr::write_csv(combined_problematic_data, file.path(entity_dir, paste0(entity_name, "_summary_invalid_data.csv")),
+                progress = readr::show_progress())
 
     }
   }
@@ -369,17 +315,17 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
     combined_data$year <- as.integer(format(combined_data$time_end, "%Y"))
     combined_data$month <- as.integer(format(combined_data$time_end, "%m"))
     combined_data$quarter <- as.integer(substr(quarters(combined_data$time_end), 2, 2))
-    # Save the combined data as a .qs file
-    qs::qsave(combined_data,"All_invalid_data.qs")
+    # Save the combined data
+    cwp_save_object(combined_data, "All_invalid_data.rds")
     if(upload_DB){
-      dbExecute(connectionDB, "DROP MATERIALIZED VIEW IF EXISTS public.issueddata CASCADE;")
-      dbWriteTable(connectionDB, "temp_tableissueddata", combined_data, temporary = TRUE, row.names = FALSE, append = FALSE)
-      dbExecute(connectionDB, "
+      DBI::dbExecute(connectionDB, "DROP MATERIALIZED VIEW IF EXISTS public.issueddata CASCADE;")
+      DBI::dbWriteTable(connectionDB, "temp_tableissueddata", combined_data, temporary = TRUE, row.names = FALSE, append = FALSE)
+      DBI::dbExecute(connectionDB, "
     CREATE MATERIALIZED VIEW public.issueddata AS
     SELECT * FROM temp_tableissueddata;
   ")
-      dbExecute(connectionDB, "REFRESH MATERIALIZED VIEW public.issueddata;")
-      # dbExecute(connectionDB, "DROP TABLE IF EXISTS temp_tableissueddata CASCADE;")
+      DBI::dbExecute(connectionDB, "REFRESH MATERIALIZED VIEW public.issueddata;")
+      # DBI::dbExecute(connectionDB, "DROP TABLE IF EXISTS temp_tableissueddata CASCADE;")
     }
   }
   # Directory for the R Markdown template
@@ -510,7 +456,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       # )
       summary_invalid_data <- read_csv(file.path(entity_dir, paste0(entity_name, "_summary_invalid_data.csv")))
       render_env$summary_invalid_data <- summary_invalid_data
-      qs::qsave(render_env, file.path(entity_dir, paste0(entity_name, "render_env.qs")))
+      cwp_save_object(render_env, file.path(entity_dir, paste0(entity_name, "render_env.rds")))
 
       Report_on_raw_data <- system.file("rmd", "Report_on_raw_data.Rmd", package = "CWP.dataset")
       Report_on_raw_data_tmp <- file.path(entity_dir, "Report_on_raw_data.Rmd")
@@ -577,60 +523,6 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       "Le rapport HTML a ete genere normalement."
     )
   }
-  folder_datasets_id <- "1s8sCv6j_3-zHR1MsOqhrqZrGKhGY3W_Y"
-  all_files <- list.files(getwd(), pattern = "\\.html$", full.names = TRUE, recursive = TRUE)
-
-  if(upload_drive){
-    sapply(all_files, function(file) {
-      destination_file <- file.path(getwd(),"Recap_on_pre_harmo", basename(file))
-      file.copy(file, destination_file)
-      path_to_dataset_new <- file.path(file)
-      drive_upload(path_to_dataset_new, as_id(folder_datasets_id), overwrite = TRUE)
-
-    })
-    #
-    path_Recap <- file.path(getwd(),"Recap_on_pre_harmo.html")
-    drive_upload(path_Recap, as_id(folder_datasets_id), overwrite = TRUE)
-    read_last_csv <- function(path) {
-      csv_files <- list.files(path, pattern = "\\.csv$", full.names = TRUE)
-      if (length(csv_files) == 0) return(NULL)
-      last_csv <- csv_files[order(file.info(csv_files)$mtime, decreasing = TRUE)[1]]
-      read_csv(last_csv)
-    }
-
-    # Liste des tRFMOs, n'inclut pas iattc car pas de binding
-    tRFMOs <- c("ccsbt", "wcpfc")
-    list_csv <- c()
-
-    combined_data_list <- lapply(tRFMOs, function(trfmo) {
-      trfmo_paths <- list.dirs(file.path(path, "entities"), recursive = FALSE)
-      trfmo_paths <- trfmo_paths[!grepl("nominal", trfmo_paths)]
-      if(length(trfmo_paths) != 0){
-        trfmo_paths <- trfmo_paths[grep(trfmo, trfmo_paths)]
-
-        trfmo_data <- lapply(file.path(trfmo_paths, "data"), read_last_csv)
-        trfmo_data <- do.call(rbind, trfmo_data)
-
-        # Enregistrement du fichier combine
-        name <- paste0(path, "/", trfmo, "_combined_data.csv")
-        write_csv(trfmo_data, name)
-        return(name)
-      } else {return(NULL)}
-    })
-
-    drive_upload_safe <- function(data_path) {
-      tryCatch({
-        drive_upload(data_path, as_id("1fXgxn-spBydGrFLtsrayVMLrQ2LOCkeg"), overwrite = TRUE)
-      }, error = function(e) {
-        return(NULL)  # Returning NULL or any other indication of failure
-      })
-    }
-
-    # Apply the safe upload function to each path in your list
-    result_list <- lapply(combined_data_list, drive_upload_safe)
-
-  }
-
   setwd(ancient_wd)
 
 }

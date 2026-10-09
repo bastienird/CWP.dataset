@@ -82,7 +82,7 @@ base::options(knitr.duplicate.label = "allow")
 base::options(scipen=9999)
 plotting_type <- "plot" 
 if (knitr::is_html_output()){plotting_type <- "view" }
-tmap_mode(plotting_type)
+if (requireNamespace("tmap", quietly = TRUE)) tmap::tmap_mode(plotting_type)
 
 ```
 
@@ -170,7 +170,7 @@ Overview of the data provided for which the captures are in land corresponding t
 
 ```{r, fig.cap="Data with known issues"}
 
-DT::datatable(summary_invalid_data)
+if (requireNamespace("DT", quietly = TRUE)) DT::datatable(summary_invalid_data) else knitr::kable(summary_invalid_data)
 
 ```
 

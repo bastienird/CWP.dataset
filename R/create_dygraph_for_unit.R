@@ -10,8 +10,6 @@
 #'
 #' @return A \code{dygraph} htmlwidget displaying the temporal difference (in %) for the selected unit and measurement.
 #'
-#' @importFrom xts xts
-#' @importFrom dygraphs dygraph dyAxis dyRangeSelector dyLegend
 #'
 #' @export
 #'
@@ -20,6 +18,8 @@
 #' create_dygraph_for_unit(my_data, "species", "t")
 #' }
 create_dygraph_for_unit <- function(data, filtering_unit, measurement_unit) {
+  cwp_require_package("dygraphs", "to draw interactive time series")
+  cwp_require_package("xts", "to draw interactive time series")
   filtered_data <- data %>%
     dplyr::filter(Dimension == filtering_unit, measurement_unit == measurement_unit) %>%
     dplyr::mutate(Time = as.Date(.data$Precision)) %>%

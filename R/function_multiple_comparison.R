@@ -36,15 +36,16 @@
 #' @import dplyr
 #' @import sf
 #' @import futile.logger
-#' @import qs
 #' @export
 function_multiple_comparison <- function(counting, parameter_short, sub_list_dir,
                                          parameters_child_global, fig.path, coverage = FALSE,
                                          shapefile.fix, continent) {
+  # Do not let the returned plots keep the full datasets alive (see R/forget.R)
+  on.exit(cwp_forget(c("parameter_init", "parameter_final", "initfiltered", "finalfiltered"), environment()), add = TRUE)
   gc()
 
-  parameter_init <- file.path(sub_list_dir[counting], "data.qs")
-  parameter_final <- file.path(sub_list_dir[counting + 1], "data.qs")
+  parameter_init <- cwp_step_data_path(sub_list_dir[counting])
+  parameter_final <- cwp_step_data_path(sub_list_dir[counting + 1])
   parameter_titre_dataset_1 <- basename(sub_list_dir[counting])
   parameter_titre_dataset_2 <- basename(sub_list_dir[counting + 1])
 
@@ -55,14 +56,19 @@ function_multiple_comparison <- function(counting, parameter_short, sub_list_dir
   flog.info("Starting comparison between: %s and %s | Coverage: %s",
             parameter_titre_dataset_1, parameter_titre_dataset_2, coverage)
 
-  initfiltered <- filtering_function(qs::qread(parameter_init),
+  initfiltered <- filtering_function(read_data(parameter_init),
                                      parameter_filtering = parameters_child_global$parameter_filtering)
-  finalfiltered <- filtering_function(qs::qread(parameter_final),
+  finalfiltered <- filtering_function(read_data(parameter_final),
                                      parameter_filtering = parameters_child_global$parameter_filtering)
 
   if (!identical(initfiltered, finalfiltered)) {
-    rm(initfiltered, finalfiltered)
     flog.info("Datasets are different: %s vs %s", parameter_titre_dataset_1, parameter_titre_dataset_2)
+
+    # Reuse the data already read and filtered above instead of reading both
+    # files a second time inside the analysis.
+    if (is.data.frame(initfiltered)) parameter_init <- initfiltered
+    if (is.data.frame(finalfiltered)) parameter_final <- finalfiltered
+    rm(initfiltered, finalfiltered)
 
     child_env_result <- comprehensive_cwp_dataframe_analysis(
       parameter_init = parameter_init,

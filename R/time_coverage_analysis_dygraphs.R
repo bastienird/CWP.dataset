@@ -16,12 +16,12 @@
 #' }
 #' @import dplyr
 #' @import tidyr
-#' @importFrom xts xts
-#' @importFrom dygraphs dygraph dyAxis dyRangeSelector dyLegend
 #' @export
 #' @author
 #' Bastien Grasset, \email{bastien.grasset@@ird.fr}
 time_coverage_analysis_dygraphs <- function(time_dimension_list_groupped, parameter_time_dimension, titre_1, titre_2, unique_analyse = FALSE) {
+  cwp_require_package("dygraphs", "to draw interactive time series")
+  cwp_require_package("xts", "to draw interactive time series")
 
   # Generate titles based on whether it's a unique analysis
   titles_time <- if (unique_analyse) {

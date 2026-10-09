@@ -8,7 +8,7 @@
 strata_in_georef_but_not_in_nominal_report_launching(
   main.dir,
   connectionDB,
-  uploadgoogledrive = TRUE
+  uploadgoogledrive = FALSE
 )
 }
 \arguments{
@@ -16,7 +16,8 @@ strata_in_georef_but_not_in_nominal_report_launching(
 
 \item{connectionDB}{Database connection object.}
 
-\item{uploadgoogledrive}{Logical indicating whether to upload the report to Google Drive.}
+\item{uploadgoogledrive}{Deprecated and ignored: the upload to Google Drive has been removed.
+Kept so that existing calls do not fail.}
 }
 \value{
 Data frame containing the upgraded nominal data.

@@ -13,7 +13,8 @@ spatial_coverage_analysis(
   plotting_type,
   continent,
   print_map = TRUE,
-  Grouppedgridtype
+  Grouppedgridtype,
+  deferred = FALSE
 )
 }
 \arguments{
@@ -34,6 +35,9 @@ spatial_coverage_analysis(
 \item{print_map}{Logical indicating whether to print the map.}
 
 \item{Grouppedgridtype}{Data frame containing grouped gridtype data.}
+
+\item{deferred}{Logical. If \code{TRUE}, tile maps are returned as deferred plots (their description,
+to be drawn with \code{\link[=cwp_materialise_plot]{cwp_materialise_plot()}}) instead of plot objects. Default \code{FALSE}.}
 }
 \value{
 A list containing the spatial coverage maps and related information.

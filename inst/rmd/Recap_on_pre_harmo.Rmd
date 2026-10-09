@@ -34,7 +34,7 @@ if (knitr::opts_knit$get("rmarkdown.pandoc.to") == "html") {
 } else {
   plotting_type <- "plot"
 }
-tmap_mode(plotting_type)
+if (requireNamespace("tmap", quietly = TRUE)) tmap::tmap_mode(plotting_type)
 
 ```
 

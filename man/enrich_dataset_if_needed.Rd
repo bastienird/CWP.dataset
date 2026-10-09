@@ -8,7 +8,8 @@ enrich_dataset_if_needed(
   data,
   connectionDB = NULL,
   save_prefix = NULL,
-  shp_raw = NULL
+  shp_raw = NULL,
+  with_geom = TRUE
 )
 }
 \arguments{
@@ -16,14 +17,19 @@ enrich_dataset_if_needed(
 
 \item{connectionDB}{Optional. A DBI-compatible database connection for querying codelists.}
 
-\item{save_prefix}{Optional. Filename prefix for saving outputs (\code{.qs} and \code{.csv}).}
+\item{save_prefix}{Optional. Filename prefix for saving outputs (\code{.rds} and \code{.csv}).}
 
 \item{shp_raw}{Optional. To prevent reading it every time that can be time consuming, we can provide it directly}
+
+\item{with_geom}{Logical. Should the geometries be attached and the \code{sf} version returned?
+Default \code{TRUE}. Use \code{FALSE} when only \code{without_geom} is needed: attaching one
+polygon per row and parsing the grid WKT is by far the slowest part of this function.}
 }
 \value{
 A \code{list} with two elements:
 \describe{
-\item{\code{with_geom}}{An \code{sf} object enriched with geometries (CRS EPSG:4326).}
+\item{\code{with_geom}}{An \code{sf} object enriched with geometries (CRS EPSG:4326),
+or \code{NULL} when \code{with_geom = FALSE}.}
 \item{\code{without_geom}}{A \code{data.frame} enriched without geometries.}
 }
 }

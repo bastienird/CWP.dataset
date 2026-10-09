@@ -92,7 +92,7 @@ compnumberstratas <- function(init, final, Groupped_all, titre_1, titre_2, param
         `Values dataset 1` = "value_sum_1",
         `Values dataset 2` = "value_sum_2"
       ) %>%
-      dplyr::select(parameter_columns_to_keep) %>%
+      dplyr::select(dplyr::all_of(parameter_columns_to_keep)) %>%
       dplyr::group_by(Dimension, measurement_unit, `Loss / Gain`) %>%
       dplyr::arrange(Dimension, measurement_unit, `Loss / Gain`, desc(`Difference in value`)) %>%
       dplyr::ungroup() %>%
