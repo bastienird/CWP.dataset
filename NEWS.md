@@ -2,6 +2,10 @@
 
 ## Continuous integration
 
+* New end-to-end test: a two-step job is created from the example datasets in a temporary
+  directory, and `summarising_step()` renders its HTML report. It checks the report pages, the
+  enriched step datasets and that the maps are interactive. It is the first test going through
+  the report templates; it needs pandoc and is skipped on CRAN.
 * New `tests` workflow: it runs the test suite on every pull request and writes a report
   (totals, failing and skipped tests, duration by file) on the summary page of the run.
   The same report can be produced locally with `Rscript .github/scripts/test-report.R`.
