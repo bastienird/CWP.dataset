@@ -294,7 +294,7 @@ summarising_invalid_data = function(main_dir, connectionDB, upload_drive = FALSE
       flog.info("writingcombinedproblematic")
       # Write the combined data frame to a CSV file
       readr::write_csv(combined_problematic_data, file.path(entity_dir, paste0(entity_name, "_summary_invalid_data.csv")),
-                progress = show_progress())
+                progress = readr::show_progress())
 
     }
   }

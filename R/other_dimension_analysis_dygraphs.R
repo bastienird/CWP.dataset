@@ -38,7 +38,7 @@ other_dimension_analysis_dygraphs <- function(Other_dimensions, init, final = NU
       dplyr::select(Time, measurement_value)
 
     # Create xts object for the first dataset
-    first_xts <- xts(provisoire_i$measurement_value, order.by = provisoire_i$Time)
+    first_xts <- xts::xts(provisoire_i$measurement_value, order.by = provisoire_i$Time)
     colnames(first_xts) <- titre_1
 
     if (!is.null(second)) {
