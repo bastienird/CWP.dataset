@@ -120,20 +120,30 @@ test_that("cwp_forget removes the listed objects and ignores unknown names", {
 })
 
 test_that("plots returned by compare_temporal_differences do not carry the input datasets", {
-  n <- 1e6
-  init <- data.frame(
-    time_start = rep(c("2020-01-01", "2021-01-01"), length.out = n),
-    measurement_unit = "t",
-    measurement_value = 1,
-    filler = seq_len(n) + 0.5,
-    stringsAsFactors = FALSE
-  )
-  final <- init
-  final$measurement_value <- 2
+  # Size of the plot returned for an input of n rows. The size of a ggplot
+  # object depends a lot on the version of ggplot2, so it is not compared with
+  # a fixed limit: what matters is that it does not grow with the input.
+  plot_size <- function(n) {
+    init <- data.frame(
+      time_start = rep(c("2020-01-01", "2021-01-01"), length.out = n),
+      measurement_unit = "t",
+      measurement_value = 1,
+      filler = seq_len(n) + 0.5,
+      stringsAsFactors = FALSE
+    )
+    final <- init
+    final$measurement_value <- 2
+    res <- compare_temporal_differences("time_start", init, final, "Dataset 1", "Dataset 2")
+    expect_s3_class(res$plots[[1]], "ggplot")
+    expect_error(ggplot2::ggplot_build(res$plots[[1]]), NA)
+    list(plot = length(serialize(res$plots[[1]], NULL)), input = as.numeric(object.size(init)))
+  }
 
-  res <- compare_temporal_differences("time_start", init, final, "Dataset 1", "Dataset 2")
+  small <- plot_size(1e4)
+  large <- plot_size(1e6)
 
-  expect_s3_class(res$plots[[1]], "ggplot")
-  expect_error(ggplot2::ggplot_build(res$plots[[1]]), NA)
-  expect_lt(length(serialize(res$plots[[1]], NULL)), as.numeric(object.size(init)) / 5)
+  # The input is 100 times larger; a plot carrying it would grow by about as
+  # much as the input itself
+  expect_gt(large$input, 50 * small$input)
+  expect_lt(large$plot - small$plot, large$input / 10)
 })
