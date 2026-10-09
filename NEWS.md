@@ -1,5 +1,13 @@
 # CWP.dataset (development version)
 
+## Continuous integration
+
+* New `tests` workflow: it runs the test suite on every pull request and writes a report
+  (totals, failing and skipped tests, duration by file) on the summary page of the run.
+  The same report can be produced locally with `Rscript .github/scripts/test-report.R`.
+* `R-CMD-check` runs on one platform (Ubuntu, R release) instead of five, only fails on
+  errors for now, and can be started by hand.
+
 ## Dependencies
 
 * The upload to Google Drive is removed, and {googledrive} with it. `summarising_invalid_data()`
