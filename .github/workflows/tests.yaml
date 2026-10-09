@@ -29,8 +29,23 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::pkgload, any::testthat
+          extra-packages: any::pkgload, any::testthat, local::.
           needs: check
 
       - name: Run tests and write the report
         run: Rscript .github/scripts/test-report.R
+
+      # The report of a tiny example job, to look at before merging: download
+      # the "example-report" artifact of the run and open index.html
+      - name: Render the example report
+        if: always()
+        continue-on-error: true
+        run: Rscript .github/scripts/example-report.R example-report
+
+      - name: Upload the example report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: example-report
+          path: example-report
+          if-no-files-found: warn
