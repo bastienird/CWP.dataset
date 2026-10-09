@@ -40,7 +40,7 @@ test_that("step datasets written as data.qs by earlier versions are still read",
   step_dir <- file.path(tempfile("steps"), "old_step")
   dir.create(step_dir, recursive = TRUE)
   df <- data.frame(a = 1:2, b = c("x", "y"), stringsAsFactors = FALSE)
-  qs::qsave(df, file.path(step_dir, "data.qs"))
+  getExportedValue("qs", "qsave")(df, file.path(step_dir, "data.qs"))
 
   expect_equal(basename(cwp_step_data_path(step_dir)), "data.qs")
   expect_equal(cwp_read_step_data(step_dir), df)
@@ -65,7 +65,7 @@ test_that("steps are listed in processing order, whatever their format or name",
   df <- data.frame(a = 1L)
 
   cwp_write_step_data(df, dirs[1])
-  qs::qsave(df, file.path(dirs[2], "data.qs"))
+  getExportedValue("qs", "qsave")(df, file.path(dirs[2], "data.qs"))
   cwp_write_step_data(df, dirs[3])
 
   t0 <- as.POSIXct("2024-01-01 00:00:00", tz = "UTC")

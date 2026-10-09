@@ -25,7 +25,7 @@ test_that("an environment of results survives the round trip", {
 test_that(".qs files from earlier versions are still read when qs is installed", {
   skip_if_not_installed("qs")
   file <- tempfile(fileext = ".qs")
-  qs::qsave(list(a = 1), file)
+  getExportedValue("qs", "qsave")(list(a = 1), file)
 
   expect_equal(cwp_read_object(file), list(a = 1))
   expect_equal(read_data(file), list(a = 1))

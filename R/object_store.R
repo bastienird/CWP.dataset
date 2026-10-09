@@ -44,5 +44,8 @@ cwp_read_legacy_qs <- function(file) {
     stop("'", file, "' was written with the {qs} package by an earlier version of CWP.dataset. ",
          "Install {qs} to read it, or generate the file again.")
   }
-  qs::qread(file)
+  # qs is no longer on CRAN, so it cannot be declared as a dependency of the
+  # package: its reader is looked up at run time instead of with qs::qread()
+  read_qs <- getExportedValue("qs", "qread")
+  read_qs(file)
 }
