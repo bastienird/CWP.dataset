@@ -1,6 +1,7 @@
 utils::globalVariables(c(".dataset", ".year", ".colour", ".line", "measurement_value",
                          "measurement_unit", "time_start", "value", "CWP_CODE",
-                         "geographic_identifier", "gridtype", "width", "height"))
+                         "geographic_identifier", "gridtype", "width", "height",
+                         "Comparison"))
 
 # Columns offered as filters when they exist, in this order
 # (source_authority is the tRFMO in the Global Tuna Atlas datasets)
@@ -15,8 +16,9 @@ cwp_explore_not_dimensions <- c("geographic_identifier", "time_start", "time_end
 #'
 #' Opens a Shiny application to filter one or several CWP datasets on the fly
 #' (for example on a species, a fishing fleet and/or a tRFMO) and see the
-#' result as time series, tables and maps. The totals are recomputed for every
-#' selection, so they are always exact.
+#' result as time series, tables and maps. The totals are recomputed for
+#' every selection, so they are always exact. With several datasets, a tab
+#' shows the differences between two of them, by dimension and by cell.
 #'
 #' The reports stay the reference document of each processing step; this
 #' application is for looking at the data in more detail.
@@ -324,6 +326,83 @@ cwp_explore_map <- function(cells, unit) {
                   popup_cols = c("Dataset", "Cell", "value"), layout = "layers")
 }
 
+#' Difference between two totals, in percent
+#'
+#' @param reference,compared Totals of the reference and the compared dataset.
+#' @return `100 * (compared - reference) / reference`; `Inf` when only the
+#'   compared dataset has data, `0` when neither has.
+#' @keywords internal
+#' @noRd
+cwp_difference_percent <- function(reference, compared) {
+  ifelse(reference == 0, ifelse(compared == 0, 0, Inf), 100 * (compared - reference) / reference)
+}
+
+#' Category of a difference between two totals
+#'
+#' Same categories as the maps of differences of the reports
+#' (see `geographic_diff()`).
+#'
+#' @inheritParams cwp_difference_percent
+#' @return A factor with the levels `cwp_impact_levels`.
+#' @keywords internal
+#' @noRd
+cwp_impact_category <- function(reference, compared) {
+  percent <- cwp_difference_percent(reference, compared)
+  impact <- data.table::fcase(
+    percent == Inf, "Appearing data",
+    percent >= 100, "Gain (more than double)",
+    percent > 0, "Gain",
+    percent == 0, "No differences",
+    percent > -100, "Loss",
+    default = "All data lost"
+  )
+  factor(impact, levels = cwp_impact_levels)
+}
+
+#' Differences between two datasets, by a dimension
+#'
+#' @param data Rows to compare (output of `cwp_explore_filter()`).
+#' @param by Columns to group by; the unit is always added.
+#' @param reference,compared Names of the two datasets.
+#' @return Output of `cwp_explore_summary()` for the two datasets, with
+#'   `Difference`, `Difference (%)` and `Impact`, sorted by decreasing
+#'   absolute difference.
+#' @keywords internal
+#' @noRd
+cwp_explore_differences <- function(data, by = NULL, reference, compared) {
+  if (identical(reference, compared)) stop("Choose two different datasets to compare.")
+  data <- data[.dataset %in% c(reference, compared)]
+  data[, .dataset := factor(as.character(.dataset), levels = c(reference, compared))]
+
+  wide <- cwp_explore_summary(data, by)
+  reference_values <- wide[[reference]]
+  compared_values <- wide[[compared]]
+  data.table::set(wide, j = "Difference", value = compared_values - reference_values)
+  data.table::set(wide, j = "Difference (%)",
+                  value = cwp_difference_percent(reference_values, compared_values))
+  data.table::set(wide, j = "Impact", value = cwp_impact_category(reference_values, compared_values))
+  wide[order(-abs(wide$Difference))]
+}
+
+#' Map of the differences by cell between two datasets
+#'
+#' @param cells Output of `cwp_explore_differences()` by `geographic_identifier`,
+#'   merged with the tiles of the cells.
+#' @param title Name of the comparison, shown above the map.
+#' @return A leaflet widget, with one layer per resolution.
+#' @keywords internal
+#' @noRd
+cwp_explore_difference_map <- function(cells, title) {
+  cells <- as.data.frame(cells)
+  cells$Comparison <- title
+  value_cols <- setdiff(names(cells), c("geographic_identifier", "measurement_unit", "x", "y",
+                                        "width", "height", "gridtype", "Comparison", "Impact"))
+  cwp_leaflet_map(cells, fill = "Impact", facet_rows = "gridtype", facet_cols = "Comparison",
+                  fill_scale = "impact", fill_label = "Impact on the data",
+                  popup_cols = c("geographic_identifier", value_cols, "Impact"),
+                  layout = "layers")
+}
+
 #' User interface of the explorer
 #'
 #' @param data Output of `cwp_explore_datasets()`.
@@ -368,6 +447,26 @@ cwp_explore_ui <- function(data, filters) {
   )
   if ("geographic_identifier" %in% names(data)) {
     tabs <- c(tabs, list(shiny::tabPanel("Map", leaflet::leafletOutput("map", height = "600px"))))
+  }
+  datasets <- levels(data$.dataset)
+  if (length(datasets) > 1) {
+    differences_table <- if (requireNamespace("DT", quietly = TRUE)) {
+      DT::DTOutput("differences")
+    } else {
+      shiny::tableOutput("differences")
+    }
+    tabs <- c(tabs, list(shiny::tabPanel(
+      "Differences",
+      shiny::fluidRow(
+        shiny::column(4, shiny::selectInput("reference", "Reference dataset", datasets, datasets[1])),
+        shiny::column(4, shiny::selectInput("compared", "Compared dataset", datasets, datasets[2]))
+      ),
+      differences_table,
+      if ("geographic_identifier" %in% names(data)) {
+        shiny::tagList(shiny::h4("Differences by cell"),
+                       leaflet::leafletOutput("difference_map", height = "600px"))
+      }
+    )))
   }
 
   shiny::fluidPage(
@@ -442,6 +541,49 @@ cwp_explore_server <- function(data, filters) {
         shiny::validate(shiny::need(!is.null(cells), "No CWP grid cell to map for this selection."))
         cwp_explore_map(cells, unit())
       })
+    }
+
+    datasets <- levels(data$.dataset)
+    if (length(datasets) > 1) {
+      pair <- shiny::reactive({
+        reference <- if (is.null(input$reference)) datasets[1] else input$reference
+        compared <- if (is.null(input$compared)) datasets[2] else input$compared
+        shiny::validate(shiny::need(reference != compared, "Choose two different datasets."))
+        c(reference, compared)
+      })
+      differences_table <- shiny::reactive({
+        cwp_explore_differences(selection(), by(), pair()[1], pair()[2])
+      })
+      if (requireNamespace("DT", quietly = TRUE)) {
+        output$differences <- DT::renderDT({
+          table <- differences_table()
+          numeric_cols <- setdiff(names(table)[vapply(table, is.numeric, logical(1))], "Difference (%)")
+          widget <- DT::datatable(table, rownames = FALSE, filter = "top",
+                                  options = list(pageLength = 25, scrollX = TRUE))
+          widget <- DT::formatRound(widget, numeric_cols, digits = 0)
+          DT::formatRound(widget, "Difference (%)", digits = 1)
+        })
+      } else {
+        output$differences <- shiny::renderTable(differences_table(), digits = 1)
+      }
+
+      if ("geographic_identifier" %in% names(data)) {
+        difference_cells <- shiny::reactive({
+          rows <- selection()[measurement_unit %in% unit()]
+          by_cell <- cwp_explore_differences(rows, "geographic_identifier", pair()[1], pair()[2])
+          by_cell <- by_cell[by_cell[[pair()[1]]] != 0 | by_cell[[pair()[2]]] != 0]
+          by_cell[, geographic_identifier := as.character(geographic_identifier)]
+          cells <- merge(by_cell, tiles(), by.x = "geographic_identifier", by.y = "code")
+          if (nrow(cells) == 0) return(NULL)
+          cells[, gridtype := sprintf("%gdeg_x_%gdeg", width, height)]
+          cells
+        })
+        output$difference_map <- leaflet::renderLeaflet({
+          cells <- difference_cells()
+          shiny::validate(shiny::need(!is.null(cells), "No CWP grid cell to map for this selection."))
+          cwp_explore_difference_map(cells, paste(pair()[1], "vs", pair()[2]))
+        })
+      }
     }
   }
 }

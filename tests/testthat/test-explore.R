@@ -196,3 +196,62 @@ test_that("the explorer maps the selection", {
     expect_false(is.null(output$map))
   })
 })
+
+test_that("differences are classified like in the reports", {
+  impact <- cwp_impact_category(reference = c(0, 10, 10, 10, 10, 10, 0),
+                                compared  = c(5, 25, 15, 10, 4, 0, 0))
+  expect_equal(as.character(impact),
+               c("Appearing data", "Gain (more than double)", "Gain", "No differences",
+                 "Loss", "All data lost", "No differences"))
+  expect_equal(levels(impact), cwp_impact_levels)
+  expect_equal(cwp_difference_percent(c(0, 0, 10), c(0, 3, 5)), c(0, Inf, -50))
+})
+
+test_that("the differences between two datasets are computed by dimension", {
+  data <- explore_data()
+  differences <- cwp_explore_differences(data, "species", "init", "final")
+  expect_equal(names(differences), c("species", "measurement_unit", "init", "final",
+                                     "Difference", "Difference (%)", "Impact"))
+  skj <- differences[species == "SKJ"]
+  expect_equal(c(skj$init, skj$final, skj$Difference, skj$`Difference (%)`), c(20, 0, -20, -100))
+  expect_equal(as.character(skj$Impact), "All data lost")
+  yft <- differences[species == "YFT" & measurement_unit == "t"]
+  expect_equal(yft$Difference, 30)
+  # Largest differences first
+  expect_equal(abs(differences$Difference), sort(abs(differences$Difference), decreasing = TRUE))
+
+  # The other way round
+  reversed <- cwp_explore_differences(data, "species", "final", "init")
+  expect_equal(as.character(reversed[species == "SKJ"]$Impact), "Appearing data")
+
+  expect_error(cwp_explore_differences(data, "species", "init", "init"), "two different")
+  empty <- cwp_explore_differences(cwp_explore_filter(data, list(species = "none")), "species",
+                                   "init", "final")
+  expect_equal(nrow(empty), 0)
+})
+
+test_that("the explorer compares two datasets", {
+  skip_if_not_installed("shiny")
+  data <- explore_data()
+  shiny::testServer(cwp_explore_server(data, c("species")), {
+    session$setInputs(by = "species", unit = "t", reference = "init", compared = "final")
+    session$elapse(1000)
+    expect_equal(differences_table()[species == "SKJ"]$Difference, -20)
+
+    cells <- difference_cells()
+    # Cell 5100001 only has SKJ, lost in the final dataset
+    expect_equal(as.character(cells[geographic_identifier == "5100001"]$Impact), "All data lost")
+    expect_equal(as.character(cells[geographic_identifier == "6100000"]$Impact), "Gain")
+    expect_false(is.null(output$difference_map))
+
+    session$setInputs(compared = "init")
+    expect_error(pair())
+  })
+})
+
+test_that("the explorer of a single dataset has no Differences tab", {
+  skip_if_not_installed("shiny")
+  single <- cwp_explore_datasets(list(explore_table()))
+  expect_false(grepl("Differences", as.character(cwp_explore_ui(single, "species"))))
+  expect_true(grepl("Differences", as.character(cwp_explore_ui(explore_data(), "species"))))
+})
