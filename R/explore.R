@@ -1,5 +1,6 @@
 utils::globalVariables(c(".dataset", ".year", ".colour", ".line", "measurement_value",
-                         "measurement_unit", "time_start", "value"))
+                         "measurement_unit", "time_start", "value", "CWP_CODE",
+                         "geographic_identifier", "gridtype", "width", "height"))
 
 # Columns offered as filters when they exist, in this order
 # (source_authority is the tRFMO in the Global Tuna Atlas datasets)
@@ -14,7 +15,7 @@ cwp_explore_not_dimensions <- c("geographic_identifier", "time_start", "time_end
 #'
 #' Opens a Shiny application to filter one or several CWP datasets on the fly
 #' (for example on a species, a fishing fleet and/or a tRFMO) and see the
-#' result as time series and tables. The totals are recomputed for every
+#' result as time series, tables and maps. The totals are recomputed for every
 #' selection, so they are always exact.
 #'
 #' The reports stay the reference document of each processing step; this
@@ -265,6 +266,64 @@ cwp_explore_summary <- function(data, by = NULL) {
   wide
 }
 
+#' Tiles of the CWP cells, from the grid shipped with the package
+#'
+#' Only the WKT of the cells asked for is parsed, which keeps this fast.
+#'
+#' @param codes CWP codes of the cells.
+#' @return Output of `cwp_grid_tiles()`: a `data.table` with `code`, `x`, `y`,
+#'   `width` and `height`, or `NULL` if the cells cannot be drawn as tiles.
+#' @keywords internal
+#' @noRd
+cwp_explore_tiles <- function(codes) {
+  codes <- unique(as.character(codes[!is.na(codes)]))
+  grid <- cwp_cached("grid_wkt", {
+    grid_file <- system.file("extdata", "cl_areal_grid.csv", package = "CWP.dataset")
+    if (!nzchar(grid_file)) stop("cl_areal_grid.csv not found in the package")
+    data.table::fread(grid_file, select = c("CWP_CODE", "geom_wkt"), colClasses = "character")
+  })
+  cells <- grid[CWP_CODE %in% codes]
+  if (nrow(cells) == 0) return(NULL)
+  shape <- sf::st_as_sf(as.data.frame(cells), wkt = "geom_wkt", crs = 4326)
+  cwp_grid_tiles(shape, codes)
+}
+
+#' Totals by cell, ready to map
+#'
+#' @param data Rows to sum (output of `cwp_explore_filter()`).
+#' @param unit The unit to map: values in different units are not added up.
+#' @param tiles Output of `cwp_explore_tiles()`.
+#' @return A `data.table` with `Dataset`, `Cell`, the total `value`, the tile
+#'   columns and `gridtype`; cells without a tile are left out. `NULL` when
+#'   there is nothing to map.
+#' @keywords internal
+#' @noRd
+cwp_explore_map_data <- function(data, unit, tiles) {
+  if (is.null(tiles) || nrow(tiles) == 0 || !"geographic_identifier" %in% names(data)) return(NULL)
+  rows <- data[data$measurement_unit %in% unit]
+  if (nrow(rows) == 0) return(NULL)
+  totals <- rows[, .(value = sum(measurement_value, na.rm = TRUE)),
+                 by = .(Dataset = .dataset, Cell = as.character(geographic_identifier))]
+  cells <- merge(totals, tiles, by.x = "Cell", by.y = "code")
+  if (nrow(cells) == 0) return(NULL)
+  cells[, gridtype := sprintf("%gdeg_x_%gdeg", width, height)]
+  cells
+}
+
+#' Map of the totals by cell
+#'
+#' @param cells Output of `cwp_explore_map_data()`.
+#' @param unit Unit of the values, used as legend title.
+#' @return A leaflet widget: one layer per dataset and resolution.
+#' @keywords internal
+#' @noRd
+cwp_explore_map <- function(cells, unit) {
+  cwp_leaflet_map(as.data.frame(cells), fill = "value", facet_rows = "gridtype",
+                  facet_cols = "Dataset", fill_scale = "magnitude",
+                  fill_label = if (nzchar(unit)) unit else "value",
+                  popup_cols = c("Dataset", "Cell", "value"), layout = "layers")
+}
+
 #' User interface of the explorer
 #'
 #' @param data Output of `cwp_explore_datasets()`.
@@ -291,10 +350,24 @@ cwp_explore_ui <- function(data, filters) {
                                  choices = c("Nothing" = "", dimensions),
                                  selected = if (is.na(default_by)) "" else default_by)
 
+  units <- sort(unique(data$measurement_unit))
+  unit_input <- if (length(units) > 1) {
+    shiny::selectInput("unit", "Unit of the maps", choices = units,
+                       selected = if ("t" %in% units) "t" else units[1])
+  }
+
   table_output <- if (requireNamespace("DT", quietly = TRUE)) {
     DT::DTOutput("summary")
   } else {
     shiny::tableOutput("summary")
+  }
+
+  tabs <- list(
+    shiny::tabPanel("Time series", shiny::plotOutput("timeseries", height = "550px")),
+    shiny::tabPanel("Table", table_output)
+  )
+  if ("geographic_identifier" %in% names(data)) {
+    tabs <- c(tabs, list(shiny::tabPanel("Map", leaflet::leafletOutput("map", height = "600px"))))
   }
 
   shiny::fluidPage(
@@ -305,15 +378,12 @@ cwp_explore_ui <- function(data, filters) {
         filter_inputs,
         year_input,
         by_input,
+        unit_input,
         shiny::helpText(shiny::textOutput("selection", inline = TRUE))
       ),
       shiny::mainPanel(
         width = 9,
-        shiny::tabsetPanel(
-          id = "tab",
-          shiny::tabPanel("Time series", shiny::plotOutput("timeseries", height = "550px")),
-          shiny::tabPanel("Table", table_output)
-        )
+        do.call(shiny::tabsetPanel, c(list(id = "tab"), tabs))
       )
     )
   )
@@ -356,6 +426,22 @@ cwp_explore_server <- function(data, filters) {
       })
     } else {
       output$summary <- shiny::renderTable(summary_table(), digits = 0)
+    }
+
+    units <- sort(unique(data$measurement_unit))
+    unit <- shiny::reactive({
+      if (!is.null(input$unit)) input$unit else if ("t" %in% units) "t" else units[1]
+    })
+
+    if ("geographic_identifier" %in% names(data)) {
+      # Computed once, the first time a map is shown
+      tiles <- shiny::reactive(cwp_explore_tiles(data$geographic_identifier))
+      map_cells <- shiny::reactive(cwp_explore_map_data(selection(), unit(), tiles()))
+      output$map <- leaflet::renderLeaflet({
+        cells <- map_cells()
+        shiny::validate(shiny::need(!is.null(cells), "No CWP grid cell to map for this selection."))
+        cwp_explore_map(cells, unit())
+      })
     }
   }
 }

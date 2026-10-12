@@ -147,3 +147,52 @@ test_that("the explorer recomputes the outputs when a filter changes", {
     expect_false(is.null(output$timeseries))
   })
 })
+
+test_that("the cells of the grid become tiles", {
+  tiles <- cwp_explore_tiles(c("5100000", "6100000", "5100000", NA, "not_a_cell"))
+  expect_equal(sort(tiles$code), c("5100000", "6100000"))
+  one <- tiles[code == "5100000"]
+  expect_equal(c(one$x, one$y, one$width, one$height), c(0.5, 0.5, 1, 1))
+  expect_null(cwp_explore_tiles("not_a_cell"))
+})
+
+test_that("totals by cell are mapped one unit at a time", {
+  data <- explore_data()
+  tiles <- cwp_explore_tiles(data$geographic_identifier)
+  cells <- cwp_explore_map_data(data, "t", tiles)
+  expect_equal(sort(unique(cells$gridtype)), c("1deg_x_1deg", "5deg_x_5deg"))
+  expect_equal(cells[Dataset == "init" & Cell == "6100000"]$value, 70)
+  expect_equal(cells[Dataset == "init" & Cell == "5100000"]$value, 15)
+  expect_equal(sum(cells$value), sum(data[measurement_unit == "t"]$measurement_value))
+
+  expect_null(cwp_explore_map_data(data, "kg", tiles))
+  expect_null(cwp_explore_map_data(data, "t", NULL))
+
+  map <- cwp_explore_map(cells, "t")
+  expect_s3_class(map, "leaflet")
+  methods <- vapply(map$x$calls, function(call) call$method, character(1))
+  expect_true(all(c("addRectangles", "addLegend", "addLayersControl") %in% methods))
+})
+
+test_that("the colour classes of totals cover every value", {
+  values <- c(0.5, 3, 12, 150, 2000, 2000, 45000)
+  palette <- cwp_leaflet_palette("magnitude", values)
+  expect_false(any(is.na(palette(values)) | palette(values) == "#CCCCCC"))
+  expect_false(any(palette(c(5, 5)) == "#CCCCCC"))
+  expect_s3_class(cwp_tile_fill_scale("magnitude"), "ScaleContinuous")
+})
+
+test_that("the explorer maps the selection", {
+  skip_if_not_installed("shiny")
+  data <- explore_data()
+  shiny::testServer(cwp_explore_server(data, c("species")), {
+    session$setInputs(by = "", unit = "t")
+    session$elapse(1000)
+    expect_equal(sum(map_cells()$value), sum(data[measurement_unit == "t"]$measurement_value))
+
+    session$setInputs(filter_species = "BET")
+    session$elapse(1000)
+    expect_equal(unique(map_cells()$Cell), "6100000")
+    expect_false(is.null(output$map))
+  })
+})

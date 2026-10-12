@@ -11,7 +11,7 @@ cwp_html_escape <- function(x) {
 
 #' Colours of the interactive map, matching the static one
 #'
-#' @param name `"impact"` or `"value"` (see `cwp_tile_fill_scale()`).
+#' @param name `"impact"`, `"value"` or `"magnitude"` (see `cwp_tile_fill_scale()`).
 #' @param values The values to colour.
 #' @return A leaflet palette function.
 #' @keywords internal
@@ -30,6 +30,17 @@ cwp_leaflet_palette <- function(name, values) {
         palette = c("#D73027", "#FFFFBF", "#1A9850"),
         domain = c(-limit, limit), na.color = "#CCCCCC"
       )
+    },
+    magnitude = {
+      # Totals are very skewed: classes of equal size rather than a linear scale
+      finite <- values[is.finite(values)]
+      if (length(finite) == 0) finite <- c(0, 1)
+      low <- min(finite)
+      high <- max(finite)
+      inner <- signif(stats::quantile(finite, probs = (1:6) / 7, names = FALSE), 2)
+      bins <- sort(unique(c(low, inner[inner > low & inner < high], high)))
+      if (length(bins) < 2) bins <- c(low, low + 1)
+      leaflet::colorBin("YlGnBu", domain = range(bins), bins = bins, na.color = "#CCCCCC")
     },
     stop("Unknown tile fill scale: ", name)
   )
@@ -135,7 +146,7 @@ cwp_leaflet_map <- function(plot_data, fill, facet_rows, facet_cols, fill_scale,
                             layout = getOption("CWP.dataset.map_layout", "panels")) {
   cwp_require_package("leaflet", "to draw interactive maps")
   if (!is.character(fill_scale)) {
-    stop("An interactive map needs a named fill scale (\"impact\" or \"value\").")
+    stop("An interactive map needs a named fill scale (\"impact\", \"value\" or \"magnitude\").")
   }
   plot_data <- as.data.frame(plot_data)
   values <- plot_data[[fill]]

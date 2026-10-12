@@ -103,8 +103,9 @@ cwp_impact_levels <- c("Appearing data", "Gain (more than double)", "Gain",
 
 #' Predefined fill scales of the tile maps
 #'
-#' @param name `"impact"` (categories of difference between two datasets) or
-#'   `"value"` (measurement values, diverging around 0).
+#' @param name `"impact"` (categories of difference between two datasets),
+#'   `"value"` (measurement values, diverging around 0) or `"magnitude"`
+#'   (positive totals).
 #' @return A ggplot2 fill scale.
 #' @keywords internal
 #' @noRd
@@ -118,6 +119,8 @@ cwp_tile_fill_scale <- function(name) {
     },
     value = ggplot2::scale_fill_gradient2(low = "#D73027", mid = "#FFFFBF",
                                           high = "#1A9850", midpoint = 0),
+    magnitude = ggplot2::scale_fill_distiller(palette = "YlGnBu", direction = 1,
+                                              labels = scales::label_comma()),
     stop("Unknown tile fill scale: ", name)
   )
 }
