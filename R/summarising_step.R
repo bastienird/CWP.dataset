@@ -184,6 +184,19 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
 
       prefix <- paste0(sizepdf, source_authoritylist[s])
 
+      # Script to explore the steps of this report with filters (see cwp_explore())
+      explorer_script <- tryCatch({
+        explorer_file <- if (source_authoritylist[s] == "all") "explorer.R" else {
+          paste0("explorer_", source_authoritylist[s], ".R")
+        }
+        cwp_write_explorer_script(step_dirs, explorer_file, selected = parameter_filtering,
+                                  title = entity$identifiers[["id"]])
+        as.character(fs::path_abs(explorer_file))
+      }, error = function(e) {
+        futile.logger::flog.warn("Explorer script not written: %s", conditionMessage(e))
+        NULL
+      })
+
       if(usesave & file.exists(paste0(prefix, "renderenv.rds")) | (sizepdf=="short" && file.exists(paste0("long", paste0(source_authoritylist[s],"renderenv.rds"))))){ # if the size pdf is short but the .qs for long exists we can use it
         if(file.exists(paste0(prefix, "renderenv.rds"))){
 
@@ -429,7 +442,7 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         render_env$plotting_type <- "view"
         render_env$fig.path <- new_path
         render_env$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
-
+        render_env$explorer_script <- explorer_script
 
         if(fast_and_heavy){
           if(savestep){
@@ -481,6 +494,9 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
           gc()
         }
       }
+
+      # Also when the analyses were read back from a previous run
+      render_env$explorer_script <- explorer_script
 
       if(is.null(nameoutput)){
         nameoutput <- paste0(prefix,"recappdf")
