@@ -18,7 +18,8 @@ cwp_explore_not_dimensions <- c("geographic_identifier", "time_start", "time_end
 #' (for example on a species, a fishing fleet and/or a tRFMO) and see the
 #' result as time series, tables and maps. The totals are recomputed for
 #' every selection, so they are always exact. With several datasets, a tab
-#' shows the differences between two of them, by dimension and by cell.
+#' shows the differences between two of them, by dimension and by cell (by
+#' default the first and the last one).
 #'
 #' The reports stay the reference document of each processing step; this
 #' application is for looking at the data in more detail.
@@ -29,6 +30,9 @@ cwp_explore_not_dimensions <- c("geographic_identifier", "time_start", "time_end
 #'   example `cwp_explore(init = "Markdown/rawdata", final = "Markdown/step5")`.
 #' @param filters Columns offered as filters. By default `source_authority`,
 #'   `species`, `fishing_fleet`, `gear_type` and `fishing_mode`, when present.
+#' @param selected Values selected in the filters when the application opens,
+#'   as a named list, for example `list(source_authority = "IOTC")`. A column
+#'   listed here is offered as a filter even if it is not in `filters`.
 #' @return A Shiny application. Printing it (at the console) launches it; it
 #'   can also be given to [shiny::runApp()].
 #' @export
@@ -36,14 +40,14 @@ cwp_explore_not_dimensions <- c("geographic_identifier", "time_start", "time_end
 #' if (interactive() && requireNamespace("shiny", quietly = TRUE)) {
 #'   cwp_explore(init = parameter_init_catch, final = parameter_final_catch)
 #' }
-cwp_explore <- function(..., filters = NULL) {
+cwp_explore <- function(..., filters = NULL, selected = list()) {
   cwp_require_package("shiny", "to explore datasets interactively")
   data <- cwp_explore_datasets(list(...))
   if (is.null(filters)) filters <- intersect(cwp_explore_default_filters, names(data))
-  filters <- intersect(filters, names(data))
+  filters <- intersect(union(filters, names(selected)), names(data))
 
   shiny::shinyApp(
-    ui = cwp_explore_ui(data, filters),
+    ui = cwp_explore_ui(data, filters, selected),
     server = cwp_explore_server(data, filters)
   )
 }
@@ -407,13 +411,16 @@ cwp_explore_difference_map <- function(cells, title) {
 #'
 #' @param data Output of `cwp_explore_datasets()`.
 #' @param filters Columns offered as filters.
+#' @param selected Named list of the values selected when the application opens.
 #' @return A Shiny UI.
 #' @keywords internal
 #' @noRd
-cwp_explore_ui <- function(data, filters) {
+cwp_explore_ui <- function(data, filters, selected = list()) {
   filter_inputs <- lapply(filters, function(column) {
+    choices <- cwp_explore_choices(data, column)
     shiny::selectizeInput(paste0("filter_", column), column,
-                          choices = cwp_explore_choices(data, column), multiple = TRUE,
+                          choices = choices, multiple = TRUE,
+                          selected = intersect(as.character(selected[[column]]), choices),
                           options = list(placeholder = "All"))
   })
 
@@ -459,7 +466,8 @@ cwp_explore_ui <- function(data, filters) {
       "Differences",
       shiny::fluidRow(
         shiny::column(4, shiny::selectInput("reference", "Reference dataset", datasets, datasets[1])),
-        shiny::column(4, shiny::selectInput("compared", "Compared dataset", datasets, datasets[2]))
+        shiny::column(4, shiny::selectInput("compared", "Compared dataset", datasets,
+                                            datasets[length(datasets)]))
       ),
       differences_table,
       if ("geographic_identifier" %in% names(data)) {
@@ -547,7 +555,7 @@ cwp_explore_server <- function(data, filters) {
     if (length(datasets) > 1) {
       pair <- shiny::reactive({
         reference <- if (is.null(input$reference)) datasets[1] else input$reference
-        compared <- if (is.null(input$compared)) datasets[2] else input$compared
+        compared <- if (is.null(input$compared)) datasets[length(datasets)] else input$compared
         shiny::validate(shiny::need(reference != compared, "Choose two different datasets."))
         c(reference, compared)
       })

@@ -255,3 +255,18 @@ test_that("the explorer of a single dataset has no Differences tab", {
   expect_false(grepl("Differences", as.character(cwp_explore_ui(single, "species"))))
   expect_true(grepl("Differences", as.character(cwp_explore_ui(explore_data(), "species"))))
 })
+
+test_that("the explorer can open with values selected and compares first and last", {
+  skip_if_not_installed("shiny")
+  three <- cwp_explore_datasets(list(a = explore_table(), b = explore_table(), c = explore_table()))
+  ui <- as.character(cwp_explore_ui(three, c("species", "gear_type"),
+                                    selected = list(species = c("YFT", "not_a_code"))))
+  expect_match(ui, '<option value="YFT" selected>', fixed = TRUE)
+  expect_false(grepl("not_a_code", ui, fixed = TRUE))
+  # The last dataset is compared with the first one
+  expect_match(ui, '<option value="c" selected>c</option>', fixed = TRUE)
+
+  # A column given in `selected` becomes a filter
+  app <- cwp_explore(explore_table(), filters = "species", selected = list(gear_type = "01.1"))
+  expect_s3_class(app, "shiny.appobj")
+})
