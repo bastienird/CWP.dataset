@@ -25,6 +25,24 @@ pak::pak("bastienird/CWP.dataset")
 Full documentation website on:
 <https://bastienird.github.io/CWP.dataset>
 
+## Explore datasets interactively
+
+The reports are the reference document of each processing step. To look
+at the data in more detail,
+[`cwp_explore()`](https://bastienird.github.io/CWP.dataset/reference/cwp_explore.md)
+opens a Shiny application that filters one or several datasets on the
+fly (tRFMO, species, fishing fleet, gear, fishing mode, years) and shows
+time series, tables, maps and, for two datasets, their differences:
+
+``` r
+
+install.packages(c("shiny", "DT"))
+CWP.dataset::cwp_explore(init = "Markdown/rawdata", final = "Markdown/final_step")
+```
+
+The datasets can be step directories, data files (`.parquet`, `.rds`,
+`.csv`) or data.frames.
+
 ## Example
 
 ``` r

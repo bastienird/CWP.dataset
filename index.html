@@ -78,9 +78,18 @@
 <p>Full documentation website on: <a href="https://bastienird.github.io/CWP.dataset" class="uri">https://bastienird.github.io/CWP.dataset</a></p>
 </div>
 <div class="section level2">
+<h2 id="explore-datasets-interactively">Explore datasets interactively<a class="anchor" aria-label="anchor" href="#explore-datasets-interactively"></a>
+</h2>
+<p>The reports are the reference document of each processing step. To look at the data in more detail, <code><a href="reference/cwp_explore.html">cwp_explore()</a></code> opens a Shiny application that filters one or several datasets on the fly (tRFMO, species, fishing fleet, gear, fishing mode, years) and shows time series, tables, maps and, for two datasets, their differences:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"shiny"</span>, <span class="st">"DT"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">CWP.dataset</span><span class="fu">::</span><span class="fu"><a href="reference/cwp_explore.html">cwp_explore</a></span><span class="op">(</span>init <span class="op">=</span> <span class="st">"Markdown/rawdata"</span>, final <span class="op">=</span> <span class="st">"Markdown/final_step"</span><span class="op">)</span></span></code></pre></div>
+<p>The datasets can be step directories, data files (<code>.parquet</code>, <code>.rds</code>, <code>.csv</code>) or data.frames.</p>
+</div>
+<div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">fusen</span><span class="fu">::</span><span class="fu"><a href="https://thinkr-open.github.io/fusen/reference/get_package_structure.html" class="external-link">draw_package_structure</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── Reading NAMESPACE file ──────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; ── flat_additional.Rmd ─────────────────────────────────────────────────────────────────</span></span>

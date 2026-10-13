@@ -44,6 +44,12 @@
 - [`create_dygraph_for_unit()`](https://bastienird.github.io/CWP.dataset/reference/create_dygraph_for_unit.md)
   : Create Interactive Dygraph for a Specific Unit and Measurement Type
 
+- [`cwp_explore()`](https://bastienird.github.io/CWP.dataset/reference/cwp_explore.md)
+  : Explore CWP datasets interactively
+
+- [`cwp_explorer_service()`](https://bastienird.github.io/CWP.dataset/reference/cwp_explorer_service.md)
+  : Serve the explorer for the reports of a folder
+
 - [`cwp_materialise_plot()`](https://bastienird.github.io/CWP.dataset/reference/cwp_materialise_plot.md)
   : Draw a deferred plot
 
