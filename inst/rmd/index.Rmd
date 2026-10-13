@@ -61,16 +61,20 @@ fancyhdr:
 ---
 
 ```{r explorer-note, echo=FALSE, results="asis"}
-# Shown in the HTML report when summarising_step() wrote the script of the explorer
-if (exists("explorer_script") && is.character(explorer_script) && length(explorer_script) == 1 &&
-    file.exists(explorer_script) && knitr::is_html_output()) {
-  cat(
-    "\n> **Explore these data in detail.** The file `", basename(explorer_script), "`, ",
-    "saved in the folder of this dataset next to `Markdown/`, opens an application to filter ",
-    "the data of this report on the fly (tRFMO, species, fishing fleet, gear, years), with time ",
-    "series, tables, maps and the differences between the first and the last step. ",
-    "Open it in RStudio and click *Source* (packages shiny and DT needed).\n",
-    sep = ""
-  )
+# Link to the explorer, in the HTML report rendered by summarising_step()
+if (knitr::is_html_output()) {
+  if (exists("explorer_info") && is.character(explorer_info) && length(explorer_info) == 1 &&
+      file.exists(explorer_info)) {
+    cat(CWP.dataset:::cwp_explorer_link_html(CWP.dataset::cwp_read_object(explorer_info)))
+  } else if (exists("explorer_script") && is.character(explorer_script) &&
+             length(explorer_script) == 1 && file.exists(explorer_script)) {
+    cat(
+      "\n> **Explore these data in detail.** The file `", basename(explorer_script), "`, ",
+      "saved in the folder of this dataset next to `Markdown/`, opens an application to filter ",
+      "the data of this report on the fly (tRFMO, species, fishing fleet, gear, years). ",
+      "Open it in RStudio and click *Source* (packages shiny and DT needed).\n",
+      sep = ""
+    )
+  }
 }
 ```
