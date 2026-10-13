@@ -68,6 +68,11 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
   futile.logger::flog.info(paste0("Size pdf is:", sizepdf))
 
   ancient_wd <- getwd()
+  # Folder served by the explorer the reports link to (see cwp_explorer_service())
+  # (relative paths are resolved like the entity directories, from here::here())
+  explorer_root <- getOption("CWP.dataset.explorer_root", main_dir)
+  if (!fs::is_absolute_path(explorer_root)) explorer_root <- here::here(explorer_root)
+  explorer_root <- as.character(fs::path_abs(explorer_root))
   futile.logger::flog.info("Starting Summarising_step function")
 
   entity_dirs <- list.dirs(file.path(main_dir, "entities"), full.names = TRUE, recursive = FALSE)
@@ -183,6 +188,36 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
       }
 
       prefix <- paste0(sizepdf, source_authoritylist[s])
+
+      # Script to explore the steps of this report with filters (see cwp_explore())
+      explorer_script <- tryCatch({
+        explorer_file <- if (source_authoritylist[s] == "all") "explorer.R" else {
+          paste0("explorer_", source_authoritylist[s], ".R")
+        }
+        cwp_write_explorer_script(step_dirs, explorer_file, selected = parameter_filtering,
+                                  title = entity$identifiers[["id"]])
+        as.character(fs::path_abs(explorer_file))
+      }, error = function(e) {
+        futile.logger::flog.warn("Explorer script not written: %s", conditionMessage(e))
+        NULL
+      })
+
+      # Link of the report to the explorer, kept in a file: the variables of the
+      # report that look like paths are rewritten (see build_book())
+      explorer_info <- tryCatch({
+        explore_steps <- unique(step_dirs[c(1, length(step_dirs))])
+        info_file <- sub("\\.R$", ".rds", explorer_file)
+        cwp_save_object(list(
+          url = cwp_explorer_link(explore_steps, explorer_root, selected = parameter_filtering),
+          base_url = cwp_explorer_base_url(),
+          root = explorer_root,
+          script = if (is.null(explorer_script)) NULL else basename(explorer_script)
+        ), info_file)
+        as.character(fs::path_abs(info_file))
+      }, error = function(e) {
+        futile.logger::flog.warn("Link to the explorer not written: %s", conditionMessage(e))
+        NULL
+      })
 
       if(usesave & file.exists(paste0(prefix, "renderenv.rds")) | (sizepdf=="short" && file.exists(paste0("long", paste0(source_authoritylist[s],"renderenv.rds"))))){ # if the size pdf is short but the .qs for long exists we can use it
         if(file.exists(paste0(prefix, "renderenv.rds"))){
@@ -429,7 +464,8 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         render_env$plotting_type <- "view"
         render_env$fig.path <- new_path
         render_env$parameter_titre_dataset_1 <- entity$identifiers[["id"]]
-
+        render_env$explorer_script <- explorer_script
+        render_env$explorer_info <- explorer_info
 
         if(fast_and_heavy){
           if(savestep){
@@ -482,6 +518,10 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
         }
       }
 
+      # Also when the analyses were read back from a previous run
+      render_env$explorer_script <- explorer_script
+      render_env$explorer_info <- explorer_info
+
       if(is.null(nameoutput)){
         nameoutput <- paste0(prefix,"recappdf")
       }
@@ -503,6 +543,12 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
                      output_format = "bookdown::gitbook",
                      output_dir = nameoutput)
         }
+
+        # Link to the explorer at the top of the pages
+        tryCatch(cwp_add_explorer_box(nameoutput, explorer_info), error = function(e) {
+          futile.logger::flog.warn("Link to the explorer not added to the report: %s",
+                                   conditionMessage(e))
+        })
 
 
         gc()

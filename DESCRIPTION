@@ -52,6 +52,7 @@ Suggests:
     DT,
     dygraphs,
     fusen,
+    shiny,
     testthat,
     tinytex,
     tmap,

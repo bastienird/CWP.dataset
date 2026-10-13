@@ -70,6 +70,20 @@ test_that("summarising_step renders the HTML report of a two-step job", {
   expect_false(any(grepl("## Error", html, fixed = TRUE)))
   # No PDF was asked for
   expect_length(list.files(report_dir, pattern = "\\.pdf$"), 0)
+
+  # The script of the explorer is saved with the job and announced in the report
+  script <- file.path(job$entity_dir, "explorer.R")
+  expect_true(file.exists(script))
+  script_lines <- readLines(script)
+  expect_true(any(grepl('"step1_raw" = "Markdown/step1_raw"', script_lines, fixed = TRUE)))
+  expect_true(any(grepl('"step2_processed" = "Markdown/step2_processed"', script_lines, fixed = TRUE)))
+  expect_error(parse(script), NA)
+  expect_true(any(grepl("Explore these data in detail", html, fixed = TRUE)))
+  # ... with a link to the explorer service
+  expect_true(file.exists(file.path(job$entity_dir, "explorer.rds")))
+  expect_true(any(grepl("cwpOpenExplorer", html, fixed = TRUE)))
+  expect_true(any(grepl("steps=entities%2Fmini_catch_dataset%2FMarkdown%2Fstep1_raw", html,
+                        fixed = TRUE)))
 })
 
 test_that("the maps of the HTML report are interactive", {
