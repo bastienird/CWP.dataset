@@ -544,6 +544,12 @@ summarising_step <- function(main_dir, connectionDB, config, source_authoritylis
                      output_dir = nameoutput)
         }
 
+        # Link to the explorer at the top of the pages
+        tryCatch(cwp_add_explorer_box(nameoutput, explorer_info), error = function(e) {
+          futile.logger::flog.warn("Link to the explorer not added to the report: %s",
+                                   conditionMessage(e))
+        })
+
 
         gc()
       if (pdf_render_available) {

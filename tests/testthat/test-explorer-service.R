@@ -80,7 +80,6 @@ test_that("the report box links to the explorer and explains how to start it", {
   html <- cwp_explorer_link_html(list(url = "http://127.0.0.1:8765/?steps=a%2Cb&species=YFT",
                                       base_url = "http://127.0.0.1:8765",
                                       root = "/jobs/my_job", script = "explorer.R"))
-  expect_match(html, "```{=html}", fixed = TRUE)
   expect_match(html, 'href="http://127.0.0.1:8765/?steps=a%2Cb&amp;species=YFT"', fixed = TRUE)
   expect_match(html, 'data-base="http://127.0.0.1:8765"', fixed = TRUE)
   expect_match(html, 'cwp_explorer_service("/jobs/my_job")', fixed = TRUE)
@@ -88,4 +87,27 @@ test_that("the report box links to the explorer and explains how to start it", {
   expect_false(grepl("explorer.R", cwp_explorer_link_html(list(url = "u", base_url = "b",
                                                                root = "r", script = NULL)),
                      fixed = TRUE))
+})
+
+test_that("the box is added once at the top of each page of a report", {
+  report_dir <- tempfile("report_")
+  dir.create(report_dir)
+  writeLines(c("<html><body>", "<div class=\"book\">", "<div class=\"page-inner\">",
+               "<section class=\"normal\">Text</section>", "</div></div></body></html>"),
+             file.path(report_dir, "chapter-1.html"))
+  writeLines(c("<html>", "<body>", "<p>Other</p>", "</body></html>"),
+             file.path(report_dir, "other.html"))
+  info_file <- file.path(report_dir, "explorer.rds")
+  cwp_save_object(list(url = "http://127.0.0.1:8765/?steps=a", base_url = "http://127.0.0.1:8765",
+                       root = "/jobs", script = "explorer.R"), info_file)
+
+  expect_equal(cwp_add_explorer_box(report_dir, info_file), 2L)
+  page <- readLines(file.path(report_dir, "chapter-1.html"))
+  expect_equal(grep("cwp-explorer\"", page, fixed = TRUE),
+               grep("page-inner", page, fixed = TRUE) + 1L)
+  expect_true(any(grepl("cwp-explorer\"", readLines(file.path(report_dir, "other.html")),
+                        fixed = TRUE)))
+  # Not added twice
+  expect_equal(cwp_add_explorer_box(report_dir, info_file), 0L)
+  expect_equal(cwp_add_explorer_box(report_dir, NULL), 0L)
 })

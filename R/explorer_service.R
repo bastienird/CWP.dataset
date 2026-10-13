@@ -183,7 +183,7 @@ cwp_explorer_link <- function(step_dirs, root, selected = list(), base_url = cwp
 #'
 #' @param info List with `url` (output of `cwp_explorer_link()`), `base_url`,
 #'   `root` and `script` (name of the explorer script, or `NULL`).
-#' @return A character string: a raw HTML block for pandoc.
+#' @return A character string of HTML.
 #' @keywords internal
 #' @noRd
 cwp_explorer_link_html <- function(info) {
@@ -193,7 +193,6 @@ cwp_explorer_link_html <- function(info) {
     "this dataset, next to <code>Markdown/</code>) in RStudio and click <em>Source</em>."
   )
   paste0(
-    "\n```{=html}\n",
     "<div class=\"cwp-explorer\" style=\"border:1px solid #9ec5e5;background:#eef6fc;",
     "border-radius:6px;padding:10px 14px;margin:1em 0;\">",
     "<strong>Explore these data in detail:</strong> ",
@@ -225,7 +224,34 @@ cwp_explorer_link_html <- function(info) {
     "    return false;\n",
     "  };\n",
     "}\n",
-    "</script>\n",
-    "```\n"
+    "</script>"
   )
+}
+
+#' Add the link to the explorer at the top of the pages of an HTML report
+#'
+#' The box is inserted in the HTML pages once they are rendered, which works
+#' whatever the way the book was built.
+#'
+#' @param report_dir Folder of the HTML report.
+#' @param info_file File written by `summarising_step()` with the link
+#'   (see `cwp_explorer_link_html()`), or `NULL`.
+#' @return The number of pages changed, invisibly.
+#' @keywords internal
+#' @noRd
+cwp_add_explorer_box <- function(report_dir, info_file) {
+  if (is.null(info_file) || !file.exists(info_file)) return(invisible(0L))
+  box <- cwp_explorer_link_html(cwp_read_object(info_file))
+  changed <- 0L
+  for (page in list.files(report_dir, pattern = "\\.html$", full.names = TRUE)) {
+    html <- readLines(page, warn = FALSE, encoding = "UTF-8")
+    if (any(grepl("class=\"cwp-explorer\"", html, fixed = TRUE))) next
+    # Top of the text of a gitbook page, otherwise the start of the body
+    at <- grep("<div class=\"page-inner\">", html, fixed = TRUE)[1]
+    if (is.na(at)) at <- grep("<body", html, fixed = TRUE)[1]
+    if (is.na(at)) next
+    writeLines(append(html, box, after = at), page, useBytes = TRUE)
+    changed <- changed + 1L
+  }
+  invisible(changed)
 }
