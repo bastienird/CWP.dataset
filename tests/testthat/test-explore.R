@@ -105,7 +105,8 @@ test_that("totals by year are exact and kept apart by unit", {
 test_that("the main values of a breakdown are kept, the others grouped", {
   data <- data.table::data.table(species = letters[1:12], measurement_value = 12:1)
   reduced <- cwp_explore_top(data, "species", n = 3)
-  expect_equal(sort(unique(reduced$species)), c("a", "b", "c", "Other"))
+  # The order of sort() depends on the locale (R CMD check sorts "Other" first)
+  expect_setequal(unique(reduced$species), c("a", "b", "c", "Other"))
   expect_equal(sum(reduced$measurement_value), sum(data$measurement_value))
   expect_equal(data$species, letters[1:12])
 })
