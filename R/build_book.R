@@ -116,7 +116,7 @@ build_book <- function(master_qs_rel,
   bookdown::render_book(
     input         = dest_files,
     config_file   = "_bookdown.yml",
-    output_dir = paste0(orig_wd, "/_book"),
+    output_dir    = fs::path_abs(output_dir, start = orig_wd),
     output_format = output_format
   )
 
