@@ -1,3 +1,10 @@
+```{r rootdir, include=FALSE}
+# Child documents are knitted from the package folder (system.file("rmd")):
+# without this, the files they write (Figures/...) would go there, which is
+# read-only when the package is installed in a library owned by another user.
+if (is.null(knitr::opts_knit$get("root.dir"))) knitr::opts_knit$set(root.dir = getwd())
+```
+
 ```{r results='asis'}
 
 if (!is.null(all_list)) {
