@@ -1,4 +1,5 @@
-utils::globalVariables(c(".", "Difference in value",
+utils::globalVariables(c(
+  ".", "Difference in value",
   "Dataset", "measurement_unit", "write.csv",
   "as_grouped_data", "autofit", "autonum", "brewer.pal",
   "code", "continent", "curl_download", "cwp_code",
@@ -30,3 +31,6 @@ utils::globalVariables(c(".", "Difference in value",
   "Values", "Values dataset 1", "Values dataset 2",
   "WFSClient", "width", "write_csv", "ypos_ligne"
 ))
+
+# cwp_aggregate(), cwp_split_common_periods()
+utils::globalVariables(c(".order", "n_rows", "number_lines"))
