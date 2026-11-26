@@ -1,5 +1,16 @@
 # CWP.dataset (development version)
 
+## Comparing two versions of a dataset
+
+* New `cwp_aggregate()`: sums a CWP dataset by year (or month) and by 5 degree square, keeping
+  its other dimensions and its totals, with the number of rows summed. The result is small enough
+  to be stored, e.g. one per release, and compared later. `cwp_grid_to_5deg()` gives the 5 degree
+  square of 1 degree square codes.
+* New `cwp_split_common_periods()`: keeps, for each source, the years present in both datasets
+  (the comparable part, for `fonction_groupement()` or `comprehensive_cwp_dataframe_analysis()`),
+  and lists apart the years present in one dataset only (typically the new year of a release),
+  with their totals.
+
 ## Continuous integration
 
 * New end-to-end test: a two-step job is created from the example datasets in a temporary
