@@ -44,11 +44,17 @@
 - [`create_dygraph_for_unit()`](https://bastienird.github.io/CWP.dataset/reference/create_dygraph_for_unit.md)
   : Create Interactive Dygraph for a Specific Unit and Measurement Type
 
+- [`cwp_aggregate()`](https://bastienird.github.io/CWP.dataset/reference/cwp_aggregate.md)
+  : Aggregate a CWP dataset to a coarser time and space resolution
+
 - [`cwp_explore()`](https://bastienird.github.io/CWP.dataset/reference/cwp_explore.md)
   : Explore CWP datasets interactively
 
 - [`cwp_explorer_service()`](https://bastienird.github.io/CWP.dataset/reference/cwp_explorer_service.md)
   : Serve the explorer for the reports of a folder
+
+- [`cwp_grid_to_5deg()`](https://bastienird.github.io/CWP.dataset/reference/cwp_grid_to_5deg.md)
+  : 5 degree square of CWP 1 degree square codes
 
 - [`cwp_materialise_plot()`](https://bastienird.github.io/CWP.dataset/reference/cwp_materialise_plot.md)
   : Draw a deferred plot
@@ -56,6 +62,9 @@
 - [`cwp_save_object()`](https://bastienird.github.io/CWP.dataset/reference/cwp_save_object.md)
   [`cwp_read_object()`](https://bastienird.github.io/CWP.dataset/reference/cwp_save_object.md)
   : Save and read R objects on disk
+
+- [`cwp_split_common_periods()`](https://bastienird.github.io/CWP.dataset/reference/cwp_split_common_periods.md)
+  : Split two datasets into their common years and the years of one only
 
 - [`download_codelists`](https://bastienird.github.io/CWP.dataset/reference/download_codelists.md)
   : download_codelists
